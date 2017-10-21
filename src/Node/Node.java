@@ -24,6 +24,8 @@ public class Node {
 
     public void joinNetwork() {
         System.out.println("connecting to bootstrap server...");
+        
+        
     }
 
     public void listen() {
@@ -48,7 +50,6 @@ public class Node {
                         String message = new String(data, 0, incoming.getLength());
 
                         //echo the details of incoming data - client ip : client port - client message
-//                echo(incoming.getAddress().getHostAddress() + " : " + incoming.getPort() + " - " + s);
                         System.out.println(message);
                         
                         //handle the incoming query

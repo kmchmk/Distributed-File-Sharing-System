@@ -15,47 +15,40 @@ import java.net.DatagramSocket;
  */
 public class Server {
 
+    static DatagramSocket sock = null;
+    static DatagramPacket incoming;
+
+    //This is used to run only the server
     public static void main(String[] args) {
         start();
+        while (true) {
+            listen();
+        }
     }
 
     public static void start() {
-        DatagramSocket sock = null;
 
         try {
-            //1. creating a server socket, parameter is local port number
-            sock = new DatagramSocket(7777);
+            sock = new DatagramSocket(55555);
 
-            //buffer to receive incoming data
             byte[] buffer = new byte[65536];
-            DatagramPacket incoming = new DatagramPacket(buffer, buffer.length);
+            incoming = new DatagramPacket(buffer, buffer.length);
 
-            //2. Wait for an incoming data
-            echo("Server:- socket created. Waiting for incoming data...");
+            System.out.println("Server:- socket created. Waiting for incoming data...");
 
-            //communication loop
-//            while (true) {
-                sock.receive(incoming);
-                byte[] data = incoming.getData();
-                String s = new String(data, 0, incoming.getLength());
-
-                //echo the details of incoming data - client ip : client port - client message
-//                echo(incoming.getAddress().getHostAddress() + " : " + incoming.getPort() + " - " + s);
-                echo("Server:- received from Client: " + s);
-
-                s = "message received.";
-//                s = "OK : " + s;
-                echo("Server:- sending reply to client...");
-                DatagramPacket dp = new DatagramPacket(s.getBytes(), s.getBytes().length, incoming.getAddress(), incoming.getPort());
-                sock.send(dp);
-//            }
         } catch (IOException e) {
             System.err.println("IOException " + e);
         }
     }
 
-    //simple function to echo data to terminal
-    public static void echo(String msg) {
-        System.out.println(msg);
+    public static void listen() {
+        try {
+            sock.receive(incoming);
+            byte[] data = incoming.getData();
+            String s = new String(data, 0, incoming.getLength());
+            System.out.println("Server:- received from Client: " + s);
+        } catch (IOException ex) {
+            System.err.println(ex);
+        }
     }
 }

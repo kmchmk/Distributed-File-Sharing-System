@@ -22,10 +22,16 @@ public class DistributedFileSharingSystem {
         new Thread() {
             public void run() {
                 Server.start();
+                Server.listen();
             }
         }.start();
         
-        Client.start();
+        new Thread() {
+            public void run() {
+                Client.start();
+                Client.send("This is the message");
+            }
+        }.start();
     }
 
 }
