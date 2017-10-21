@@ -5,6 +5,9 @@
  */
 package View;
 
+import UPDSocket.Client;
+import UPDSocket.Server;
+
 /**
  *
  * @author Chanaka
@@ -15,7 +18,14 @@ public class DistributedFileSharingSystem {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+
+        new Thread() {
+            public void run() {
+                Server.start();
+            }
+        }.start();
+        
+        Client.start();
     }
-    
+
 }
