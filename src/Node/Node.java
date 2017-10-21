@@ -5,10 +5,10 @@
  */
 package Node;
 
-import static UPDSocket.Server.echo;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.ArrayList;
 
 /**
  *
@@ -16,6 +16,8 @@ import java.net.DatagramSocket;
  */
 public class Node {
 
+    public String name;
+    public ArrayList<String> neighborList;//this should be Neighbor object list
     public void init() {
 
     }
