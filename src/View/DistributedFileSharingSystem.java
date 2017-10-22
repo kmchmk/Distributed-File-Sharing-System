@@ -5,8 +5,7 @@
  */
 package View;
 
-import UPDSocket.Client;
-import UPDSocket.Server;
+import Node.Node;
 
 /**
  *
@@ -19,19 +18,21 @@ public class DistributedFileSharingSystem {
      */
     public static void main(String[] args) {
 
-        new Thread() {
-            public void run() {
-                Server.start();
-                Server.listen();
-            }
-        }.start();
-        
-        new Thread() {
-            public void run() {
-                Client.start();
-                Client.send("This is the message");
-            }
-        }.start();
+        Node node = new Node();
+        node.joinNetwork();
+//        new Thread() {
+//            public void run() {
+//                Server.start();
+//                Server.listen();
+//            }
+//        }.start();
+//        
+//        new Thread() {
+//            public void run() {
+//                Client.start();
+//                Client.send("This is the message");
+//            }
+//        }.start();
     }
 
 }

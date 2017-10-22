@@ -13,23 +13,23 @@ import java.net.DatagramSocket;
  *
  * @author Chanaka
  */
-public class Server {
+public class Server{
 
     static DatagramSocket sock = null;
     static DatagramPacket incoming;
 
     //This is used to run only the server
     public static void main(String[] args) {
-        start();
+        start(55555);
         while (true) {
             listen();
         }
     }
 
-    public static void start() {
+    public static void start(int port) {
 
         try {
-            sock = new DatagramSocket(55555);
+            sock = new DatagramSocket(port);
 
             byte[] buffer = new byte[65536];
             incoming = new DatagramPacket(buffer, buffer.length);
@@ -41,14 +41,17 @@ public class Server {
         }
     }
 
-    public static void listen() {
-        try {
-            sock.receive(incoming);
-            byte[] data = incoming.getData();
-            String s = new String(data, 0, incoming.getLength());
-            System.out.println("Server:- received from Client: " + s);
-        } catch (IOException ex) {
-            System.err.println(ex);
-        }
+    public static String listen() {
+        String message;
+                try {
+                    sock.receive(incoming);
+                    byte[] data = incoming.getData();
+                    message = new String(data, 0, incoming.getLength());
+                    System.out.println("Server:- received from Client: " + message);
+                } catch (IOException ex) {
+                    System.err.println(ex);
+                    message = null;
+                }
+        return message;
     }
 }

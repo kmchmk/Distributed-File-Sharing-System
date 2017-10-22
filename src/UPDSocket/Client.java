@@ -47,13 +47,25 @@ public class Client {
         }
     }
 
-    public static void send(String message) {
+    public static String send(String message) {
+        String response = null;
         try {
             byte[] b = message.getBytes();
             DatagramPacket dp = new DatagramPacket(b, b.length, host, port);
             sock.send(dp);
+
+            byte[] buffer = new byte[65536];
+            DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+            sock.receive(reply);
+
+            byte[] data = reply.getData();
+            response = new String(data, 0, reply.getLength());
+
+            //echo the details of incoming data - client ip : client port - client message
+//            echo(reply.getAddress().getHostAddress() + " : " + reply.getPort() + " - " + s);
         } catch (IOException ex) {
             System.err.println(ex);
         }
+        return response;
     }
 }
