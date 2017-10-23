@@ -19,7 +19,8 @@ public class DistributedFileSharingSystem {
     public static void main(String[] args) {
 
         Node node = new Node();
-        node.joinNetwork();
+        node.registerToNetwork();
+        node.unregisterFromNetwork();
 //        new Thread() {
 //            public void run() {
 //                Server.start();

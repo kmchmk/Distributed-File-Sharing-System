@@ -32,9 +32,10 @@ public class Node {
     public void init() {
 
         try {
-            this.username = "kmcm1026";
-            this.myIP = getMyIP();
-            this.myPort = 5555;
+            this.username = "kmcm1028";
+//            this.myIP = getMyIP();
+            this.myIP = "192.168.8.30";
+            this.myPort = 5558;
 
             Server.start(myPort);//for search queries
             Client.start();
@@ -43,16 +44,57 @@ public class Node {
         }
     }
 
-    public void joinNetwork() {
+    public void registerToNetwork() {
         System.out.println("connecting to bootstrap server...");
         String registerMessage = " " + "REG" + " " + myIP + " " + Integer.toString(myPort) + " " + username;
         int length = registerMessage.length() + 4;
 
         registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + registerMessage;
-        
+
         String reply = Client.send(registerMessage);
         System.out.println("Reply from bootstrap server:- " + reply);
+        String[] replyList = reply.split(" ");
+        if ("REGOK".equals(replyList[1])) {
+            if (replyList[2].equals("0")) {
+                System.out.println("This is the first node.");
+            } else if (replyList[2].equals("1")) {
+                Neighbor firstNeighbor = new Neighbor(replyList[3], Integer.parseInt(replyList[4]));
+            } else if (replyList[2].equals("2")) {
+                Neighbor firstNeighbor = new Neighbor(replyList[3], Integer.parseInt(replyList[4]));
+                Neighbor secondNeighbor = new Neighbor(replyList[5], Integer.parseInt(replyList[6]));
+            } else if (replyList[2].equals("9999")) {
+                System.out.println(" Failed, there is some error in the command.");
+            } else if (replyList[2].equals("9998")) {
+                System.out.println("Failed, already registered to you, unregister first.");
+            } else if (replyList[2].equals("9997")) {
+                System.out.println("Failed, registered to another user, try a different IP and port.");
+            } else if (replyList[2].equals("9996")) {
+                System.out.println("Failed, can’t register. Bootstrap Server full.");
+            }
+        } else {
+            System.out.println("Error in registration message or the server is offline");
+        }
 
+    }
+
+    public void unregisterFromNetwork() {
+        String registerMessage = " " + "UNREG" + " " + myIP + " " + Integer.toString(myPort) + " " + username;
+        int length = registerMessage.length() + 4;
+
+        registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + registerMessage;
+
+        String reply = Client.send(registerMessage);
+        System.out.println("Reply from bootstrap server:- " + reply);
+        String[] replyList = reply.split(" ");
+        if ("UNROK".equals(replyList[1])) {
+            if (replyList[2].equals("0")) {
+                System.out.println("Successfully unregistered.");
+            } else if (replyList[2].equals("9999")) {
+                System.out.println("Error while unregistering. IP and port may not be in the registry or command is incorrect.");
+            }
+        } else {
+            System.out.println("Error in unregistration message or the server is offline");
+        }
     }
 
     public void listen() {
