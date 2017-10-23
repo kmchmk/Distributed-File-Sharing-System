@@ -22,7 +22,8 @@ public class Node {
     public String myIP;
     int myQueryListeningPort;
     int myBSListeningPort;
-    public ArrayList<String> neighborList;//this should be Neighbor object list
+    public ArrayList<Neighbor> neighborList;//this should be Neighbor object list
+    public ArrayList<String> fileList;
 
     public Node(String username, String IP, int myQueryListeningPort, int myBSListeningPort) {
         init(username, IP, myQueryListeningPort, myBSListeningPort);
@@ -60,9 +61,12 @@ public class Node {
                 System.out.println("This is the first node.");
             } else if (replyList[2].equals("1")) {
                 Neighbor firstNeighbor = new Neighbor(replyList[3], Integer.parseInt(replyList[4]));
+                neighborList.add(firstNeighbor);
             } else if (replyList[2].equals("2")) {
                 Neighbor firstNeighbor = new Neighbor(replyList[3], Integer.parseInt(replyList[4]));
+                neighborList.add(firstNeighbor);
                 Neighbor secondNeighbor = new Neighbor(replyList[5], Integer.parseInt(replyList[6]));
+                neighborList.add(secondNeighbor);
             } else if (replyList[2].equals("9999")) {
                 System.out.println(" Failed, there is some error in the command.");
             } else if (replyList[2].equals("9998")) {
@@ -107,8 +111,14 @@ public class Node {
         System.out.println("Doing something...");
     }
 
-    public void search() {
-        //search a file
+    public void search(String searchString) {
+        String searchQuery = " " + "SER" + " " + myIP + " " + Integer.toString(myQueryListeningPort) + " " + searchString;
+        int length = searchQuery.length() + 4;
+
+        searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
+
+//        String reply = Client.send(searchQuery, 55555);
+//        System.out.println("Reply from bootstrap server:- " + reply);
     }
 
     private String getMyIP() {
