@@ -30,19 +30,6 @@ public class DistributedFileSharingSystem {
         node3.registerToNetwork();
 //        node3.unregisterFromNetwork();
 
-//        new Thread() {
-//            public void run() {
-//                Server.start();
-//                Server.listen();
-//            }
-//        }.start();
-//        
-//        new Thread() {
-//            public void run() {
-//                Client.start();
-//                Client.send("This is the message");
-//            }
-//        }.start();
     }
 
 }
