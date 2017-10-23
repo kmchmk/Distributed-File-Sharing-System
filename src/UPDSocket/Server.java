@@ -13,27 +13,25 @@ import java.net.DatagramSocket;
  *
  * @author Chanaka
  */
-public class Server{
+public class Server {
 
     static DatagramSocket sock = null;
     static DatagramPacket incoming;
 
     //This is used to run only the server
     public static void main(String[] args) {
-        start(55555);
+        start(7778);
         while (true) {
             listen();
         }
     }
 
-    public static void start(int port) {
+    public static void start(int myQueryListeningPort) {
 
         try {
-            sock = new DatagramSocket(port);
-
+            sock = new DatagramSocket(myQueryListeningPort);
             byte[] buffer = new byte[65536];
             incoming = new DatagramPacket(buffer, buffer.length);
-
             System.out.println("Server:- socket created. Waiting for incoming data...");
 
         } catch (IOException e) {
@@ -41,17 +39,30 @@ public class Server{
         }
     }
 
-    public static String listen() {
-        String message;
+    public static void listen() {
+
+        new Thread() {
+            public void run() {
+                System.out.println("Listening...");
                 try {
                     sock.receive(incoming);
                     byte[] data = incoming.getData();
-                    message = new String(data, 0, incoming.getLength());
-                    System.out.println("Server:- received from Client: " + message);
-                } catch (IOException ex) {
-                    System.err.println(ex);
-                    message = null;
+                    String message = new String(data, 0, incoming.getLength());
+                    System.out.println(message);
+
+                    //handle the incoming query
+                    doSomething();
+                } catch (IOException e) {
+                    System.err.println("IOException " + e);
                 }
-        return message;
+
+
+            }
+        }.start();
+
+    }
+    
+    public static void doSomething(){
+        System.out.println("Doing something");
     }
 }

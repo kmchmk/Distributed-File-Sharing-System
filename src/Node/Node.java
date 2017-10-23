@@ -7,8 +7,6 @@ package Node;
 
 import UPDSocket.Client;
 import UPDSocket.Server;
-import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -22,36 +20,39 @@ public class Node {
 
     public String username;
     public String myIP;
-    int myPort;
+    int myQueryListeningPort;
+    int myBSListeningPort;
     public ArrayList<String> neighborList;//this should be Neighbor object list
 
-    public Node() {
-        init();
+    public Node(String username, String IP, int myQueryListeningPort, int myBSListeningPort) {
+        init(username, IP, myQueryListeningPort, myBSListeningPort);
     }
 
-    public void init() {
+    public void init(String username, String IP, int myQueryListeningPort, int myBSListeningPort) {
 
         try {
-            this.username = "kmcm1028";
+            this.username = username;
 //            this.myIP = getMyIP();
-            this.myIP = "192.168.8.30";
-            this.myPort = 5558;
+            this.myIP = IP;
+            this.myQueryListeningPort = myQueryListeningPort;
+            this.myBSListeningPort = myBSListeningPort;
 
-            Server.start(myPort);//for search queries
-            Client.start();
+            Server.start(myQueryListeningPort);//for search queries
+            Client.start(myBSListeningPort);
         } catch (Exception ex) {
+            System.out.println("Error");
             System.err.println(ex);
         }
     }
 
     public void registerToNetwork() {
         System.out.println("connecting to bootstrap server...");
-        String registerMessage = " " + "REG" + " " + myIP + " " + Integer.toString(myPort) + " " + username;
+        String registerMessage = " " + "REG" + " " + myIP + " " + Integer.toString(myQueryListeningPort) + " " + username;
         int length = registerMessage.length() + 4;
 
         registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + registerMessage;
 
-        String reply = Client.send(registerMessage);
+        String reply = Client.send(registerMessage, 55555);
         System.out.println("Reply from bootstrap server:- " + reply);
         String[] replyList = reply.split(" ");
         if ("REGOK".equals(replyList[1])) {
@@ -71,6 +72,7 @@ public class Node {
             } else if (replyList[2].equals("9996")) {
                 System.out.println("Failed, can’t register. Bootstrap Server full.");
             }
+            Server.listen();
         } else {
             System.out.println("Error in registration message or the server is offline");
         }
@@ -78,13 +80,13 @@ public class Node {
     }
 
     public void unregisterFromNetwork() {
-        String registerMessage = " " + "UNREG" + " " + myIP + " " + Integer.toString(myPort) + " " + username;
+        String registerMessage = " " + "UNREG" + " " + myIP + " " + Integer.toString(myQueryListeningPort) + " " + username;
         int length = registerMessage.length() + 4;
 
         registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + registerMessage;
 
-        String reply = Client.send(registerMessage);
-        System.out.println("Reply from bootstrap server:- " + reply);
+        String reply = Client.send(registerMessage, 55555);
+//        System.out.println("Reply from bootstrap server:- " + reply);
         String[] replyList = reply.split(" ");
         if ("UNROK".equals(replyList[1])) {
             if (replyList[2].equals("0")) {
@@ -98,37 +100,11 @@ public class Node {
     }
 
     public void listen() {
-        new Thread() {
-            public void run() {
+        Server.listen();
+    }
 
-                DatagramSocket sock = null;
-
-                try {
-                    //1. creating a server socket, parameter is local port number
-                    sock = new DatagramSocket(7777);
-
-                    //buffer to receive incoming data
-                    byte[] buffer = new byte[65536];
-                    DatagramPacket incoming = new DatagramPacket(buffer, buffer.length);
-
-                    //2. Wait for an incoming data
-                    //communication loop
-                    while (true) {
-                        sock.receive(incoming);
-                        byte[] data = incoming.getData();
-                        String message = new String(data, 0, incoming.getLength());
-
-                        //echo the details of incoming data - client ip : client port - client message
-                        System.out.println(message);
-
-                        //handle the incoming query
-                    }
-                } catch (IOException e) {
-                    System.err.println("IOException " + e);
-                }
-                System.out.println("Listening...");
-            }
-        }.start();
+    public void doSomething() {
+        System.out.println("Doing something...");
     }
 
     public void search() {

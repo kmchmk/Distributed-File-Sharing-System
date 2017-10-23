@@ -20,34 +20,32 @@ public class Client {
 
     static DatagramSocket sock = null;
     static InetAddress host;
-    static int port = 55555;
 
     //this is used to run only the client
     public static void main(String[] args) {
-        start();
+        start(7777);
         BufferedReader cin = new BufferedReader(new InputStreamReader(System.in));
         while (true) {
             System.out.println("Client:- enter a message to send : ");
             try {
                 String s = (String) cin.readLine();
-                send(s);
+                System.out.println(send(s, 7778));
             } catch (IOException ex) {
                 System.err.println(ex);
             }
         }
     }
 
-    public static void start() {
-
+    public static void start(int port) {
         try {
-            sock = new DatagramSocket(7778);
+            sock = new DatagramSocket(port);
             host = InetAddress.getByName("localhost");
         } catch (IOException e) {
             System.err.println("IOException " + e);
         }
     }
 
-    public static String send(String message) {
+    public static String send(String message, int port) {
         String response = null;
         try {
             byte[] b = message.getBytes();
