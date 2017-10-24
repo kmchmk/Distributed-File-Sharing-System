@@ -5,6 +5,7 @@
  */
 package UPDSocket;
 
+import Node.Node;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -17,17 +18,18 @@ public class Server {
 
     static DatagramSocket sock = null;
     static DatagramPacket incoming;
+    static Node myNode;
 
     //This is used to run only the server
     public static void main(String[] args) {
-        start(7778);
+        start(7778, null);
         while (true) {
             listen();
         }
     }
 
-    public static void start(int myQueryListeningPort) {
-
+    public static void start(int myQueryListeningPort, Node myNode) {
+        Server.myNode = myNode;
         try {
             sock = new DatagramSocket(myQueryListeningPort);
             byte[] buffer = new byte[65536];
@@ -51,18 +53,13 @@ public class Server {
                     System.out.println(message);
 
                     //handle the incoming query
-                    doSomething();
+                    myNode.executeSearch(message);
                 } catch (IOException e) {
                     System.err.println("IOException " + e);
                 }
 
-
             }
         }.start();
 
-    }
-    
-    public static void doSomething(){
-        System.out.println("Doing something");
     }
 }

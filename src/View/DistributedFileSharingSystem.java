@@ -30,6 +30,10 @@ public class DistributedFileSharingSystem {
         node3.registerToNetwork();
 //        node3.unregisterFromNetwork();
 
+
+
+
+        node1.search("Chanaka");
     }
 
 }

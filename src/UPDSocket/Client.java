@@ -19,7 +19,7 @@ import java.net.InetAddress;
 public class Client {
 
     static DatagramSocket sock = null;
-    static InetAddress host;
+//    static InetAddress host;
 
     //this is used to run only the client
     public static void main(String[] args) {
@@ -29,7 +29,7 @@ public class Client {
             System.out.println("Client:- enter a message to send : ");
             try {
                 String s = (String) cin.readLine();
-                System.out.println(send(s, 7778));
+                System.out.println(send(s, "localhost", 7778));
             } catch (IOException ex) {
                 System.err.println(ex);
             }
@@ -39,17 +39,17 @@ public class Client {
     public static void start(int port) {
         try {
             sock = new DatagramSocket(port);
-            host = InetAddress.getByName("localhost");
+//            host = InetAddress.getByName("localhost");
         } catch (IOException e) {
             System.err.println("IOException " + e);
         }
     }
 
-    public static String send(String message, int port) {
+    public static String send(String message, String IP, int port) {
         String response = null;
         try {
             byte[] b = message.getBytes();
-            DatagramPacket dp = new DatagramPacket(b, b.length, host, port);
+            DatagramPacket dp = new DatagramPacket(b, b.length, InetAddress.getByName(IP), port);
             sock.send(dp);
 
             byte[] buffer = new byte[65536];

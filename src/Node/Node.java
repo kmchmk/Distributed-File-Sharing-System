@@ -9,6 +9,8 @@ import UPDSocket.Client;
 import UPDSocket.Server;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -26,6 +28,7 @@ public class Node {
     public ArrayList<String> fileList;
 
     public Node(String username, String IP, int myQueryListeningPort, int myBSListeningPort) {
+        neighborList = new ArrayList<Neighbor>();
         init(username, IP, myQueryListeningPort, myBSListeningPort);
     }
 
@@ -38,10 +41,9 @@ public class Node {
             this.myQueryListeningPort = myQueryListeningPort;
             this.myBSListeningPort = myBSListeningPort;
 
-            Server.start(myQueryListeningPort);//for search queries
+            Server.start(myQueryListeningPort, this);//for search queries
             Client.start(myBSListeningPort);
         } catch (Exception ex) {
-            System.out.println("Error");
             System.err.println(ex);
         }
     }
@@ -53,7 +55,7 @@ public class Node {
 
         registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + registerMessage;
 
-        String reply = Client.send(registerMessage, 55555);
+        String reply = Client.send(registerMessage,"localhost", 55555);
         System.out.println("Reply from bootstrap server:- " + reply);
         String[] replyList = reply.split(" ");
         if ("REGOK".equals(replyList[1])) {
@@ -89,7 +91,7 @@ public class Node {
 
         registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + registerMessage;
 
-        String reply = Client.send(registerMessage, 55555);
+        String reply = Client.send(registerMessage, "localhost", 55555);
 //        System.out.println("Reply from bootstrap server:- " + reply);
         String[] replyList = reply.split(" ");
         if ("UNROK".equals(replyList[1])) {
@@ -107,18 +109,17 @@ public class Node {
         Server.listen();
     }
 
-    public void doSomething() {
-        System.out.println("Doing something...");
-    }
-
     public void search(String searchString) {
         String searchQuery = " " + "SER" + " " + myIP + " " + Integer.toString(myQueryListeningPort) + " " + searchString;
         int length = searchQuery.length() + 4;
 
         searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
-
-//        String reply = Client.send(searchQuery, 55555);
+        System.out.println(searchQuery);
+        //asking from the first user
+        if (neighborList.size() > 0) {
+            String reply = Client.send(searchQuery,neighborList.get(0).getIP(), neighborList.get(0).getPort());
 //        System.out.println("Reply from bootstrap server:- " + reply);
+        }
     }
 
     private String getMyIP() {
@@ -126,9 +127,14 @@ public class Node {
             final DatagramSocket socket = new DatagramSocket();
             socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
             return socket.getLocalAddress().getHostAddress();
-        } catch (Exception ex) {
+        } catch (SocketException | UnknownHostException ex) {
             System.err.println(ex);
             return null;
         }
+    }
+
+
+    public void executeSearch(String message) {
+        System.out.println("Searching...");
     }
 }
