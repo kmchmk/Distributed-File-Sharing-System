@@ -5,9 +5,7 @@
  */
 package UPDSocket;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -18,25 +16,25 @@ import java.net.InetAddress;
  */
 public class Client {
 
-    static DatagramSocket sock = null;
+    private DatagramSocket sock = null;
 //    static InetAddress host;
 
     //this is used to run only the client
-    public static void main(String[] args) {
-        start(7777);
-        BufferedReader cin = new BufferedReader(new InputStreamReader(System.in));
-        while (true) {
-            System.out.println("Client:- enter a message to send : ");
-            try {
-                String s = (String) cin.readLine();
-                System.out.println(send(s, "localhost", 7778));
-            } catch (IOException ex) {
-                System.err.println(ex);
-            }
-        }
-    }
+//    public static void main(String[] args) {
+//        start(7777);
+//        BufferedReader cin = new BufferedReader(new InputStreamReader(System.in));
+//        while (true) {
+//            System.out.println("Client:- enter a message to send : ");
+//            try {
+//                String s = (String) cin.readLine();
+//                System.out.println(send(s, "localhost", 7778));
+//            } catch (IOException ex) {
+//                System.err.println(ex);
+//            }
+//        }
+//    }
 
-    public static void start(int port) {
+    public void start(int port) {
         try {
             sock = new DatagramSocket(port);
 //            host = InetAddress.getByName("localhost");
@@ -45,13 +43,13 @@ public class Client {
         }
     }
 
-    public static String send(String message, String IP, int port) {
+    public String send(String message, String IP, int port) {
         String response = null;
         try {
             byte[] b = message.getBytes();
             DatagramPacket dp = new DatagramPacket(b, b.length, InetAddress.getByName(IP), port);
             sock.send(dp);
-
+            
             byte[] buffer = new byte[65536];
             DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
             sock.receive(reply);

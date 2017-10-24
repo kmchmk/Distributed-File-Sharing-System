@@ -14,12 +14,15 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+
 /**
  *
  * @author Chanaka
  */
 public class Node {
 
+    public Server server;
+    public Client client;
     public String username;
     public String myIP;
     int myQueryListeningPort;
@@ -40,25 +43,28 @@ public class Node {
             this.myIP = IP;
             this.myQueryListeningPort = myQueryListeningPort;
             this.myBSListeningPort = myBSListeningPort;
+            this.server = new Server();
+            this.client = new Client();
 
-            Server.start(myQueryListeningPort, this);//for search queries
-            Client.start(myBSListeningPort);
+            server.start(myQueryListeningPort, this);//for search queries
+            client.start(myBSListeningPort);
         } catch (Exception ex) {
             System.err.println(ex);
         }
     }
 
     public void registerToNetwork() {
-        System.out.println("connecting to bootstrap server...");
+        System.out.println("Registering to network (" + username + ")");
         String registerMessage = " " + "REG" + " " + myIP + " " + Integer.toString(myQueryListeningPort) + " " + username;
         int length = registerMessage.length() + 4;
 
         registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + registerMessage;
 
-        String reply = Client.send(registerMessage,"localhost", 55555);
+        String reply = client.send(registerMessage, "localhost", 55555);
         System.out.println("Reply from bootstrap server:- " + reply);
         String[] replyList = reply.split(" ");
         if ("REGOK".equals(replyList[1])) {
+            server.listen();
             if (replyList[2].equals("0")) {
                 System.out.println("This is the first node.");
             } else if (replyList[2].equals("1")) {
@@ -78,7 +84,6 @@ public class Node {
             } else if (replyList[2].equals("9996")) {
                 System.out.println("Failed, can’t register. Bootstrap Server full.");
             }
-            Server.listen();
         } else {
             System.out.println("Error in registration message or the server is offline");
         }
@@ -91,12 +96,12 @@ public class Node {
 
         registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + registerMessage;
 
-        String reply = Client.send(registerMessage, "localhost", 55555);
+        String reply = client.send(registerMessage, "localhost", 55555);
 //        System.out.println("Reply from bootstrap server:- " + reply);
         String[] replyList = reply.split(" ");
         if ("UNROK".equals(replyList[1])) {
             if (replyList[2].equals("0")) {
-                System.out.println("Successfully unregistered.");
+//                System.out.println("Successfully unregistered.");
             } else if (replyList[2].equals("9999")) {
                 System.out.println("Error while unregistering. IP and port may not be in the registry or command is incorrect.");
             }
@@ -105,20 +110,16 @@ public class Node {
         }
     }
 
-    public void listen() {
-        Server.listen();
-    }
-
     public void search(String searchString) {
         String searchQuery = " " + "SER" + " " + myIP + " " + Integer.toString(myQueryListeningPort) + " " + searchString;
         int length = searchQuery.length() + 4;
 
         searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
-        System.out.println(searchQuery);
         //asking from the first user
         if (neighborList.size() > 0) {
-            String reply = Client.send(searchQuery,neighborList.get(0).getIP(), neighborList.get(0).getPort());
-//        System.out.println("Reply from bootstrap server:- " + reply);
+            //here, IP should be neighborList.get(0).getIP()
+            String reply = client.send(searchQuery, "localhost", neighborList.get(0).getPort());
+            System.out.println("Reply from neighbor:- " + reply);
         }
     }
 
@@ -132,7 +133,6 @@ public class Node {
             return null;
         }
     }
-
 
     public void executeSearch(String message) {
         System.out.println("Searching...");
