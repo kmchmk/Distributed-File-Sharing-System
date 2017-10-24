@@ -12,8 +12,9 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-
+import java.util.Random;
 
 /**
  *
@@ -32,7 +33,9 @@ public class Node {
 
     public Node(String username, String IP, int myQueryListeningPort, int myBSListeningPort) {
         neighborList = new ArrayList<Neighbor>();
+        fileList = new ArrayList<String>();
         init(username, IP, myQueryListeningPort, myBSListeningPort);
+        fileList = new ArrayList<>(Arrays.asList("Adventures of Tintin", "Jack and Jill", "Glee"));//populateWithFiles();
     }
 
     public void init(String username, String IP, int myQueryListeningPort, int myBSListeningPort) {
@@ -134,7 +137,31 @@ public class Node {
         }
     }
 
+    public void populateWithFiles() {
+        ArrayList<String> files = new ArrayList<>(Arrays.asList("Adventures of Tintin", "Jack and Jill", "Glee", "The Vampire Diarie", "King Arthur", "Windows XP", "Harry Potter", "Kung Fu Panda", "Lady Gaga", "Twilight", "Windows 8", "Mission Impossible", "Turn Up The Music", "Super Mario", "American Pickers", "Microsoft Office 2010", "Happy Feet", "Modern Family", "American Idol", "Hacking for Dummies"));
+        for (int i = 0; i < 3; i++) {
+            int rand = new Random().nextInt(files.size());
+            String file = files.get(rand);
+            files.remove(rand);
+            fileList.add(file);
+        }
+
+//        System.out.println(fileList.toString());
+    }
+
     public void executeSearch(String message) {
-        System.out.println("Searching...");
+        System.out.println(message);
+        String[] messageList = message.split(" ");
+
+        if ("SER".equals(messageList[1])) {
+            String searchString = messageList[4];
+            System.out.println("Searching for ("+searchString+")");
+            if (fileList.contains(searchString)) {
+                System.out.println("Found:- " + searchString);
+            }
+            else{
+                System.out.println("Not found:- " + searchString);
+            }
+        }
     }
 }

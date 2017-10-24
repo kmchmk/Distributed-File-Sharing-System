@@ -34,7 +34,7 @@ public class DistributedFileSharingSystem {
                 try {
                     sleep(3000);
                     System.out.println("Trying to search...");
-                    node2.search("Chanaka");
+                    node2.search("Glee");
                 } catch (Exception ex) {
                     System.err.println(ex);
                 }
