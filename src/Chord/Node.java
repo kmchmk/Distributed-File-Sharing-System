@@ -1,0 +1,22 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Chord;
+
+/**
+ *
+ * @author erang
+ */
+public interface Node {
+    public boolean joinNetwork();
+    public boolean leaveNetwork();
+    public void initialize();
+    public void routeMessge();
+    public String search();
+    public Node getSuccessor();
+    public Node getPredeccessor();
+    public void updateSuccessor(Node node);
+    public void updatePredecessor(Node node);
+}

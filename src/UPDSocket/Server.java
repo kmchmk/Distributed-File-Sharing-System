@@ -5,7 +5,7 @@
  */
 package UPDSocket;
 
-import Node.Node;
+import Chord.NodeImpl;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -18,7 +18,7 @@ public class Server {
 
     private DatagramSocket sock = null;
     private DatagramPacket incoming;
-    private Node myNode;
+    private NodeImpl myNode;
 
     //This is used to run only the server
 //    public static void main(String[] args) {
@@ -28,7 +28,7 @@ public class Server {
 //        }
 //    }
 
-    public void start(int myQueryListeningPort, Node myNode) {
+    public void start(int myQueryListeningPort, NodeImpl myNode) {
         this.myNode = myNode;
         try {
             sock = new DatagramSocket(myQueryListeningPort);

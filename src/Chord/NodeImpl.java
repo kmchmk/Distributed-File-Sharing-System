@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Node;
+package Chord;
 
 import UPDSocket.Client;
 import UPDSocket.Server;
@@ -20,7 +20,7 @@ import java.util.Random;
  *
  * @author Chanaka
  */
-public class Node {
+public class NodeImpl {
 
     public Server server;
     public Client client;
@@ -31,7 +31,7 @@ public class Node {
     public ArrayList<Neighbor> neighborList;//this should be Neighbor object list
     public ArrayList<String> fileList;
 
-    public Node(String username, String IP, int myQueryListeningPort, int myBSListeningPort) {
+    public NodeImpl(String username, String IP, int myQueryListeningPort, int myBSListeningPort) {
         neighborList = new ArrayList<Neighbor>();
         fileList = new ArrayList<String>();
         init(username, IP, myQueryListeningPort, myBSListeningPort);

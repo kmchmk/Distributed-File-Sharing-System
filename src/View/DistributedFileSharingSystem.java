@@ -6,7 +6,7 @@
 package View;
 
 import BootstrapServer.BootstrapServer;
-import Node.Node;
+import Chord.NodeImpl;
 
 /**
  *
@@ -24,9 +24,9 @@ public class DistributedFileSharingSystem {
             }
         }.start();
         
-        Node node1 = new Node("kmchmk1", "13.58.202.127", 7771, 7772);
-        Node node2 = new Node("kmchmk2", "13.58.202.128", 7773, 7774);
-        Node node3 = new Node("kmchmk3", "13.58.202.129", 7775, 7776);
+        NodeImpl node1 = new NodeImpl("kmchmk1", "13.58.202.127", 7771, 7772);
+        NodeImpl node2 = new NodeImpl("kmchmk2", "13.58.202.128", 7773, 7774);
+        NodeImpl node3 = new NodeImpl("kmchmk3", "13.58.202.129", 7775, 7776);
         node1.unregisterFromNetwork();
         node2.unregisterFromNetwork();
         node3.unregisterFromNetwork();
