@@ -9,6 +9,10 @@ package Node;
  *
  * @author Chanaka
  */
+
+
+//This Neighbor is same as the Neighbour in bootstrap server.
+//But I have used two classes for decoupling purposes
 public class Neighbor {
     public String IP;
     public int port;
