@@ -62,10 +62,12 @@ public class NodeImpl implements Node {
         this(username, port, getMyIP(), BSport);
     }
 
+    @Override
     public String getIp(){
         return this.ip;
     }
     
+    @Override
     public int getPort(){
         return this.port;
     }
