@@ -79,6 +79,7 @@ public class NodeImpl implements Node {
         return this.port;
     }
 
+<<<<<<< HEAD
     @Override
     public boolean joinNetwork() {
         this.successor = findSuccessor();
@@ -86,6 +87,14 @@ public class NodeImpl implements Node {
 
         this.predecessor = findPredecessor();
         this.predecessor.setSuccessor(this);
+=======
+    public boolean joinNetwork() {
+        this.successor = findSuccessor();
+//        this.successor.updatePredecessor(this);
+
+        this.predecessor = findPredecessor();
+//        this.predecessor.updateSuccessor(this);
+>>>>>>> 0e5e7592dfa0d64793ca2f7c14cb0f2f33f95248
 
         return updateFingerTable();
     }
@@ -101,6 +110,30 @@ public class NodeImpl implements Node {
 
         }
         return successorNeighbor;
+<<<<<<< HEAD
+    }
+
+    private Node findPredecessor() {
+        Node predecessorNeighbor = null;
+        if (neighborList.size() > 0) {
+            predecessorNeighbor = askClosestPredecessor(neighborList.get(0));
+        }
+        if (neighborList.size() > 1) {
+            Node tempNeighbor = askClosestPredecessor(neighborList.get(1));
+            //have to check what is the closest
+
+        }
+        return predecessorNeighbor;
+    }
+
+    private Node askClosestPredecessor(SimpleNeighbor neighbor) {
+        String reply = socketConnector.sendMessage("CP " + Integer.toString(id), neighbor.getIp(), neighbor.getPort());
+        String[] replyList = reply.split(" ");
+        if ("PRED".equals(replyList[0])) {
+            String predecessorIP = replyList[1];
+            int predecessorPort = Integer.parseInt(replyList[2]);
+//            return new SimpleNeighbor(predecessorIP, predecessorPort);
+=======
     }
 
     private Node findPredecessor() {
@@ -136,12 +169,29 @@ public class NodeImpl implements Node {
             String successorIP = replyList[1];
             int successorPort = Integer.parseInt(replyList[2]);
 //            return new SimpleNeighbor(successorIP, successorPort);
+>>>>>>> 0e5e7592dfa0d64793ca2f7c14cb0f2f33f95248
             return null;
         } else {
             return null;
         }
     }
 
+<<<<<<< HEAD
+    private Node askClosestSuccessor(SimpleNeighbor neighbor) {
+        String reply = socketConnector.sendMessage("CS " + Integer.toString(id), neighbor.getIp(), neighbor.getPort());
+        String[] replyList = reply.split(" ");
+        if ("SUCC".equals(replyList[0])) {
+            String successorIP = replyList[1];
+            int successorPort = Integer.parseInt(replyList[2]);
+//            return new SimpleNeighbor(successorIP, successorPort);
+            return null;
+        } else {
+            return null;
+        }
+    }
+
+=======
+>>>>>>> 0e5e7592dfa0d64793ca2f7c14cb0f2f33f95248
     private boolean updateFingerTable() {
 
         return true;
