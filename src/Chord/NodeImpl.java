@@ -5,8 +5,8 @@
  */
 package Chord;
 
-import UPDSocket.Client;
-import UPDSocket.Server;
+import COM.SocketConnector;
+import COM.Server;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -14,7 +14,10 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+import javax.print.DocFlavor;
 
 /**
  *
@@ -22,20 +25,26 @@ import java.util.Random;
  */
 public class NodeImpl {
 
+    private final int maxFingers = 10;
+    
     public Server server;
-    public Client client;
-    public String username;
-    public String myIP;
+    public SocketConnector client;
+
+    private String ip;
+    private int port;
+    private String username;
+
     int myQueryListeningPort;
     int myBSListeningPort;
-    public ArrayList<Neighbor> neighborList;//this should be Neighbor object list
-    public ArrayList<String> fileList;
+    
+    public FingerTable fingerTable;
+    public Map<Integer, String> files;
 
-    public NodeImpl(String username, String IP, int myQueryListeningPort, int myBSListeningPort) {
-        neighborList = new ArrayList<Neighbor>();
-        fileList = new ArrayList<String>();
+    public NodeImpl(String username, String ip, , String port, int myQueryListeningPort, int myBSListeningPort) {
+        fingerTable = new FingertableImpl(maxFingers);
+        files = new HashMap<>();
+        
         init(username, IP, myQueryListeningPort, myBSListeningPort);
-//        fileList = new ArrayList<>(Arrays.asList("Adventures of Tintin", "Jack and Jill", "Glee"));
         populateWithFiles();
     }
 
@@ -48,7 +57,7 @@ public class NodeImpl {
             this.myQueryListeningPort = myQueryListeningPort;
             this.myBSListeningPort = myBSListeningPort;
             this.server = new Server();
-            this.client = new Client();
+            this.client = new SocketConnector();
 
             server.start(myQueryListeningPort, this);//for search queries
             client.start(myBSListeningPort);
