@@ -53,7 +53,10 @@ public class Server {
                     System.out.println("Search query received: " + message);
 
                     //handle the incoming query
-                    myNode.executeSearch(message);
+                    String reply = myNode.executeSearch(message);
+                    
+                    DatagramPacket dp = new DatagramPacket(reply.getBytes() , reply.getBytes().length , incoming.getAddress() , incoming.getPort());
+                    sock.send(dp);
                 } catch (IOException e) {
                     System.err.println("IOException " + e);
                 }

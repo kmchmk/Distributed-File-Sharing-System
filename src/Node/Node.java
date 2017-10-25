@@ -35,7 +35,8 @@ public class Node {
         neighborList = new ArrayList<Neighbor>();
         fileList = new ArrayList<String>();
         init(username, IP, myQueryListeningPort, myBSListeningPort);
-        fileList = new ArrayList<>(Arrays.asList("Adventures of Tintin", "Jack and Jill", "Glee"));//populateWithFiles();
+//        fileList = new ArrayList<>(Arrays.asList("Adventures of Tintin", "Jack and Jill", "Glee"));
+        populateWithFiles();
     }
 
     public void init(String username, String IP, int myQueryListeningPort, int myBSListeningPort) {
@@ -104,16 +105,21 @@ public class Node {
         String[] replyList = reply.split(" ");
         if ("UNROK".equals(replyList[1])) {
             if (replyList[2].equals("0")) {
-//                System.out.println("Successfully unregistered.");
+                System.out.println("Successfully unregistered.");
             } else if (replyList[2].equals("9999")) {
                 System.out.println("Error while unregistering. IP and port may not be in the registry or command is incorrect.");
+            } else {
+                System.out.println("Some error while unregistering.");
             }
+        } else if ("Failed".equals(replyList[0])) {
+            System.out.println(reply);
         } else {
             System.out.println("Error in unregistration message or the server is offline");
         }
     }
 
     public void search(String searchString) {
+        System.out.println("\n\n");
         String searchQuery = " " + "SER" + " " + myIP + " " + Integer.toString(myQueryListeningPort) + " " + searchString;
         int length = searchQuery.length() + 4;
 
@@ -122,7 +128,12 @@ public class Node {
         if (neighborList.size() > 0) {
             //here, IP should be neighborList.get(0).getIP()
             String reply = client.send(searchQuery, "localhost", neighborList.get(0).getPort());
-            System.out.println("Reply from neighbor:- " + reply);
+            System.out.println("Reply from first neighbor:- " + reply);
+        }
+        if (neighborList.size() > 1) {
+            //here, IP should be neighborList.get(0).getIP()
+            String reply = client.send(searchQuery, "localhost", neighborList.get(1).getPort());
+            System.out.println("Reply from second neighbor:- " + reply);
         }
     }
 
@@ -149,19 +160,19 @@ public class Node {
 //        System.out.println(fileList.toString());
     }
 
-    public void executeSearch(String message) {
+    public String executeSearch(String message) {
         System.out.println(message);
         String[] messageList = message.split(" ");
 
         if ("SER".equals(messageList[1])) {
             String searchString = messageList[4];
-            System.out.println("Searching for ("+searchString+")");
+            System.out.println("Searching for (" + searchString + ")");
             if (fileList.contains(searchString)) {
-                System.out.println("Found:- " + searchString);
-            }
-            else{
-                System.out.println("Not found:- " + searchString);
+                return ("Found - " + searchString);
+            } else {
+                return ("Not found - " + searchString);
             }
         }
+        return "Search query is in wrong format";
     }
 }

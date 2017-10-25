@@ -32,9 +32,9 @@ public class DistributedFileSharingSystem {
         new Thread() {
             public void run() {
                 try {
-                    sleep(3000);
-                    System.out.println("Trying to search...");
-                    node2.search("Glee");
+                    sleep(2000);
+                    System.out.println("Searching for (Glee)");
+                    node3.search("Glee");
                 } catch (Exception ex) {
                     System.err.println(ex);
                 }
