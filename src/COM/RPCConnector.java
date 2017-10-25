@@ -5,6 +5,8 @@
  */
 package COM;
 
+import Chord.Node;
+
 /**
  *
  * @author erang
@@ -17,7 +19,7 @@ public class RPCConnector implements Connector{
     }
 
     @Override
-    public void listen(int port) {
+    public void listen(int port, Node node) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

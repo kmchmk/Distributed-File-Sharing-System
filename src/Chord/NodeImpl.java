@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -118,12 +117,13 @@ public class NodeImpl implements Node {
 
     private Node askClosestPredecessor(SimpleNeighbor neighbor) {
         String reply = socketConnector.sendMessage("CP " + Integer.toString(id), neighbor.getIp(), neighbor.getPort());
+        System.out.println(reply);
         String[] replyList = reply.split(" ");
         if ("PRED".equals(replyList[0])) {
             String predecessorIP = replyList[1];
             int predecessorPort = Integer.parseInt(replyList[2]);
-//            return new SimpleNeighbor(predecessorIP, predecessorPort);
-            return null;
+            return new NodeImpl(null,predecessorIP, predecessorPort, this.BSip, this.BSport);
+//            return null;
         } else {
             return null;
         }
@@ -314,7 +314,7 @@ public class NodeImpl implements Node {
     @Override
     public void initialize() {
         populateWithFiles();
-        this.socketConnector.listen(port);
+        this.socketConnector.listen(port, this);
     }
 
     @Override
@@ -362,5 +362,9 @@ public class NodeImpl implements Node {
 
     private void redirectMessage(String message, Node next) {
         socketConnector.sendMessage(message, next.getIp(), next.getPort());
+    }
+    
+    public FingerTable getFingerTable(){
+        return fingerTable;
     }
 }
