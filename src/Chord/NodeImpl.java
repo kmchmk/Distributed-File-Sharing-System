@@ -37,10 +37,11 @@ public class NodeImpl implements Node {
     public SocketConnector socketConnector;
 
     public FingerTable fingerTable;
-    
+
     private List<SimpleNeighbor> neighborList;
-    
+
     public Map<Integer, String> files;
+    private Node successor;
 
     public NodeImpl(String username, int port, String BSip, int BSport) {
         fingerTable = new FingertableImpl(maxFingers);
@@ -53,7 +54,7 @@ public class NodeImpl implements Node {
         this.BSip = BSip;
         this.BSport = BSport;
         this.id = this.username.hashCode();
-        
+
         this.socketConnector = new SocketConnector();
     }
 
@@ -81,29 +82,27 @@ public class NodeImpl implements Node {
 
         String reply = socketConnector.sendMessage(registerMessage, "localhost", BSport);
         System.out.println("Reply from bootstrap server:- " + reply);
-        
+
         String[] replyList = reply.split(" ");
-        
+
         if ("REGOK".equals(replyList[1])) {
-            
+
             switch (replyList[2]) {
                 case "0":
                     System.out.println("This is the first node.");
                     break;
-                case "1":
-                    {
-                        SimpleNeighbor firstNeighbor = new SimpleNeighbor(replyList[3], Integer.parseInt(replyList[4]));
-                        neighborList.add(firstNeighbor);
-                        break;
-                    }
-                case "2":
-                    {
-                        SimpleNeighbor firstNeighbor = new SimpleNeighbor(replyList[3], Integer.parseInt(replyList[4]));
-                        neighborList.add(firstNeighbor);
-                        SimpleNeighbor secondNeighbor = new SimpleNeighbor(replyList[5], Integer.parseInt(replyList[6]));
-                        neighborList.add(secondNeighbor);
-                        break;
-                    }
+                case "1": {
+                    SimpleNeighbor firstNeighbor = new SimpleNeighbor(replyList[3], Integer.parseInt(replyList[4]));
+                    neighborList.add(firstNeighbor);
+                    break;
+                }
+                case "2": {
+                    SimpleNeighbor firstNeighbor = new SimpleNeighbor(replyList[3], Integer.parseInt(replyList[4]));
+                    neighborList.add(firstNeighbor);
+                    SimpleNeighbor secondNeighbor = new SimpleNeighbor(replyList[5], Integer.parseInt(replyList[6]));
+                    neighborList.add(secondNeighbor);
+                    break;
+                }
                 case "9999":
                     System.out.println(" Failed, there is some error in the command.");
                     break;
@@ -134,7 +133,7 @@ public class NodeImpl implements Node {
         String reply = socketConnector.sendMessage(registerMessage, "localhost", BSport);
 //        System.out.println("Reply from bootstrap server:- " + reply);
         String[] replyList = reply.split(" ");
-        
+
         if ("UNROK".equals(replyList[1])) {
             switch (replyList[2]) {
                 case "0":
@@ -209,10 +208,10 @@ public class NodeImpl implements Node {
         String[] messageList = queryMessage.split(" ");
 
         if ("SER".equals(messageList[1])) {
-            
+
             String queryWord = messageList[4];
             System.out.println("Searching for (" + queryWord + ")");
-            
+
             if (files.containsKey(queryWord.hashCode())) {
                 return ("Found - " + queryWord);
             } else {
@@ -240,19 +239,19 @@ public class NodeImpl implements Node {
 
     @Override
     public void routeMessge(int key) {
-        if(this.id == key){
-        //handle request
-        }else{
+        if (this.id == key) {
+            //handle request
+        } else {
             Node next;
-            if(fingerTable.searchEntries(key)){
+            if (fingerTable.searchEntries(key)) {
                 next = fingerTable.getNode(key);
-                redirectMessage(next);
-            }else if(fingerTable.getClosestPredecessorToKey(key) != null){
+            } else if (fingerTable.getClosestPredecessorToKey(key) != null) {
                 next = fingerTable.getClosestPredecessorToKey(key);
-                redirectMessage(next);
-            }else{
-                next = 
+
+            } else {
+                next = this.successor;
             }
+            redirectMessage(next);
         }
     }
 
