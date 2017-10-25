@@ -37,13 +37,26 @@ public class FingertableImpl implements FingerTable {
     }
 
     @Override
-    public Node getClosestPredecessorToKey(int key) {
-//            Iterator it = this.fingerEntries..iterator();
-//    while (it.hasNext()) {
-//        Map.Entry pair = (Map.Entry)it.next();
-//        System.out.println(pair.getKey() + " = " + pair.getValue());
-//        it.remove(); // avoids a ConcurrentModificationException
-//    }
-        return null;
+    public Node getClosestPredecessorToKey(int Destkey) {
+        int maxBeforeKey = Integer.MIN_VALUE;
+        boolean found = false;
+        Node ClosestPredecessor = null;
+        
+        for (int key : this.fingerEntries.keySet()) {
+            if(key < Destkey && key > maxBeforeKey){
+                maxBeforeKey = key;
+                found = true;
+            }
+        }
+        
+        if (found) {
+            ClosestPredecessor = this.fingerEntries.get(maxBeforeKey);
+        }
+        return ClosestPredecessor;
+    }
+
+    @Override
+    public void removeEntry(int key) {
+        this.fingerEntries.remove(key);
     }
 }

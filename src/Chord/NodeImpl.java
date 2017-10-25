@@ -17,53 +17,38 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import javax.print.DocFlavor;
 
 /**
  *
  * @author Chanaka
  */
-public class NodeImpl {
+public class NodeImpl implements Node {
 
     private final int maxFingers = 10;
-    
-    public Server server;
-    public SocketConnector client;
 
-    private String ip;
-    private int port;
-    private String username;
+    private final String BSip;
+    private final int BSport;
 
-    int myQueryListeningPort;
-    int myBSListeningPort;
-    
+    private final String ip;
+    private final int port;
+    private final String username;
+
+    public SocketConnector socketConnector;
+
     public FingerTable fingerTable;
     public Map<Integer, String> files;
 
-    public NodeImpl(String username, String ip, , String port, int myQueryListeningPort, int myBSListeningPort) {
+    public NodeImpl(String username, int port, String BSip, int BSport) {
         fingerTable = new FingertableImpl(maxFingers);
         files = new HashMap<>();
+
+        this.username = username;
+        this.ip = getMyIP();
+        this.port = port;
+        this.BSip = BSip;
+        this.BSport = BSport;
         
-        init(username, IP, myQueryListeningPort, myBSListeningPort);
-        populateWithFiles();
-    }
-
-    public void init(String username, String IP, int myQueryListeningPort, int myBSListeningPort) {
-
-        try {
-            this.username = username;
-//            this.myIP = getMyIP();
-            this.myIP = IP;
-            this.myQueryListeningPort = myQueryListeningPort;
-            this.myBSListeningPort = myBSListeningPort;
-            this.server = new Server();
-            this.client = new SocketConnector();
-
-            server.start(myQueryListeningPort, this);//for search queries
-            client.start(myBSListeningPort);
-        } catch (Exception ex) {
-            System.err.println(ex);
-        }
+        this.socketConnector =  new SocketConnector();
     }
 
     public void registerToNetwork() {
@@ -183,5 +168,51 @@ public class NodeImpl {
             }
         }
         return "Search query is in wrong format";
+    }
+
+    @Override
+    public boolean joinNetwork() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean leaveNetwork() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void initialize() {
+        populateWithFiles();
+        this.socketConnector.start(port);
+    }
+
+    @Override
+    public void routeMessge() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String search() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Node getSuccessor() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Node getPredeccessor() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void updateSuccessor(Node node) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void updatePredecessor(Node node) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

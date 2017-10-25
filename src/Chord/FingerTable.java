@@ -12,5 +12,6 @@ package Chord;
 public interface FingerTable {
     public Node getNode(int key);
     public void updateEntry(int key, Node node);
+    public void removeEntry(int key);
     public Node getClosestPredecessorToKey(int key);
 }

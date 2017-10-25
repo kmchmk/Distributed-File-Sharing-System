@@ -10,7 +10,7 @@ package COM;
  * @author erang
  */
 public interface Connector {
-    public String sendMessage();
+    public String sendMessage(String message, String ip, int port);
     public void initialize();
-    public void listen();
+    public void listen(int port);
 }
