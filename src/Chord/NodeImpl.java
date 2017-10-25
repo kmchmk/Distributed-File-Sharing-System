@@ -281,7 +281,7 @@ public class NodeImpl implements Node {
         }
     }
 
-    public String searchFileLisr(String queryMessage) {
+    public String searchFileList(String queryMessage) {
         System.out.println(queryMessage);
         String[] messageList = queryMessage.split(" ");
 
