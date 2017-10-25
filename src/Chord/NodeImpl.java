@@ -91,13 +91,55 @@ public class NodeImpl implements Node {
     }
 
     private Node findSuccessor() {
+        Node successorNeighbor = null;
+        if (neighborList.size() > 0) {
+            successorNeighbor = askClosestSuccessor(neighborList.get(0));
+        }
+        if (neighborList.size() > 1) {
+            Node tempNeighbor = askClosestSuccessor(neighborList.get(1));
+            //have to check what is the closest
 
-        return null;
+        }
+        return successorNeighbor;
     }
 
     private Node findPredecessor() {
+        Node predecessorNeighbor = null;
+        if (neighborList.size() > 0) {
+            predecessorNeighbor = askClosestPredecessor(neighborList.get(0));
+        }
+        if (neighborList.size() > 1) {
+            Node tempNeighbor = askClosestPredecessor(neighborList.get(1));
+            //have to check what is the closest
 
-        return null;
+        }
+        return predecessorNeighbor;
+    }
+
+    private Node askClosestPredecessor(SimpleNeighbor neighbor) {
+        String reply = socketConnector.sendMessage("CP " + Integer.toString(id), neighbor.getIp(), neighbor.getPort());
+        String[] replyList = reply.split(" ");
+        if ("PRED".equals(replyList[0])) {
+            String predecessorIP = replyList[1];
+            int predecessorPort = Integer.parseInt(replyList[2]);
+//            return new SimpleNeighbor(predecessorIP, predecessorPort);
+            return null;
+        } else {
+            return null;
+        }
+    }
+
+    private Node askClosestSuccessor(SimpleNeighbor neighbor) {
+        String reply = socketConnector.sendMessage("CS " + Integer.toString(id), neighbor.getIp(), neighbor.getPort());
+        String[] replyList = reply.split(" ");
+        if ("SUCC".equals(replyList[0])) {
+            String successorIP = replyList[1];
+            int successorPort = Integer.parseInt(replyList[2]);
+//            return new SimpleNeighbor(successorIP, successorPort);
+            return null;
+        } else {
+            return null;
+        }
     }
 
     private boolean updateFingerTable() {
