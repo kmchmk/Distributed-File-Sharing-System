@@ -32,6 +32,7 @@ public class NodeImpl implements Node {
     private final String ip;
     private final int port;
     private final String username;
+    private final int id;
 
     public SocketConnector socketConnector;
 
@@ -51,7 +52,8 @@ public class NodeImpl implements Node {
         this.port = port;
         this.BSip = BSip;
         this.BSport = BSport;
-
+        this.id = this.username.hashCode();
+        
         this.socketConnector = new SocketConnector();
     }
 
@@ -172,7 +174,7 @@ public class NodeImpl implements Node {
     }
 
     public void populateWithFiles() {
-        ArrayList<String> files = new ArrayList<>(Arrays.asList(
+        ArrayList<String> filelist = new ArrayList<>(Arrays.asList(
                 "Adventures of Tintin",
                 "Jack and Jill",
                 "Glee",
@@ -195,10 +197,10 @@ public class NodeImpl implements Node {
                 "Hacking for Dummies"));
 
         for (int i = 0; i < 3; i++) {
-            int rand = new Random().nextInt(files.size());
-            String file = files.get(rand);
-            files.remove(rand);
-            files.add(file);
+            int rand = new Random().nextInt(filelist.size());
+            String file = filelist.get(rand);
+            filelist.remove(rand);
+            filelist.add(file);
         }
     }
 
@@ -237,8 +239,8 @@ public class NodeImpl implements Node {
     }
 
     @Override
-    public void routeMessge() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void routeMessge(int key) {
+        if(this == key)
     }
 
     @Override
