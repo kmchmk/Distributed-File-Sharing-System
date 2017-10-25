@@ -18,33 +18,24 @@ public class DistributedFileSharingSystem {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        
         new Thread() {
+            @Override
             public void run() {
                 BootstrapServer.runBootstrapServer();
             }
         }.start();
-        
-        NodeImpl node1 = new NodeImpl("kmchmk1", "13.58.202.127", 7771, 7772);
-        NodeImpl node2 = new NodeImpl("kmchmk2", "13.58.202.128", 7773, 7774);
-        NodeImpl node3 = new NodeImpl("kmchmk3", "13.58.202.129", 7775, 7776);
-        node1.unregisterFromNetwork();
-        node2.unregisterFromNetwork();
-        node3.unregisterFromNetwork();
 
+        NodeImpl node1 = new NodeImpl("One", 3001, 55555);
+        NodeImpl node2 = new NodeImpl("Two", 3002, 55555);
+        NodeImpl node3 = new NodeImpl("Three", 3003, 55555);
+        
         node1.registerToNetwork();
         node2.registerToNetwork();
         node3.registerToNetwork();
 
-        new Thread() {
-            public void run() {
-                try {
-                    sleep(2000);
-                    System.out.println("Searching for (Glee)");
-                    node3.search("Glee");
-                } catch (Exception ex) {
-                    System.err.println(ex);
-                }
-            }
-        }.start();
+        node1.unregisterFromNetwork();
+        node2.unregisterFromNetwork();
+        node3.unregisterFromNetwork();
     }
 }
