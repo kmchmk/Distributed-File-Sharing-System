@@ -17,8 +17,8 @@ public interface Node {
     public String search();
     public Node getSuccessor();
     public Node getPredeccessor();
-    public void updateSuccessor(Node node);
-    public void updatePredecessor(Node node);
+    public void setSuccessor(Node successor);
+    public void setPredecessor(Node predecessor);
     public String getIp();
     public int getPort();
 }
