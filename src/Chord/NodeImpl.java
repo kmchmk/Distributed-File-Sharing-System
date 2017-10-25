@@ -41,8 +41,8 @@ public class NodeImpl implements Node {
     private List<SimpleNeighbor> neighborList;
 
     public Map<Integer, String> files;
-    private Node successor;
-    private Node predecessor;
+    private SimpleNeighbor successor;
+    private SimpleNeighbor predecessor;
 
     public NodeImpl(String username, int port, String BSip, int BSport) {
         fingerTable = new FingertableImpl(maxFingers);
@@ -64,41 +64,80 @@ public class NodeImpl implements Node {
     }
 
     @Override
-    public String getIp(){
+    public String getIp() {
         return this.ip;
     }
-    
+
     @Override
-    public int getPort(){
+    public int getPort() {
         return this.port;
     }
+
     public boolean joinNetwork() {
         this.successor = findSuccessor();
-        this.successor.updatePredecessor(this);
-        
+//        this.successor.updatePredecessor(this);
+
         this.predecessor = findPredecessor();
-        this.predecessor.updateSuccessor(this);
-        
+//        this.predecessor.updateSuccessor(this);
+
         return updateFingerTable();
     }
-    
-    private Node findSuccessor(){
-        
-        return null;
+
+    private SimpleNeighbor findSuccessor() {
+        SimpleNeighbor successorNeighbor = null;
+        if (neighborList.size() > 0) {
+            successorNeighbor = askClosestSuccessor(neighborList.get(0));
+        }
+        if(neighborList.size() > 1){
+            SimpleNeighbor tempNeighbor = askClosestSuccessor(neighborList.get(1));
+            //have to check what is the closest
+            
+        }
+        return successorNeighbor;
     }
-    private Node findPredecessor(){
-        
-        return null;
+
+    private SimpleNeighbor findPredecessor() {
+        SimpleNeighbor predecessorNeighbor = null;
+        if (neighborList.size() > 0) {
+            predecessorNeighbor = askClosestPredecessor(neighborList.get(0));
+        }
+        if(neighborList.size() > 1){
+            SimpleNeighbor tempNeighbor = askClosestPredecessor(neighborList.get(1));
+            //have to check what is the closest
+            
+        }
+        return predecessorNeighbor;
     }
-    
-    private boolean updateFingerTable(){
-        
-        
+
+    private SimpleNeighbor askClosestPredecessor(SimpleNeighbor neighbor) {
+        String reply = socketConnector.sendMessage("CP " + Integer.toString(id), neighbor.getIp(), neighbor.getPort());
+        String[] replyList = reply.split(" ");
+        if("PRED".equals(replyList[0])){
+            String predecessorIP = replyList[1];
+            int predecessorPort = Integer.parseInt(replyList[2]);
+            return new SimpleNeighbor(predecessorIP, predecessorPort);
+        }
+        else{
+            return null;
+        }
+    }
+    private SimpleNeighbor askClosestSuccessor(SimpleNeighbor neighbor) {
+        String reply = socketConnector.sendMessage("CS " + Integer.toString(id), neighbor.getIp(), neighbor.getPort());
+        String[] replyList = reply.split(" ");
+        if("SUCC".equals(replyList[0])){
+            String successorIP = replyList[1];
+            int successorPort = Integer.parseInt(replyList[2]);
+            return new SimpleNeighbor(successorIP, successorPort);
+        }
+        else{
+            return null;
+        }
+    }
+    private boolean updateFingerTable() {
+
         return true;
     }
-    
-    
-    
+
     private static String getMyIP() {
         try {
             final DatagramSocket socket = new DatagramSocket();
@@ -257,7 +296,6 @@ public class NodeImpl implements Node {
         }
         return "Search query is in wrong format";
     }
-
 
     @Override
     public boolean leaveNetwork() {
