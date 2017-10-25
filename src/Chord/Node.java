@@ -13,7 +13,7 @@ public interface Node {
     public boolean joinNetwork();
     public boolean leaveNetwork();
     public void initialize();
-    public void routeMessge();
+    public void routeMessge(int key);
     public String search();
     public Node getSuccessor();
     public Node getPredeccessor();

@@ -5,12 +5,16 @@
  */
 package Chord;
 
+import java.util.Map;
+
 /**
  *
  * @author erang
  */
 public interface FingerTable {
     public Node getNode(int key);
+    public Map<Integer, Node> getFingerEntries();
+    public boolean searchEntries(int key);
     public void updateEntry(int key, Node node);
     public void removeEntry(int key);
     public Node getClosestPredecessorToKey(int key);

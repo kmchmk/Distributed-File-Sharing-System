@@ -23,6 +23,16 @@ public class FingertableImpl implements FingerTable {
     }
 
     @Override
+    public Map<Integer, Node> getFingerEntries(){
+        return this.fingerEntries;
+    }
+    
+    @Override
+    public boolean searchEntries(int key){
+        return this.fingerEntries.containsKey(key);
+    }
+    
+    @Override
     public Node getNode(int key) {
         if (this.fingerEntries.containsKey(key)) {
             return this.fingerEntries.get(key);

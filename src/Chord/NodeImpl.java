@@ -240,7 +240,20 @@ public class NodeImpl implements Node {
 
     @Override
     public void routeMessge(int key) {
-        if(this == key)
+        if(this.id == key){
+        //handle request
+        }else{
+            Node next;
+            if(fingerTable.searchEntries(key)){
+                next = fingerTable.getNode(key);
+                redirectMessage(next);
+            }else if(fingerTable.getClosestPredecessorToKey(key) != null){
+                next = fingerTable.getClosestPredecessorToKey(key);
+                redirectMessage(next);
+            }else{
+                next = 
+            }
+        }
     }
 
     @Override
@@ -265,6 +278,10 @@ public class NodeImpl implements Node {
 
     @Override
     public void updatePredecessor(Node node) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private void redirectMessage(Node next) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
