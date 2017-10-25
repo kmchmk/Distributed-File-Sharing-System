@@ -24,7 +24,7 @@ import java.util.Random;
  */
 public class NodeImpl implements Node {
 
-    private final int maxFingers = 10;
+    private static final int MAX_FINGERS = 10;
 
     private final String BSip;
     private final int BSport;
@@ -34,23 +34,25 @@ public class NodeImpl implements Node {
     private final String username;
     private final int id;
 
-    public SocketConnector socketConnector;
+    private SocketConnector socketConnector;
 
-    public FingerTable fingerTable;
-
-    private List<SimpleNeighbor> neighborList;
-
-    public Map<Integer, String> files;
+    private FingerTable fingerTable;
     private Node successor;
     private Node predecessor;
 
-    public NodeImpl(String username, int port, String BSip, int BSport) {
-        fingerTable = new FingertableImpl(maxFingers);
-        files = new HashMap<>();
+    private ArrayList<SimpleNeighbor> neighborList;
+
+    private Map<Integer, String> metaData;
+    private ArrayList<String> files;
+
+    public NodeImpl(String username, String ip, int port, String BSip, int BSport) {
+        fingerTable = new FingertableImpl(MAX_FINGERS);
+        metaData = new HashMap<>();
+        files = new ArrayList<>();
         neighborList = new ArrayList<>();
 
         this.username = username;
-        this.ip = getMyIP();
+        this.ip = ip;
         this.port = port;
         this.BSip = BSip;
         this.BSport = BSport;
@@ -59,8 +61,12 @@ public class NodeImpl implements Node {
         this.socketConnector = new SocketConnector();
     }
 
-    public NodeImpl(String username, int port, int BSport) {
-        this(username, port, getMyIP(), BSport);
+    public NodeImpl(String username, int port, String BSip, int BSport) {
+        this(username, getMyIP(), port, BSip, BSport);
+    }
+
+    public NodeImpl(String username, int port) {
+        this(username, getMyIP(), port, getMyIP(), 55555);
     }
 
     @Override
@@ -79,6 +85,7 @@ public class NodeImpl implements Node {
 
         this.predecessor = findPredecessor();
 //        this.predecessor.updateSuccessor(this);
+
 
         return updateFingerTable();
     }
@@ -134,7 +141,7 @@ public class NodeImpl implements Node {
             return null;
         }
     }
-
+    
     private boolean updateFingerTable() {
 
         return true;
@@ -276,12 +283,12 @@ public class NodeImpl implements Node {
         for (int i = 0; i < 3; i++) {
             int rand = new Random().nextInt(filelist.size());
             String file = filelist.get(rand);
+            files.add(file);
             filelist.remove(rand);
-            filelist.add(file);
         }
     }
 
-    public String searchFileList(String queryMessage) {
+    public String searchMetaData(String queryMessage) {
         System.out.println(queryMessage);
         String[] messageList = queryMessage.split(" ");
 
@@ -290,7 +297,7 @@ public class NodeImpl implements Node {
             String queryWord = messageList[4];
             System.out.println("Searching for (" + queryWord + ")");
 
-            if (files.containsKey(queryWord.hashCode())) {
+            if (metaData.containsKey(queryWord.hashCode())) {
                 return ("Found - " + queryWord);
             } else {
                 return ("Not found - " + queryWord);
@@ -335,22 +342,22 @@ public class NodeImpl implements Node {
 
     @Override
     public Node getSuccessor() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.successor;
     }
 
     @Override
     public Node getPredeccessor() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.predecessor;
     }
 
     @Override
-    public void updateSuccessor(Node node) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void setSuccessor(Node successor) {
+        this.successor = successor;
     }
 
     @Override
-    public void updatePredecessor(Node node) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void setPredecessor(Node predecessor) {
+        this.predecessor = predecessor;
     }
 
     private void redirectMessage(String message, Node next) {
