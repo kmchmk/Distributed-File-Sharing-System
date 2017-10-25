@@ -62,6 +62,14 @@ public class NodeImpl implements Node {
         this(username, port, getMyIP(), BSport);
     }
 
+    public String getIp(){
+        return this.ip;
+    }
+    
+    public int getPort(){
+        return this.port;
+    }
+    
     private static String getMyIP() {
         try {
             final DatagramSocket socket = new DatagramSocket();
@@ -238,7 +246,7 @@ public class NodeImpl implements Node {
     }
 
     @Override
-    public void routeMessge(int key) {
+    public void routeMessge(String message, int key) {
         if (this.id == key) {
             //handle request
         } else {
@@ -251,7 +259,7 @@ public class NodeImpl implements Node {
             } else {
                 next = this.successor;
             }
-            redirectMessage(next);
+            redirectMessage(message, next);
         }
     }
 
@@ -280,7 +288,7 @@ public class NodeImpl implements Node {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    private void redirectMessage(Node next) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void redirectMessage(String message, Node next) {
+        socketConnector.sendMessage(message, next.getIp(), next.getPort());
     }
 }
