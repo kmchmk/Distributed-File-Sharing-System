@@ -6,6 +6,7 @@
 package COM;
 
 import Chord.Node;
+import Chord.NodeImpl;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -48,6 +49,11 @@ public class SocketConnector implements Connector {
                         String reply = "PRED " + temp.getIp() + " " + temp.getPort();
                         DatagramPacket dp = new DatagramPacket(reply.getBytes(), reply.getBytes().length, incoming.getAddress(), incoming.getPort());
                         socket.send(dp);
+                    } else if ("UP".equals(messageList[0])) {
+                        me.setPredecessor(new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), me.getBSip(), me.getBSport()));
+                    }
+                    else if ("US".equals(messageList[0])) {
+                        me.setSuccessor(new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), me.getBSip(), me.getBSport()));
                     }
                     System.out.println("Message Received: " + message);
 
