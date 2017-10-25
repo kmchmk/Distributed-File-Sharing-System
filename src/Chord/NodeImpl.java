@@ -42,6 +42,7 @@ public class NodeImpl implements Node {
 
     public Map<Integer, String> files;
     private Node successor;
+    private Node predecessor;
 
     public NodeImpl(String username, int port, String BSip, int BSport) {
         fingerTable = new FingertableImpl(maxFingers);
@@ -62,6 +63,34 @@ public class NodeImpl implements Node {
         this(username, port, getMyIP(), BSport);
     }
 
+    @Override
+    public boolean joinNetwork() {
+        this.successor = findSuccessor();
+        this.successor.updatePredecessor(this);
+        
+        this.predecessor = findPredecessor();
+        this.predecessor.updateSuccessor(this);
+        
+        return updateFingerTable();
+    }
+    
+    private Node findSuccessor(){
+        
+        return null;
+    }
+    private Node findPredecessor(){
+        
+        return null;
+    }
+    
+    private boolean updateFingerTable(){
+        
+        
+        return true;
+    }
+    
+    
+    
     private static String getMyIP() {
         try {
             final DatagramSocket socket = new DatagramSocket();
@@ -221,10 +250,6 @@ public class NodeImpl implements Node {
         return "Search query is in wrong format";
     }
 
-    @Override
-    public boolean joinNetwork() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 
     @Override
     public boolean leaveNetwork() {
