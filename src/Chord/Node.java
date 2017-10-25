@@ -13,10 +13,12 @@ public interface Node {
     public boolean joinNetwork();
     public boolean leaveNetwork();
     public void initialize();
-    public void routeMessge(int key);
+    public void routeMessge(String message, int key);
     public String search();
     public Node getSuccessor();
     public Node getPredeccessor();
     public void updateSuccessor(Node node);
     public void updatePredecessor(Node node);
+    public String getIp();
+    public int getPort();
 }
