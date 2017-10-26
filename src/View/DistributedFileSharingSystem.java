@@ -30,15 +30,17 @@ public class DistributedFileSharingSystem {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(1000);
+                    sleep(1000);
                     NodeImpl node1 = new NodeImpl("One", 3001);
                     NodeImpl node2 = new NodeImpl("Two", 3002);
-                    NodeImpl node3 = new NodeImpl("Three", 3003);
+//                    NodeImpl node3 = new NodeImpl("Three", 3003);
                     
                     node1.registerToNetwork();
                     node2.registerToNetwork();
-                    node3.registerToNetwork();
+//                    node3.registerToNetwork();
                     
+//                    sleep(2000);
+//                    System.exit(0);
 //                node1.unregisterFromNetwork();
 //                node2.unregisterFromNetwork();
 //                node3.unregisterFromNetwork();
@@ -48,5 +50,16 @@ public class DistributedFileSharingSystem {
             }
         }.start();
 
+        
+        new Thread(){
+        @Override
+        public void run(){
+            try {
+                sleep(60000);
+            } catch (InterruptedException ex) {
+                System.err.println(ex);
+            }
+            System.exit(0);
+        }}.start();
     }
 }

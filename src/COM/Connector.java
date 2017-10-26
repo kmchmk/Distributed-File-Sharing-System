@@ -13,5 +13,7 @@ public interface Connector {
 
     public void send(String OutgoingMessage, String ip, int port);
 
+    public void sendToBS(String message);
+
     public void listen(int port);
 }
