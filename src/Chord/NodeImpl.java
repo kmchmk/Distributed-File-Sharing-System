@@ -243,10 +243,14 @@ public class NodeImpl implements Node {
             switch (replyList[2]) {
                 case "0":
                     System.out.println("This is the first node.");
+                    for (int i = 0; i < MAX_FINGERS; i++) {
+                        this.fingerTable.updateEntry(i, this);
+                    }
                     break;
                 case "1": {
                     SimpleNeighbor firstNeighbor = new SimpleNeighbor(replyList[3], Integer.parseInt(replyList[4]));
                     neighborList.add(firstNeighbor);
+                    joinNetwork();
                     break;
                 }
                 case "2": {
@@ -254,6 +258,7 @@ public class NodeImpl implements Node {
                     neighborList.add(firstNeighbor);
                     SimpleNeighbor secondNeighbor = new SimpleNeighbor(replyList[5], Integer.parseInt(replyList[6]));
                     neighborList.add(secondNeighbor);
+                    joinNetwork();
                     break;
                 }
                 case "9999":
@@ -400,8 +405,9 @@ public class NodeImpl implements Node {
             Node next;
             if ((next = fingerTable.getNode(key)) == null) {
                 next = fingerTable.getClosestPredecessorToKey(key);
-                if (next == null)
+                if (next == null) {
                     next = this.successor;
+                }
             }
             redirectMessage(message, next);
         }
@@ -485,10 +491,28 @@ public class NodeImpl implements Node {
                         socketConnector.send("US " + successor.getIp() + " " + successor.getPort(), messageList[1], Integer.parseInt(messageList[2]));
                         this.setSuccessor(new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport()));
 
+                        //request the finger tabel from my successor
+                        //"RFT <myIP> <myPort>"
+                        socketConnector.send("RFT " + this.getIp() + " " + this.getPort(), incomingIP, incomingPort);
                     }
                     break;
                 case "US":
                     this.setSuccessor(new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport()));
+                case "RFT":
+                    //Update finger table
+                    //UFT <ip_1> <port_1> <ip_2> <port_2> <ip_3> <port_3>.....
+                    String reply = "UFT ";
+                    for (int i = 0; i < MAX_FINGERS; i++) {
+                        Node entry = fingerTable.getEntryByIndex(i);
+                        reply += entry.getIp() + " " + entry.getPort();
+                    }
+
+                    socketConnector.send(reply, messageList[1], Integer.parseInt(messageList[2]));
+                case "UFT":
+                    for (int i = 0; i < MAX_FINGERS; i++) {
+                        Node temp = new NodeImpl(null, messageList[(2 * i) + 1], Integer.parseInt(messageList[(2 * i) + 2]), this.getBSip(), this.getBSport());
+                        fingerTable.updateEntry(i, temp);
+                    }
                 default:
                     break;
             }

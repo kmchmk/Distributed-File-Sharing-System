@@ -5,9 +5,6 @@
  */
 package Chord;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  *
  * @author erang
@@ -80,5 +77,12 @@ public class FingertableImpl implements FingerTable {
         if (index >=0 && index < maxEntries)
             return fingerEntries[index];
         return null;
+    }
+    
+    
+    
+    @Override
+    public Node getEntryByIndex(int index){
+        return fingerEntries[index];
     }
 }
