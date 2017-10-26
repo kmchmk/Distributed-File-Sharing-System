@@ -614,5 +614,13 @@ public class NodeImpl implements Node {
         }
         return null;
     }
+    
+     public String getIP(){
+        return ip;
+    }
+    
+    public int getthePort(){
+        return port;
+    }
 
 }
