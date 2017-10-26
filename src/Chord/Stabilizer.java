@@ -9,18 +9,56 @@ package Chord;
  *
  * @author Irfad Hussain
  */
-public class Stabilizer implements Runnable {
-    
-    private Node me;
-    
-    public Stabilizer(Node node){
-        this.me = node;
+public class Stabilizer extends Thread {
+
+    private Node thisNode;
+    private Node newPredessor = null;
+    private boolean predMsgSent;
+
+    public Stabilizer(Node thisNode) {
+        this.thisNode = thisNode;
+    }
+
+    public void setNewPredessor(Node newPredessor) {
+        this.newPredessor = newPredessor;
     }
 
     @Override
     public void run() {
-        Node currentSuccessor = me.getSuccessor();
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        while (true) {
+            try {
+                Thread.sleep(5000);
+                System.out.println("Stabilizing...");
+                if (!predMsgSent) {
+                    String msg = "GET_PRED " + thisNode.getIp() + " " + thisNode.getPort();
+                    thisNode.routeMessge(msg, thisNode.getSuccessor().getID());
+                    predMsgSent = true;
+                    Thread.sleep(5 * 60 * 1000);
+                }
+            } catch (InterruptedException ex) {
+                if (predMsgSent) {
+                    if (newPredessor != null) {
+                        System.out.println("GET_PRED Success");
+                        int predOfSuccessorID = newPredessor.getID();
+                        int currentSuccessorID = thisNode.getSuccessor().getID();
+                        // this node and successor are in opposite side of 0
+                        if (currentSuccessorID < thisNode.getID()) {
+                            if ((thisNode.getID() < predOfSuccessorID && predOfSuccessorID < NodeImpl.MAX_NODES) || (0 <= predOfSuccessorID && predOfSuccessorID < currentSuccessorID)) {
+                                thisNode.setSuccessor(newPredessor);
+                                System.out.println("Update Successor of" + thisNode.getID() + " to " + predOfSuccessorID);
+                            }
+                        } else if (thisNode.getID() < predOfSuccessorID && predOfSuccessorID < currentSuccessorID) { // normal successor
+                            thisNode.setSuccessor(newPredessor);
+                            System.out.println("Update Successor of" + thisNode.getID() + " to " + predOfSuccessorID);
+                        }
+                        String msg = "NOTIFY_S " + thisNode.getIp() + " " + thisNode.getPort();
+                        thisNode.routeMessge(msg, thisNode.getSuccessor().getID());
+                        newPredessor = null;
+                        predMsgSent = false;
+                    }
+                }
+            }
+        }
     }
-    
+
 }

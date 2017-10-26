@@ -40,8 +40,9 @@ public interface Node {
     public void handleMessage(String message, String incomingIP, int incomingPort);
 
     public FingerTable getFingerTable();
-    
+
     public int getID();
 
+    public Node findSuccessorOf(int finger, int id, String originIP, int originPort);
 
 }

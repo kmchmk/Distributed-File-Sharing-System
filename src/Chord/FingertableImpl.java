@@ -50,19 +50,21 @@ public class FingertableImpl implements FingerTable {
     @Override
     public Node getClosestPredecessorToKey(int Destkey) {
         int maxBeforeKey = Integer.MIN_VALUE;
+        int maxKeyIndex = -1;
         boolean found = false;
         Node ClosestPredecessor = null;
         
         for (int i=0; i<maxEntries; i++) {
             int key = fingerEntries[i].getID();
             if(key < Destkey && key > maxBeforeKey){
-                maxBeforeKey = i;
+                maxBeforeKey = key;
+                maxKeyIndex = i;
                 found = true;
             }
         }
         
         if (found) {
-            ClosestPredecessor = this.fingerEntries[maxBeforeKey];
+            ClosestPredecessor = this.fingerEntries[maxKeyIndex];
         }
         return ClosestPredecessor;
     }
@@ -78,11 +80,10 @@ public class FingertableImpl implements FingerTable {
             return fingerEntries[index];
         return null;
     }
-    
-    
-    
+
     @Override
     public Node getEntryByIndex(int index){
         return fingerEntries[index];
     }
+    
 }
