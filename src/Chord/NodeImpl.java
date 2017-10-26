@@ -380,12 +380,6 @@ public class NodeImpl implements Node {
     }
 
     @Override
-    public void initialize() {
-        populateWithFiles();
-        this.socketConnector.listen(port, this);
-    }
-
-    @Override
     public void routeMessge(String message, int key) {
         if (this.id >= key) {
             //handle request
