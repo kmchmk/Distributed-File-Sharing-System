@@ -26,16 +26,27 @@ public class DistributedFileSharingSystem {
             }
         }.start();
 
-        NodeImpl node1 = new NodeImpl("One", 3001);
-        NodeImpl node2 = new NodeImpl("Two", 3002);
-        NodeImpl node3 = new NodeImpl("Three", 3003);
-        
-        node1.registerToNetwork();
-        node2.registerToNetwork();
-        node3.registerToNetwork();
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                    NodeImpl node1 = new NodeImpl("One", 3001);
+                    NodeImpl node2 = new NodeImpl("Two", 3002);
+                    NodeImpl node3 = new NodeImpl("Three", 3003);
+                    
+                    node1.registerToNetwork();
+                    node2.registerToNetwork();
+                    node3.registerToNetwork();
+                    
+//                node1.unregisterFromNetwork();
+//                node2.unregisterFromNetwork();
+//                node3.unregisterFromNetwork();
+                } catch (InterruptedException ex) {
+                    System.err.println(ex);
+                }
+            }
+        }.start();
 
-        node1.unregisterFromNetwork();
-        node2.unregisterFromNetwork();
-        node3.unregisterFromNetwork();
     }
 }

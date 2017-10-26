@@ -10,7 +10,9 @@ package Chord;
  * @author erang
  */
 public interface Node {
-    public boolean joinNetwork();
+
+    public void joinNetwork();
+
     public boolean leaveNetwork();
 
     public void initialize();

@@ -80,5 +80,10 @@ public class FingertableImpl implements FingerTable {
             return fingerEntries[index];
         return null;
     }
+
+    @Override
+    public Node getEntryByIndex(int index){
+        return fingerEntries[index];
+    }
     
 }
