@@ -222,7 +222,6 @@ public class NodeImpl implements Node {
     }
 
     public void registerToNetwork() {
-        String reply = null; // dirty fix
 
         System.out.println("Registering to network: (" + username + ")");
 
@@ -233,52 +232,6 @@ public class NodeImpl implements Node {
                 + Integer.toString(length) + registerMessage;
 
         socketConnector.send(registerMessage, BSip, BSport);
-
-        System.out.println("Reply from bootstrap server:- " + reply);
-
-        String[] replyList = reply.split(" ");
-
-        if ("REGOK".equals(replyList[1])) {
-
-            switch (replyList[2]) {
-                case "0":
-                    System.out.println("This is the first node.");
-                    for (int i = 0; i < MAX_FINGERS; i++) {
-                        this.fingerTable.updateEntry(i, this);
-                    }
-                    break;
-                case "1": {
-                    SimpleNeighbor firstNeighbor = new SimpleNeighbor(replyList[3], Integer.parseInt(replyList[4]));
-                    neighborList.add(firstNeighbor);
-                    joinNetwork();
-                    break;
-                }
-                case "2": {
-                    SimpleNeighbor firstNeighbor = new SimpleNeighbor(replyList[3], Integer.parseInt(replyList[4]));
-                    neighborList.add(firstNeighbor);
-                    SimpleNeighbor secondNeighbor = new SimpleNeighbor(replyList[5], Integer.parseInt(replyList[6]));
-                    neighborList.add(secondNeighbor);
-                    joinNetwork();
-                    break;
-                }
-                case "9999":
-                    System.out.println(" Failed, there is some error in the command.");
-                    break;
-                case "9998":
-                    System.out.println("Failed, already registered to you, unregister first.");
-                    break;
-                case "9997":
-                    System.out.println("Failed, registered to another user, try a different IP and port.");
-                    break;
-                case "9996":
-                    System.out.println("Failed, can’t register. Bootstrap Server full.");
-                    break;
-                default:
-                    break;
-            }
-        } else {
-            System.out.println("Error in registration message or the server is offline");
-        }
 
     }
 
@@ -521,6 +474,49 @@ public class NodeImpl implements Node {
                     }
                 default:
                     break;
+            }
+
+            if ("REGOK".equals(messageList[1])) {
+                System.out.println("Register message received.");
+
+                switch (messageList[2]) {
+                    case "0":
+                        System.out.println("This is the first node.");
+                        for (int i = 0; i < MAX_FINGERS; i++) {
+                            this.fingerTable.updateEntry(i, this);
+                        }
+                        break;
+                    case "1": {
+                        SimpleNeighbor firstNeighbor = new SimpleNeighbor(messageList[3], Integer.parseInt(messageList[4]));
+                        neighborList.add(firstNeighbor);
+                        joinNetwork();
+                        break;
+                    }
+                    case "2": {
+                        SimpleNeighbor firstNeighbor = new SimpleNeighbor(messageList[3], Integer.parseInt(messageList[4]));
+                        neighborList.add(firstNeighbor);
+                        SimpleNeighbor secondNeighbor = new SimpleNeighbor(messageList[5], Integer.parseInt(messageList[6]));
+                        neighborList.add(secondNeighbor);
+                        joinNetwork();
+                        break;
+                    }
+                    case "9999":
+                        System.out.println(" Failed, there is some error in the command.");
+                        break;
+                    case "9998":
+                        System.out.println("Failed, already registered to you, unregister first.");
+                        break;
+                    case "9997":
+                        System.out.println("Failed, registered to another user, try a different IP and port.");
+                        break;
+                    case "9996":
+                        System.out.println("Failed, can’t register. Bootstrap Server full.");
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                System.out.println("Error in registration message or the server is offline");
             }
         }
     }
