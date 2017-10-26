@@ -19,7 +19,7 @@ import java.util.Random;
 
 /**
  *
- * @author Chanaka
+ * @author erang
  */
 public class NodeImpl implements Node {
 
@@ -57,7 +57,7 @@ public class NodeImpl implements Node {
         this.BSport = BSport;
         this.id = this.username.hashCode();
 
-        this.socketConnector = new SocketConnector();
+        this.socketConnector = new SocketConnector(this);
     }
 
     public NodeImpl(String username, int port, String BSip, int BSport) {
@@ -66,6 +66,12 @@ public class NodeImpl implements Node {
 
     public NodeImpl(String username, int port) {
         this(username, getMyIP(), port, getMyIP(), 55555);
+    }
+
+    @Override
+    public void initialize() {
+        populateWithFiles();
+        this.socketConnector.listen(port);
     }
 
     @Override
@@ -78,6 +84,7 @@ public class NodeImpl implements Node {
         return this.port;
     }
 
+    @Override
     public String getBSip() {
         return BSip;
     }
@@ -86,8 +93,6 @@ public class NodeImpl implements Node {
     public int getBSport() {
         return BSport;
     }
-    
-    
 
     @Override
     public boolean joinNetwork() {
@@ -101,16 +106,24 @@ public class NodeImpl implements Node {
     }
 
     private void askToUpdatePredecessor(Node tempSuccessor) {
-        String reply = socketConnector.sendMessage("UP " + this.ip + " " + this.port, tempSuccessor.getIp(), tempSuccessor.getPort());
+        String reply = null; // dirty fix
+        
+        String message = "UP " + this.ip + " " + this.port;
+        
+        socketConnector.send(message, tempSuccessor.getIp(), tempSuccessor.getPort());
+        
         if (reply.equals("updated")) {
             System.out.println("Suuccessfully updated the predecessor.");
         } else {
             System.out.println("Couldn't update the predecessor.");
         }
     }
-    
+
     private void askToUpdateSuccessor(Node tempPredecessor) {
-        String reply = socketConnector.sendMessage("US " + this.ip + " " + this.port, tempPredecessor.getIp(), tempPredecessor.getPort());
+        String reply = null; // dirty fix
+        
+        socketConnector.send("US " + this.ip + " " + this.port, tempPredecessor.getIp(), tempPredecessor.getPort());
+        
         if (reply.equals("updated")) {
             System.out.println("Suuccessfully updated the successor.");
         } else {
@@ -126,7 +139,6 @@ public class NodeImpl implements Node {
         if (neighborList.size() > 1) {
             Node tempNeighbor = askClosestSuccessor(neighborList.get(1));
             //have to check what is the closest
-
         }
         return successorNeighbor;
     }
@@ -145,10 +157,13 @@ public class NodeImpl implements Node {
     }
 
     private Node askClosestPredecessor(SimpleNeighbor neighbor) {
-        //"CP <id>"
-        String reply = socketConnector.sendMessage("CP " + Integer.toString(id), neighbor.getIp(), neighbor.getPort());
+        String reply = null; // dirty fix
+        
+        socketConnector.send("CP " + Integer.toString(id), neighbor.getIp(), neighbor.getPort());
+        
         System.out.println(reply);
         String[] replyList = reply.split(" ");
+        
         if ("PRED".equals(replyList[0])) {
             String predecessorIP = replyList[1];
             int predecessorPort = Integer.parseInt(replyList[2]);
@@ -160,13 +175,17 @@ public class NodeImpl implements Node {
     }
 
     private Node askClosestSuccessor(SimpleNeighbor neighbor) {
-        //"CS <id>"
-        String reply = socketConnector.sendMessage("CS " + Integer.toString(id), neighbor.getIp(), neighbor.getPort());
+        String reply = null; // dirty fix
+        
+        
+        socketConnector.send("CS " + Integer.toString(id), neighbor.getIp(), neighbor.getPort());
+        
         String[] replyList = reply.split(" ");
+        
         if ("SUCC".equals(replyList[0])) {
             String successorIP = replyList[1];
             int successorPort = Integer.parseInt(replyList[2]);
-//            return new SimpleNeighbor(successorIP, successorPort);
+//          return new SimpleNeighbor(successorIP, successorPort);
             return null;
         } else {
             return null;
@@ -174,7 +193,6 @@ public class NodeImpl implements Node {
     }
 
     private boolean updateFingerTable() {
-
         return true;
     }
 
@@ -190,13 +208,18 @@ public class NodeImpl implements Node {
     }
 
     public void registerToNetwork() {
-        System.out.println("Registering to network (" + username + ")");
+        String reply = null; // dirty fix
+        
+        System.out.println("Registering to network: (" + username + ")");
+
         String registerMessage = " " + "REG" + " " + ip + " " + Integer.toString(port) + " " + username;
         int length = registerMessage.length() + 4;
 
-        registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + registerMessage;
+        registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0"))
+                + Integer.toString(length) + registerMessage;
 
-        String reply = socketConnector.sendMessage(registerMessage, "localhost", BSport);
+        socketConnector.send(registerMessage, BSip, BSport);
+
         System.out.println("Reply from bootstrap server:- " + reply);
 
         String[] replyList = reply.split(" ");
@@ -241,13 +264,17 @@ public class NodeImpl implements Node {
     }
 
     public void unregisterFromNetwork() {
+        
+        String reply = null; // dirty fix
+        
         String registerMessage = " " + "UNREG" + " " + ip + " " + Integer.toString(port) + " " + username;
         int length = registerMessage.length() + 4;
 
         registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + registerMessage;
 
-        String reply = socketConnector.sendMessage(registerMessage, "localhost", BSport);
-//        System.out.println("Reply from bootstrap server:- " + reply);
+        socketConnector.send(registerMessage, "localhost", BSport);
+        System.out.println("Reply from bootstrap server:- " + reply);
+        
         String[] replyList = reply.split(" ");
 
         if ("UNROK".equals(replyList[1])) {
@@ -271,6 +298,9 @@ public class NodeImpl implements Node {
 
     public void search(String searchString) {
         System.out.println("\n\n");
+        
+        String reply = null; // dirty fix
+        
         String searchQuery = " " + "SER" + " " + ip + " " + Integer.toString(port) + " " + searchString;
         int length = searchQuery.length() + 4;
 
@@ -278,17 +308,20 @@ public class NodeImpl implements Node {
         //asking from the first user
         if (neighborList.size() > 0) {
             //here, IP should be neighborList.get(0).getIP()
-            String reply = socketConnector.sendMessage(searchQuery, "localhost", neighborList.get(0).getPort());
+            socketConnector.send(searchQuery, "localhost", neighborList.get(0).getPort());
             System.out.println("Reply from first neighbor:- " + reply);
         }
         if (neighborList.size() > 1) {
             //here, IP should be neighborList.get(0).getIP()
-            String reply = socketConnector.sendMessage(searchQuery, "localhost", neighborList.get(1).getPort());
+            socketConnector.send(searchQuery, "localhost", neighborList.get(1).getPort());
             System.out.println("Reply from second neighbor:- " + reply);
         }
     }
 
     public void populateWithFiles() {
+
+        System.out.println("Populating files:\n");
+
         ArrayList<String> filelist = new ArrayList<>(Arrays.asList(
                 "Adventures of Tintin",
                 "Jack and Jill",
@@ -315,8 +348,11 @@ public class NodeImpl implements Node {
             int rand = new Random().nextInt(filelist.size());
             String file = filelist.get(rand);
             files.add(file);
+            System.out.println(file);
             filelist.remove(rand);
         }
+
+        distributeFileMetadata();
     }
 
     public String searchMetaData(String queryMessage) {
@@ -343,14 +379,8 @@ public class NodeImpl implements Node {
     }
 
     @Override
-    public void initialize() {
-        populateWithFiles();
-        this.socketConnector.listen(port, this);
-    }
-
-    @Override
     public void routeMessge(String message, int key) {
-        if (this.id == key) {
+        if (this.id >= key) {
             //handle request
         } else {
             Node next;
@@ -358,7 +388,6 @@ public class NodeImpl implements Node {
                 next = fingerTable.getNode(key);
             } else if (fingerTable.getClosestPredecessorToKey(key) != null) {
                 next = fingerTable.getClosestPredecessorToKey(key);
-
             } else {
                 next = this.successor;
             }
@@ -392,22 +421,75 @@ public class NodeImpl implements Node {
     }
 
     private void redirectMessage(String message, Node next) {
-        socketConnector.sendMessage(message, next.getIp(), next.getPort());
+        socketConnector.send(message, next.getIp(), next.getPort());
     }
 
+    @Override
     public FingerTable getFingerTable() {
         return fingerTable;
     }
+
     private void distributeFileMetadata() {
         for (String file : files) {
             int hash = file.hashCode();
             String message = "REGMD " + hash;
+            System.out.println(message);
             routeMessge(message, hash);
         }
     }
-    
-    private void insertFileMetadata(int key, String file){
+
+    private void insertFileMetadata(int key, String file) {
         this.metaData.put(key, file);
     }
-            
+
+    /*  
+    length REG IP_address port_no username
+    length REGOK no_nodes IP_1 port_1 IP_2 port_2
+    length UNREG IP_address port_no username
+    length UNROK value
+    length JOIN IP_address port_no
+    length JOINOK value
+    length LEAVE IP_address port_no
+    length LEAVEOK value
+    length SER IP port file_name hops
+    length SEROK no_files IP port hops filename1 filename2 ... ...
+    length ERROR
+     */
+    @Override
+    public void handleMessage(String message, String incomingIP, int incomingPort) {
+
+        String[] messageList = message.split(" ");
+
+        if (null != messageList[0]) {
+            switch (messageList[0]) {
+
+                case "CP":
+
+                    int tempID = Integer.parseInt(messageList[1]);
+                    Node temp = this.getFingerTable().getClosestPredecessorToKey(tempID);
+                    //"PRED " + temp.getIp() + " " + temp.getPort();
+                    //DatagramPacket dp = new DatagramPacket(reply.getBytes(), reply.getBytes().length, InetAddress.getByName(incomingIP), incomingPort);
+                    //socket.send(dp);
+                    break;
+
+                case "UP":
+
+                    this.setPredecessor(new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport()));
+                    break;
+
+                case "US":
+
+                    this.setSuccessor(new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport()));
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Node n = new NodeImpl("NodeOne", 7);
+        n.initialize();
+    }
 }

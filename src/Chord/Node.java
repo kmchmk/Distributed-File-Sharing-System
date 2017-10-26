@@ -10,20 +10,35 @@ package Chord;
  * @author erang
  */
 public interface Node {
+
     public boolean joinNetwork();
+
     public boolean leaveNetwork();
+
     public void initialize();
+
     public void routeMessge(String message, int key);
+
     public String search();
+
     public Node getSuccessor();
+
     public Node getPredeccessor();
+
     public void setSuccessor(Node successor);
+
     public void setPredecessor(Node predecessor);
+
     public String getIp();
+
     public int getPort();
+
     public String getBSip();
+
     public int getBSport();
-    
+
+    public void handleMessage(String message, String incomingIP, int incomingPort);
+
     public FingerTable getFingerTable();
-    
+
 }
