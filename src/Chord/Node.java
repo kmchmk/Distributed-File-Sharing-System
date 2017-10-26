@@ -11,7 +11,7 @@ package Chord;
  */
 public interface Node {
 
-    public boolean joinNetwork();
+    public void joinNetwork();
 
     public boolean leaveNetwork();
 
@@ -40,5 +40,7 @@ public interface Node {
     public void handleMessage(String message, String incomingIP, int incomingPort);
 
     public FingerTable getFingerTable();
+    
+    public int getID();
 
 }
