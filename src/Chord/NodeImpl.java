@@ -67,20 +67,23 @@ public class NodeImpl implements Node {
         this.stabilizer = new Stabilizer(this);
         this.fingerFixer = new FingerFixer(this);
         this.predecessorCheckor = new PredecessorCheckor(this);
+
+        initialize();
     }
 
-    public NodeImpl(String username, int port, String BSip, int BSport) {
-        this(username, getMyIP(), port, BSip, BSport);
-    }
-
+//    public NodeImpl(String username, int port, String BSip, int BSport) {
+//        this(username, getMyIP(), port, BSip, BSport);
+//    }
     public NodeImpl(String username, int port) {
         this(username, getMyIP(), port, getMyIP(), 55555);
     }
 
     @Override
     public void initialize() {
+//        System.out.println("Init (" + this.username + ")");
         populateWithFiles();
         this.socketConnector.listen(port);
+//        System.out.println("Start listening...(" + port + ") ");
     }
 
     @Override
@@ -121,7 +124,9 @@ public class NodeImpl implements Node {
     }
 
     public void sendMessageToSuccessor() {
-        routeMessge("FS " + this.ip + " " + this.port + " " + this.username, id);
+        String message = "FS " + this.ip + " " + this.port + " " + this.username;
+        routeMessge(message, id);
+        System.out.println("After route... (" + message + ")");
     }
 
     public void sendMessageToPredecessor() {
@@ -216,6 +221,9 @@ public class NodeImpl implements Node {
     }*/
 
     private static String getMyIP() {
+        if (1 == 1) {
+            return "localhost";
+        }
         try {
             final DatagramSocket socket = new DatagramSocket();
             socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
@@ -236,7 +244,8 @@ public class NodeImpl implements Node {
         registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0"))
                 + Integer.toString(length) + registerMessage;
 
-        socketConnector.send(registerMessage, BSip, BSport);
+//        System.out.println("register message - (" + registerMessage + ")");
+        socketConnector.sendToBS(registerMessage);
 
     }
 
@@ -249,7 +258,7 @@ public class NodeImpl implements Node {
 
         registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + registerMessage;
 
-        socketConnector.send(registerMessage, "localhost", BSport);
+        socketConnector.sendToBS(registerMessage);
         System.out.println("Reply from bootstrap server:- " + reply);
 
         String[] replyList = reply.split(" ");
@@ -297,8 +306,7 @@ public class NodeImpl implements Node {
 
     public void populateWithFiles() {
 
-        System.out.println("Populating files:\n");
-
+//        System.out.println("Populating files:");
         ArrayList<String> filelist = new ArrayList<>(Arrays.asList(
                 "Adventures of Tintin",
                 "Jack and Jill",
@@ -325,7 +333,7 @@ public class NodeImpl implements Node {
             int rand = new Random().nextInt(filelist.size());
             String file = filelist.get(rand);
             files.add(file);
-            System.out.println(file);
+//            System.out.println(file);
             filelist.remove(rand);
         }
 
@@ -341,7 +349,7 @@ public class NodeImpl implements Node {
             String queryWord = messageList[4];
             System.out.println("Searching for (" + queryWord + ")");
 
-            if (metaData.containsKey(Math.abs(queryWord.hashCode()) % MAX_NODES)) {
+            if (metaData.containsKey(queryWord.hashCode())) {
                 return ("Found - " + queryWord);
             } else {
                 return ("Not found - " + queryWord);
@@ -410,7 +418,7 @@ public class NodeImpl implements Node {
         for (String file : files) {
             int hash = Math.abs(file.hashCode())% MAX_NODES;
             String message = "REGMD " + hash;
-            System.out.println(message);
+//            System.out.println(message);
             //routeMessge(message, hash);
         }
     }
@@ -440,10 +448,9 @@ public class NodeImpl implements Node {
      */
     @Override
     public void handleMessage(String message, String incomingIP, int incomingPort) {
-
         String[] messageList = message.split(" ");
 
-        if (null != messageList[0]) {
+        if (null != messageList[0] && messageList.length > 1) {
             switch (messageList[0]) {
 
                 case "FS":
@@ -529,7 +536,6 @@ public class NodeImpl implements Node {
             }
 
             if ("REGOK".equals(messageList[1])) {
-                System.out.println("Register message received.");
 
                 switch (messageList[2]) {
                     case "0":

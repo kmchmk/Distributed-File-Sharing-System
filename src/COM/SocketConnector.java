@@ -16,7 +16,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Only handles communication. sends and receive messages and delegate handling messages to myNode.
+ * Only handles communication. sends and receive messages and delegate handling
+ * messages to myNode.
+ *
  * @author erang
  */
 public class SocketConnector implements Connector {
@@ -60,22 +62,50 @@ public class SocketConnector implements Connector {
                     byte[] buffer = new byte[65536];
                     DatagramPacket incomingPacket = new DatagramPacket(buffer, buffer.length);
 
-                    socket.receive(incomingPacket);
+                    while (true) {
+                        socket.receive(incomingPacket);
 
-                    byte[] data = incomingPacket.getData();
+                        byte[] data = incomingPacket.getData();
 
-                    String incomingMessage = new String(data, 0, incomingPacket.getLength());
-                    System.out.println("Message Received: " + incomingMessage);
+                        String incomingMessage = new String(data, 0, incomingPacket.getLength());
+//                        System.out.println("Message Received: " + incomingMessage);
 
-                    myNode.handleMessage(incomingMessage, incomingPacket.getAddress().getHostAddress(), incomingPacket.getPort());
-                    
+                        myNode.handleMessage(incomingMessage, incomingPacket.getAddress().getHostAddress(), incomingPacket.getPort());
+
+                    }
                 } catch (SocketException ex) {
-                    Logger.getLogger(SocketConnector.class.getName()).log(Level.SEVERE, null, ex);
+                    System.err.println(ex);
                 } catch (IOException ex) {
-                    Logger.getLogger(SocketConnector.class.getName()).log(Level.SEVERE, null, ex);
+                    System.err.println(ex);
                 }
             }
         }.start();
+    }
+    
+    
+    public void sendToBS(String message){
+        try {
+            DatagramSocket sock = new DatagramSocket();
+
+                byte[] b = message.getBytes();
+
+                DatagramPacket dp = new DatagramPacket(b, b.length, InetAddress.getByName(myNode.getBSip()), myNode.getBSport());
+                sock.send(dp);
+
+                //now receive reply
+                //buffer to receive incoming data
+                byte[] buffer = new byte[65536];
+                DatagramPacket repl = new DatagramPacket(buffer, buffer.length);
+                sock.receive(repl);
+
+                byte[] data = repl.getData();
+                String reply = new String(data, 0, repl.getLength());
+
+                myNode.handleMessage(reply, repl.getAddress().getHostAddress(), repl.getPort());
+            
+        } catch (IOException e) {
+            System.err.println("IOException " + e);
+        }
     }
 
 }
