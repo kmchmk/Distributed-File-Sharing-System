@@ -402,7 +402,7 @@ public class NodeImpl implements Node {
         }
     }
     
-    private void updateFileMetadata(int key, String file){
+    private void insertFileMetadata(int key, String file){
         this.metaData.put(key, file);
     }
             
