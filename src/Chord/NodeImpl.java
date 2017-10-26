@@ -78,15 +78,42 @@ public class NodeImpl implements Node {
         return this.port;
     }
 
-    @Override
+    public String getBSip() {
+        return BSip;
+    }
+
+    public int getBSport() {
+        return BSport;
+    }
+    
+    
+
     public boolean joinNetwork() {
         this.successor = findSuccessor();
-//        this.successor.updatePredecessor(this);
+        askToUpdatePredecessor(this.successor);
 
         this.predecessor = findPredecessor();
-//        this.predecessor.updateSuccessor(this);
+        askToUpdateSuccessor(this.predecessor);
 
         return updateFingerTable();
+    }
+
+    private void askToUpdatePredecessor(Node tempSuccessor) {
+        String reply = socketConnector.sendMessage("UP " + this.ip + " " + this.port, tempSuccessor.getIp(), tempSuccessor.getPort());
+        if (reply.equals("updated")) {
+            System.out.println("Suuccessfully updated the predecessor.");
+        } else {
+            System.out.println("Couldn't update the predecessor.");
+        }
+    }
+    
+    private void askToUpdateSuccessor(Node tempPredecessor) {
+        String reply = socketConnector.sendMessage("US " + this.ip + " " + this.port, tempPredecessor.getIp(), tempPredecessor.getPort());
+        if (reply.equals("updated")) {
+            System.out.println("Suuccessfully updated the successor.");
+        } else {
+            System.out.println("Couldn't update the successor.");
+        }
     }
 
     private Node findSuccessor() {
@@ -117,12 +144,13 @@ public class NodeImpl implements Node {
 
     private Node askClosestPredecessor(SimpleNeighbor neighbor) {
         String reply = socketConnector.sendMessage("CP " + Integer.toString(id), neighbor.getIp(), neighbor.getPort());
+        System.out.println(reply);
         String[] replyList = reply.split(" ");
         if ("PRED".equals(replyList[0])) {
             String predecessorIP = replyList[1];
             int predecessorPort = Integer.parseInt(replyList[2]);
-//            return new SimpleNeighbor(predecessorIP, predecessorPort);
-            return null;
+            return new NodeImpl(null, predecessorIP, predecessorPort, this.BSip, this.BSport);
+//            return null;
         } else {
             return null;
         }
@@ -313,7 +341,7 @@ public class NodeImpl implements Node {
     @Override
     public void initialize() {
         populateWithFiles();
-        this.socketConnector.listen(port);
+        this.socketConnector.listen(port, this);
     }
 
     @Override
@@ -363,6 +391,9 @@ public class NodeImpl implements Node {
         socketConnector.sendMessage(message, next.getIp(), next.getPort());
     }
 
+    public FingerTable getFingerTable() {
+        return fingerTable;
+    }
     private void distributeFileMetadata() {
         for (String file : files) {
             int hash = file.hashCode();

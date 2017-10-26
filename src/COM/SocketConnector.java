@@ -5,6 +5,8 @@
  */
 package COM;
 
+import Chord.Node;
+import Chord.NodeImpl;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -19,25 +21,42 @@ import java.util.logging.Logger;
  */
 public class SocketConnector implements Connector {
 
+    Node me;
+
     @Override
-    public void listen(int port) {
+    public void listen(int port, Node me) {
+        this.me = me;
         new Thread() {
             @Override
             public void run() {
                 try {
                     DatagramSocket socket = new DatagramSocket(port);
-                    
+
                     byte[] buffer = new byte[65536];
                     DatagramPacket incoming = new DatagramPacket(buffer, buffer.length);
-                    
+
                     socket.receive(incoming);
-                    
+
                     byte[] data = incoming.getData();
-                    
+
                     String message = new String(data, 0, incoming.getLength());
-                    
+
+                    String[] messageList = message.split(" ");
+                    if ("CP".equals(messageList[0])) {
+                        int tempID = Integer.parseInt(messageList[1]);
+                        Node temp = me.getFingerTable().getClosestPredecessorToKey(tempID);
+
+                        String reply = "PRED " + temp.getIp() + " " + temp.getPort();
+                        DatagramPacket dp = new DatagramPacket(reply.getBytes(), reply.getBytes().length, incoming.getAddress(), incoming.getPort());
+                        socket.send(dp);
+                    } else if ("UP".equals(messageList[0])) {
+                        me.setPredecessor(new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), me.getBSip(), me.getBSport()));
+                    }
+                    else if ("US".equals(messageList[0])) {
+                        me.setSuccessor(new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), me.getBSip(), me.getBSport()));
+                    }
                     System.out.println("Message Received: " + message);
-                    
+
                 } catch (SocketException ex) {
                     Logger.getLogger(SocketConnector.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IOException ex) {
@@ -53,7 +72,7 @@ public class SocketConnector implements Connector {
         try {
             byte[] b = message.getBytes();
             DatagramPacket packet = new DatagramPacket(b, b.length, InetAddress.getByName(ip), port);
-            
+
             DatagramSocket socket = new DatagramSocket();
             socket.send(packet);
 

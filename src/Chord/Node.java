@@ -21,4 +21,9 @@ public interface Node {
     public void setPredecessor(Node predecessor);
     public String getIp();
     public int getPort();
+    public String getBSip();
+    public int getBSport();
+    
+    public FingerTable getFingerTable();
+    
 }

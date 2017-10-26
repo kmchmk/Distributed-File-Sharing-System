@@ -5,6 +5,8 @@
  */
 package COM;
 
+import Chord.Node;
+
 /**
  *
  * @author erang
@@ -12,5 +14,5 @@ package COM;
 public interface Connector {
     public String sendMessage(String message, String ip, int port);
     public void initialize();
-    public void listen(int port);
+    public void listen(int port, Node me);
 }
