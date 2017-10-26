@@ -82,12 +82,14 @@ public class NodeImpl implements Node {
         return BSip;
     }
 
+    @Override
     public int getBSport() {
         return BSport;
     }
     
     
 
+    @Override
     public boolean joinNetwork() {
         this.successor = findSuccessor();
         askToUpdatePredecessor(this.successor);
@@ -143,6 +145,7 @@ public class NodeImpl implements Node {
     }
 
     private Node askClosestPredecessor(SimpleNeighbor neighbor) {
+        //"CP <id>"
         String reply = socketConnector.sendMessage("CP " + Integer.toString(id), neighbor.getIp(), neighbor.getPort());
         System.out.println(reply);
         String[] replyList = reply.split(" ");
@@ -157,6 +160,7 @@ public class NodeImpl implements Node {
     }
 
     private Node askClosestSuccessor(SimpleNeighbor neighbor) {
+        //"CS <id>"
         String reply = socketConnector.sendMessage("CS " + Integer.toString(id), neighbor.getIp(), neighbor.getPort());
         String[] replyList = reply.split(" ");
         if ("SUCC".equals(replyList[0])) {
