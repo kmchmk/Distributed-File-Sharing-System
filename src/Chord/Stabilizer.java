@@ -29,10 +29,12 @@ public class Stabilizer extends Thread {
             try {
                 Thread.sleep(5000);
                 System.out.println("Stabilizing...");
-                String msg = "GET_PRED " + thisNode.getIp() + " " + thisNode.getPort();
-                thisNode.routeMessge(msg, thisNode.getSuccessor().getID());
-                predMsgSent = true;
-                Thread.sleep(5 * 60 * 1000);
+                if (!predMsgSent) {
+                    String msg = "GET_PRED " + thisNode.getIp() + " " + thisNode.getPort();
+                    thisNode.routeMessge(msg, thisNode.getSuccessor().getID());
+                    predMsgSent = true;
+                    Thread.sleep(5 * 60 * 1000);
+                }
             } catch (InterruptedException ex) {
                 if (predMsgSent) {
                     if (newPredessor != null) {

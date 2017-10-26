@@ -43,6 +43,6 @@ public interface Node {
 
     public int getID();
 
-    public Node findSuccessorOf(int id);
-    
+    public Node findSuccessorOf(int finger, int id, String originIP, int originPort);
+
 }

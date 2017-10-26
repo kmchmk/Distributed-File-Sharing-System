@@ -500,6 +500,17 @@ public class NodeImpl implements Node {
                     stabilizer.setNewPredessor(newPred);
                     stabilizer.interrupt();
                     break;
+                case "FIND_S":
+                    Node succosser = findSuccessorOf(Integer.parseInt(messageList[1]),Integer.parseInt(messageList[2]), messageList[3], Integer.parseInt(messageList[4]));
+                    if (succosser != null){
+                        String response = "FIND_S_OK " + messageList[1] + " " + ip + " " + port;
+                        redirectMessage(response, new NodeImpl("", messageList[3], Integer.parseInt(messageList[4]), BSip, BSport));
+                    }
+                    break;
+                case "FIND_S_OK":
+                    fingerFixer.setSuccossorReply(message.substring(10));
+                    fingerFixer.setWaitingForSuccessor(true);
+                    fingerFixer.interrupt();
                 default:
                     break;
             }
@@ -563,7 +574,7 @@ public class NodeImpl implements Node {
        ask node n to find the successor of key
      */
     @Override
-    public Node findSuccessorOf(int key) {
+    public Node findSuccessorOf(int finger, int key, String originIP, int originPort) {
         int successorID = this.successor.getID();
         // this node and successor are in opposite side of 0
         if (successorID < this.id) {
@@ -575,7 +586,9 @@ public class NodeImpl implements Node {
             return this.successor;
         } else {
             Node nextNode = this.fingerTable.getClosestPredecessorToKey(key);
-            // TODO sendmessage to nextNode
+            String message = "FIND_S " + finger + " " + key + " " + originIP + " " + originPort;
+            redirectMessage(message, nextNode);
+            return null;
         }
         return null;
     }
