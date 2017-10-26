@@ -23,8 +23,8 @@ import java.util.Random;
  */
 public class NodeImpl implements Node {
 
-    private static final int MAX_FINGERS = 10;
-    private static final int MAX_NODES = (int) Math.pow(2, MAX_FINGERS);
+    public static final int MAX_FINGERS = 10;
+    public static final int MAX_NODES = (int) Math.pow(2, MAX_FINGERS);
 
     private final String BSip;
     private final int BSport;
@@ -44,6 +44,9 @@ public class NodeImpl implements Node {
 
     private Map<Integer, String> metaData;
     private ArrayList<String> files;
+
+    private Stabilizer stabilizer;
+    private FingerFixer fingerFixer;
 
     public NodeImpl(String username, String ip, int port, String BSip, int BSport) {
         fingerTable = new FingertableImpl(MAX_FINGERS);
@@ -472,6 +475,31 @@ public class NodeImpl implements Node {
                         Node temp = new NodeImpl(null, messageList[(2 * i) + 1], Integer.parseInt(messageList[(2 * i) + 2]), this.getBSip(), this.getBSport());
                         fingerTable.updateEntry(i, temp);
                     }
+                case "NOTIFY_S":
+                    Node tempPredecessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport());
+                    if (predecessor == null) {
+                        predecessor = tempPredecessor;
+                        System.out.println("NOTIFY_S: Update predecessor of " + id + " to " + tempPredecessor.getID());
+                    } else if (predecessor.getID() > this.id) {
+                        if ((predecessor.getID() < tempPredecessor.getID() && tempPredecessor.getID() < MAX_NODES)
+                                || (0 <= tempPredecessor.getID() && tempPredecessor.getID() < this.id)) {
+                            System.out.println("NOTIFY_S: Update predecessor of " + id + " from  " + predecessor.getID() + " to " + tempPredecessor.getID());
+                            predecessor = tempPredecessor;
+                        }
+                    } else if (predecessor.getID() < tempPredecessor.getID() && tempPredecessor.getID() < this.id) {
+                        System.out.println("NOTIFY_S: Update predecessor of " + id + " from  " + predecessor.getID() + " to " + tempPredecessor.getID());
+                        predecessor = tempPredecessor;
+                    }
+                    break;
+                case "GET_PRED":
+                    String rep = "GET_PRED_OK " + this.predecessor.getIp() + " " + this.predecessor.getPort();
+                    redirectMessage(rep, new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport));
+                    break;
+                case "GET_PRED_OK":
+                    Node newPred = new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport);
+                    stabilizer.setNewPredessor(newPred);
+                    stabilizer.interrupt();
+                    break;
                 default:
                     break;
             }
@@ -533,21 +561,23 @@ public class NodeImpl implements Node {
 
     /* 
        ask node n to find the successor of key
-    */
+     */
     @Override
-    public Node findSuccessorOf(int key){
+    public Node findSuccessorOf(int key) {
         int successorID = this.successor.getID();
         // this node and successor are in opposite side of 0
-        if (successorID < this.id){
-            if ((this.id < key && key < MAX_NODES) || (0 <= key && key <= successorID))
+        if (successorID < this.id) {
+            if ((this.id < key && key < MAX_NODES) || (0 <= key && key <= successorID)) {
                 return this.successor;
-        }else if (this.id < key && key <= this.successor.getID())  // normal successor
+            }
+        } else if (this.id < key && key <= successorID) // normal successor
+        {
             return this.successor;
-        else{
+        } else {
             Node nextNode = this.fingerTable.getClosestPredecessorToKey(key);
             // TODO sendmessage to nextNode
         }
         return null;
     }
-    
+
 }
