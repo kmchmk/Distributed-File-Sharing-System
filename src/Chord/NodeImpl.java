@@ -78,16 +78,17 @@ public class NodeImpl implements Node {
         return this.port;
     }
 
+    @Override
     public String getBSip() {
         return BSip;
     }
 
+    @Override
     public int getBSport() {
         return BSport;
     }
-    
-    
 
+    @Override
     public boolean joinNetwork() {
         this.successor = findSuccessor();
         askToUpdatePredecessor(this.successor);
@@ -106,7 +107,7 @@ public class NodeImpl implements Node {
             System.out.println("Couldn't update the predecessor.");
         }
     }
-    
+
     private void askToUpdateSuccessor(Node tempPredecessor) {
         String reply = socketConnector.sendMessage("US " + this.ip + " " + this.port, tempPredecessor.getIp(), tempPredecessor.getPort());
         if (reply.equals("updated")) {
@@ -124,7 +125,6 @@ public class NodeImpl implements Node {
         if (neighborList.size() > 1) {
             Node tempNeighbor = askClosestSuccessor(neighborList.get(1));
             //have to check what is the closest
-
         }
         return successorNeighbor;
     }
@@ -162,7 +162,7 @@ public class NodeImpl implements Node {
         if ("SUCC".equals(replyList[0])) {
             String successorIP = replyList[1];
             int successorPort = Integer.parseInt(replyList[2]);
-//            return new SimpleNeighbor(successorIP, successorPort);
+//          return new SimpleNeighbor(successorIP, successorPort);
             return null;
         } else {
             return null;
@@ -170,7 +170,6 @@ public class NodeImpl implements Node {
     }
 
     private boolean updateFingerTable() {
-
         return true;
     }
 
@@ -285,6 +284,9 @@ public class NodeImpl implements Node {
     }
 
     public void populateWithFiles() {
+
+        System.out.println("Populating files:\n");
+
         ArrayList<String> filelist = new ArrayList<>(Arrays.asList(
                 "Adventures of Tintin",
                 "Jack and Jill",
@@ -311,8 +313,11 @@ public class NodeImpl implements Node {
             int rand = new Random().nextInt(filelist.size());
             String file = filelist.get(rand);
             files.add(file);
+            System.out.println(file);
             filelist.remove(rand);
         }
+
+        distributeFileMetadata();
     }
 
     public String searchMetaData(String queryMessage) {
@@ -354,7 +359,6 @@ public class NodeImpl implements Node {
                 next = fingerTable.getNode(key);
             } else if (fingerTable.getClosestPredecessorToKey(key) != null) {
                 next = fingerTable.getClosestPredecessorToKey(key);
-
             } else {
                 next = this.successor;
             }
@@ -391,9 +395,11 @@ public class NodeImpl implements Node {
         socketConnector.sendMessage(message, next.getIp(), next.getPort());
     }
 
+    @Override
     public FingerTable getFingerTable() {
         return fingerTable;
     }
+
     private void distributeFileMetadata() {
         for (String file : files) {
             int hash = file.hashCode();
@@ -401,9 +407,9 @@ public class NodeImpl implements Node {
             routeMessge(message, hash);
         }
     }
-    
-    private void insertFileMetadata(int key, String file){
+
+    private void insertFileMetadata(int key, String file) {
         this.metaData.put(key, file);
     }
-            
+
 }
