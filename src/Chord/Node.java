@@ -23,7 +23,7 @@ public interface Node {
     public int getPort();
     public String getBSip();
     public int getBSport();
-    
+    public int getID();
     public FingerTable getFingerTable();
     
 }
