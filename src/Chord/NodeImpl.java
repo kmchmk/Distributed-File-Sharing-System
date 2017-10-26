@@ -431,10 +431,10 @@ public class NodeImpl implements Node {
 
     private void distributeFileMetadata() {
         for (String file : files) {
-            int hash = file.hashCode();
+            int hash = Math.abs(file.hashCode());
             String message = "REGMD " + hash;
             System.out.println(message);
-            routeMessge(message, hash);
+            //routeMessge(message, hash);
         }
     }
 
@@ -442,17 +442,23 @@ public class NodeImpl implements Node {
         this.metaData.put(key, file);
     }
 
-    /*  
+    /*
+    BS Messages:
+    
     length REG IP_address port_no username
     length REGOK no_nodes IP_1 port_1 IP_2 port_2
     length UNREG IP_address port_no username
     length UNROK value
+    
+    Node Messages:
+    
     length JOIN IP_address port_no
     length JOINOK value
     length LEAVE IP_address port_no
     length LEAVEOK value
     length SER IP port file_name hops
     length SEROK no_files IP port hops filename1 filename2 ... ...
+    
     length ERROR
      */
     @Override
