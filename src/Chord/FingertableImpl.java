@@ -14,36 +14,40 @@ import java.util.Map;
  */
 public class FingertableImpl implements FingerTable {
 
-    Map<Integer, Node> fingerEntries;
+    Node[] fingerEntries;
     private final int maxEntries;
 
     public FingertableImpl(int maxEntries) {
         this.maxEntries = maxEntries;
-        this.fingerEntries = new HashMap<>(maxEntries);
+        this.fingerEntries = new Node[maxEntries];
     }
 
     @Override
-    public Map<Integer, Node> getFingerEntries(){
+    public Node[] getFingerEntries(){
         return this.fingerEntries;
     }
     
     @Override
-    public boolean searchEntries(int key){
-        return this.fingerEntries.containsKey(key);
+    public int searchEntries(int key){
+        for (int i=0; i<maxEntries; i++){
+            if (fingerEntries[i].getID() == key)
+                return i;
+        }
+        return -1;
     }
     
     @Override
     public Node getNode(int key) {
-        if (this.fingerEntries.containsKey(key)) {
-            return this.fingerEntries.get(key);
-        } else {
-            return null;
+        for (Node node : fingerEntries){
+            if (node.getID() == key)
+                return node;
         }
+        return null;
     }
 
     @Override
-    public void updateEntry(int key, Node node) {
-        this.fingerEntries.replace(key, node);
+    public void updateEntry(int index, Node node) {
+        this.fingerEntries[index] = node;
     }
 
     @Override
@@ -52,21 +56,29 @@ public class FingertableImpl implements FingerTable {
         boolean found = false;
         Node ClosestPredecessor = null;
         
-        for (int key : this.fingerEntries.keySet()) {
+        for (int i=0; i<maxEntries; i++) {
+            int key = fingerEntries[i].getID();
             if(key < Destkey && key > maxBeforeKey){
-                maxBeforeKey = key;
+                maxBeforeKey = i;
                 found = true;
             }
         }
         
         if (found) {
-            ClosestPredecessor = this.fingerEntries.get(maxBeforeKey);
+            ClosestPredecessor = this.fingerEntries[maxBeforeKey];
         }
         return ClosestPredecessor;
     }
 
-    @Override
+    /*@Override
     public void removeEntry(int key) {
         this.fingerEntries.remove(key);
+    }*/
+
+    @Override
+    public Node getNodeAt(int index) {
+        if (index >=0 && index < maxEntries)
+            return fingerEntries[index];
+        return null;
     }
 }

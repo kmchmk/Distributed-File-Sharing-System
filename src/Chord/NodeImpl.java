@@ -24,6 +24,7 @@ import java.util.Random;
 public class NodeImpl implements Node {
 
     private static final int MAX_FINGERS = 10;
+    private static final int MAX_NODES = (int) Math.pow(2, MAX_FINGERS);
 
     private final String BSip;
     private final int BSport;
@@ -397,12 +398,10 @@ public class NodeImpl implements Node {
             //handle request
         } else {
             Node next;
-            if (fingerTable.searchEntries(key)) {
-                next = fingerTable.getNode(key);
-            } else if (fingerTable.getClosestPredecessorToKey(key) != null) {
+            if ((next = fingerTable.getNode(key)) == null) {
                 next = fingerTable.getClosestPredecessorToKey(key);
-            } else {
-                next = this.successor;
+                if (next == null)
+                    next = this.successor;
             }
             redirectMessage(message, next);
         }
@@ -505,4 +504,5 @@ public class NodeImpl implements Node {
         Node n = new NodeImpl("NodeOne", 7);
         n.initialize();
     }
+
 }
