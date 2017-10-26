@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -79,13 +78,13 @@ public class NodeImpl implements Node {
         return this.port;
     }
 
+    @Override
     public boolean joinNetwork() {
         this.successor = findSuccessor();
 //        this.successor.updatePredecessor(this);
 
         this.predecessor = findPredecessor();
 //        this.predecessor.updateSuccessor(this);
-
 
         return updateFingerTable();
     }
@@ -141,7 +140,7 @@ public class NodeImpl implements Node {
             return null;
         }
     }
-    
+
     private boolean updateFingerTable() {
 
         return true;
@@ -363,4 +362,17 @@ public class NodeImpl implements Node {
     private void redirectMessage(String message, Node next) {
         socketConnector.sendMessage(message, next.getIp(), next.getPort());
     }
+
+    private void distributeFileMetadata() {
+        for (String file : files) {
+            int hash = file.hashCode();
+            String message = "REGMD " + hash;
+            routeMessge(message, hash);
+        }
+    }
+    
+    private void updateFileMetadata(int key, String file){
+        this.metaData.put(key, file);
+    }
+            
 }
