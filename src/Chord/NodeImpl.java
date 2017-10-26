@@ -23,8 +23,8 @@ import java.util.Random;
  */
 public class NodeImpl implements Node {
 
-    private static final int MAX_FINGERS = 10;
-    private static final int MAX_NODES = (int) Math.pow(2, MAX_FINGERS);
+    public static final int MAX_FINGERS = 7;
+    public static final int MAX_NODES = (int) Math.pow(2, MAX_FINGERS);
 
     private final String BSip;
     private final int BSport;
@@ -56,7 +56,7 @@ public class NodeImpl implements Node {
         this.port = port;
         this.BSip = BSip;
         this.BSport = BSport;
-        this.id = this.username.hashCode();
+        this.id = Math.abs((this.ip + this.port).hashCode()) % MAX_NODES;
 
         this.socketConnector = new SocketConnector(this);
     }
@@ -497,4 +497,23 @@ public class NodeImpl implements Node {
         return this.id;
     }
 
+    /* 
+       ask node n to find the successor of key
+    */
+    @Override
+    public Node findSuccessorOf(int key){
+        int successorID = this.successor.getID();
+        // this node and successor are in opposite side of 0
+        if (successorID < this.id){
+            if ((this.id < key && key < MAX_NODES) || (0 <= key && key <= successorID))
+                return this.successor;
+        }else if (this.id < key && key <= this.successor.getID())  // normal successor
+            return this.successor;
+        else{
+            Node nextNode = this.fingerTable.getClosestPredecessorToKey(key);
+            // TODO sendmessage to nextNode
+        }
+        return null;
+    }
+    
 }

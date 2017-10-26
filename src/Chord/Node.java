@@ -41,4 +41,6 @@ public interface Node {
 
     public int getID();
 
+    public Node findSuccessorOf(int id);
+    
 }

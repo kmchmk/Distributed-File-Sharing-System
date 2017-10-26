@@ -11,16 +11,23 @@ package Chord;
  */
 public class Stabilizer implements Runnable {
     
-    private Node me;
+    private Node thisNode;
     
-    public Stabilizer(Node node){
-        this.me = node;
+    
+    public Stabilizer(Node thisNode){
+        this.thisNode = thisNode;
     }
 
     @Override
     public void run() {
-        Node currentSuccessor = me.getSuccessor();
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        while(true){
+            try{
+                // send predecessor req
+                Thread.sleep(5000);
+            }catch(InterruptedException ex){
+                
+            }
+        }
     }
     
 }
