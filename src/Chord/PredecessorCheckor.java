@@ -11,12 +11,13 @@ package Chord;
  */
 public class PredecessorCheckor extends Thread {
 
-    private Node thisNode;
+    private final Node thisNode;
 
     private boolean predecessorHBOK;
 
     public PredecessorCheckor(Node thisNode) {
         this.thisNode = thisNode;
+        this.setName("predecessorChecker-Thread");
     }
 
     public void setPredecessorHBOK(boolean predecessorHBOK) {

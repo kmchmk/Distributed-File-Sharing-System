@@ -11,12 +11,14 @@ package Chord;
  */
 public class Stabilizer extends Thread {
 
-    private Node thisNode;
+    private final Node thisNode;
     private Node newPredessor = null;
     private boolean predMsgSent;
+    private boolean waitingForSuccessor;
 
     public Stabilizer(Node thisNode) {
         this.thisNode = thisNode;
+        this.setName("Stabilizer-Thread");
     }
 
     public void setNewPredessor(Node newPredessor) {
@@ -29,12 +31,18 @@ public class Stabilizer extends Thread {
             try {
                 Thread.sleep(5000);
                 System.out.println("Stabilizing...");
-                if (!predMsgSent) {
+                
+                if (thisNode.getSuccessor() == null) {
+                    waitingForSuccessor =  true;
+                }
+                if (!waitingForSuccessor && !predMsgSent) {
                     String msg = "GET_PRED " + thisNode.getIp() + " " + thisNode.getPort();
                     thisNode.routeMessge(msg, thisNode.getSuccessor().getID());
                     predMsgSent = true;
-                    Thread.sleep(5 * 60 * 1000);
+                    
                 }
+                Thread.sleep(5 * 60 * 1000);
+                
             } catch (InterruptedException ex) {
                 if (predMsgSent) {
                     if (newPredessor != null) {

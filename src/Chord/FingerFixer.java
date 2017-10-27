@@ -20,6 +20,7 @@ public class FingerFixer extends Thread {
     private String succossorReply;
 
     public FingerFixer(Node thisNode) {
+        this.setName("FingerFixer-Thread");
         this.thisNode = thisNode;
         this.fingerTable = thisNode.getFingerTable();
     }
