@@ -116,9 +116,9 @@ public class NodeImpl implements Node {
     }
 
     public void sendMessageToSuccessor() {
-        String message = "FS " + this.username.hashCode() + " " + this.ip + " " + this.port + " " + this.username;
-        this.socketConnector.send(message, this.successor.getIp(), this.successor.getPort());
-        System.out.println("Sending message to successor port(" + this.successor.getPort() + "), Routing to self (" + message + ")");
+        String message = "FS " + this.id + " " + this.ip + " " + this.port + " " + this.username;
+        this.socketConnector.send(message, this.neighborList.get(0).getIp(), this.neighborList.get(0).getPort());
+        System.out.println("Sending message to successor port(" + this.neighborList.get(0).getPort() + "), Routing to self (" + message + ")");
     }
 
     public void sendMessageToPredecessor() {
