@@ -63,7 +63,7 @@ public class NodeImpl implements Node {
         this.id = Math.abs((this.ip + this.port).hashCode()) % MAX_NODES;
 
         this.socketConnector = new SocketConnector(this);
-        
+
         this.stabilizer = new Stabilizer(this);
         this.fingerFixer = new FingerFixer(this);
         this.predecessorCheckor = new PredecessorCheckor(this);
@@ -219,7 +219,6 @@ public class NodeImpl implements Node {
             return null;
         }
     }*/
-
     private static String getMyIP() {
         if (1 == 1) {
             return "localhost";
@@ -453,7 +452,7 @@ public class NodeImpl implements Node {
         if (null != messageList[0] && messageList.length > 1) {
             switch (messageList[0]) {
 
-                case "FS":
+                case "FS"://find successor
                     int key = Integer.parseInt(messageList[3]);
 
                     if (fingerTable.getClosestPredecessorToKey(key).getID() > this.id) {
@@ -468,19 +467,19 @@ public class NodeImpl implements Node {
                         socketConnector.send("RFT " + this.getIp() + " " + this.getPort(), incomingIP, incomingPort);
                     }
                     break;
-                case "US":
+                case "US": //update succesor
                     this.setSuccessor(new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport()));
-                case "RFT":
+                case "RFT": //request finger table
                     //Update finger table
                     //UFT <ip_1> <port_1> <ip_2> <port_2> <ip_3> <port_3>.....
-                    String reply = "UFT ";
+                    String reply = "UFT "; //update finger table
                     for (int i = 0; i < MAX_FINGERS; i++) {
                         Node entry = fingerTable.getEntryByIndex(i);
                         reply += entry.getIp() + " " + entry.getPort();
                     }
 
                     socketConnector.send(reply, messageList[1], Integer.parseInt(messageList[2]));
-                case "UFT":
+                case "UFT"://update finger table
                     for (int i = 0; i < MAX_FINGERS; i++) {
                         Node temp = new NodeImpl(null, messageList[(2 * i) + 1], Integer.parseInt(messageList[(2 * i) + 2]), this.getBSip(), this.getBSport());
                         fingerTable.updateEntry(i, temp);
@@ -514,8 +513,8 @@ public class NodeImpl implements Node {
                     stabilizer.interrupt();
                     break;
                 case "FIND_S":   // find successor message from findSuccosser
-                    Node succosser = findSuccessorOf(Integer.parseInt(messageList[1]),Integer.parseInt(messageList[2]), messageList[3], Integer.parseInt(messageList[4]));
-                    if (succosser != null){
+                    Node succosser = findSuccessorOf(Integer.parseInt(messageList[1]), Integer.parseInt(messageList[2]), messageList[3], Integer.parseInt(messageList[4]));
+                    if (succosser != null) {
                         String response = "FIND_S_OK " + messageList[1] + " " + ip + " " + port;
                         redirectMessage(response, new NodeImpl("", messageList[3], Integer.parseInt(messageList[4]), BSip, BSport));
                     }
@@ -614,12 +613,12 @@ public class NodeImpl implements Node {
         }
         return null;
     }
-    
-     public String getIP(){
+
+    public String getIP() {
         return ip;
     }
-    
-    public int getthePort(){
+
+    public int getthePort() {
         return port;
     }
 
