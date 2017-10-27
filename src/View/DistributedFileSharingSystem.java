@@ -32,11 +32,11 @@ public class DistributedFileSharingSystem {
                 try {
                     sleep(1000);
                     NodeImpl node1 = new NodeImpl("One", 3001);
-                    NodeImpl node2 = new NodeImpl("Two", 3002);
+//                    NodeImpl node2 = new NodeImpl("Two", 3002);
 //                    NodeImpl node3 = new NodeImpl("Three", 3003);
                     
                     node1.registerToNetwork();
-                    node2.registerToNetwork();
+//                    node2.registerToNetwork();
 //                    node3.registerToNetwork();
                     
 //                    sleep(2000);
