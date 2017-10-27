@@ -113,112 +113,18 @@ public class NodeImpl implements Node {
 
         sendMessageToPredecessor();//not implemented yet
 
-        /*
-        this.successor = findSuccessor();
-        askToUpdatePredecessor(this.successor);
-
-        this.predecessor = findPredecessor();
-        askToUpdateSuccessor(this.predecessor);
-
-        return updateFingerTable();*/
     }
 
     public void sendMessageToSuccessor() {
-        String message = "FS " + this.ip + " " + this.port + " " + this.username;
-        routeMessge(message, id);
-        System.out.println("After route... (" + message + ")");
+        String message = "FS " + this.username.hashCode() + " " + this.ip + " " + this.port + " " + this.username;
+        this.socketConnector.send(message, this.successor.getIp(), this.successor.getPort());
+        System.out.println("Sending message to successor port(" + this.successor.getPort() + "), Routing to self (" + message + ")");
     }
 
     public void sendMessageToPredecessor() {
         //not implemented yet
     }
 
-    /*private void askToUpdatePredecessor(Node tempSuccessor) {
-        String reply = null; // dirty fix
-        
-        String message = "UP " + this.ip + " " + this.port;
-        
-        socketConnector.send(message, tempSuccessor.getIp(), tempSuccessor.getPort());
-        
-        if (reply.equals("updated")) {
-            System.out.println("Suuccessfully updated the predecessor.");
-        } else {
-            System.out.println("Couldn't update the predecessor.");
-        }
-    }*/
-
- /*private void askToUpdateSuccessor(Node tempPredecessor) {
-        String reply = null; // dirty fix
-        
-        socketConnector.send("US " + this.ip + " " + this.port, tempPredecessor.getIp(), tempPredecessor.getPort());
-        
-        if (reply.equals("updated")) {
-            System.out.println("Suuccessfully updated the successor.");
-        } else {
-            System.out.println("Couldn't update the successor.");
-        }
-    }*/
-
- /*private Node findSuccessor() {
-        Node successorNeighbor = null;
-        if (neighborList.size() > 0) {
-            successorNeighbor = askClosestSuccessor(neighborList.get(0));
-        }
-        if (neighborList.size() > 1) {
-            Node tempNeighbor = askClosestSuccessor(neighborList.get(1));
-            //have to check what is the closest
-        }
-        return successorNeighbor;
-    }*/
-
- /*private Node findPredecessor() {
-        Node predecessorNeighbor = null;
-        if (neighborList.size() > 0) {
-            predecessorNeighbor = askClosestPredecessor(neighborList.get(0));
-        }
-        if (neighborList.size() > 1) {
-            Node tempNeighbor = askClosestPredecessor(neighborList.get(1));
-            //have to check what is the closest
-
-        }
-        return predecessorNeighbor;
-    }*/
-
- /*private Node askClosestPredecessor(SimpleNeighbor neighbor) {
-        String reply = null; // dirty fix
-        
-        socketConnector.send("CP " + Integer.toString(id), neighbor.getIp(), neighbor.getPort());
-        
-        System.out.println(reply);
-        String[] replyList = reply.split(" ");
-        
-        if ("PRED".equals(replyList[0])) {
-            String predecessorIP = replyList[1];
-            int predecessorPort = Integer.parseInt(replyList[2]);
-            return new NodeImpl(null, predecessorIP, predecessorPort, this.BSip, this.BSport);
-//            return null;
-        } else {
-            return null;
-        }
-    }*/
-
- /*private Node askClosestSuccessor(SimpleNeighbor neighbor) {
-        String reply = null; // dirty fix
-        
-        
-        socketConnector.send("CS " + Integer.toString(id), neighbor.getIp(), neighbor.getPort());
-        
-        String[] replyList = reply.split(" ");
-        
-        if ("SUCC".equals(replyList[0])) {
-            String successorIP = replyList[1];
-            int successorPort = Integer.parseInt(replyList[2]);
-//          return new SimpleNeighbor(successorIP, successorPort);
-            return null;
-        } else {
-            return null;
-        }
-    }*/
     private static String getMyIP() {
         if (1 == 1) {
             return "localhost";
@@ -250,35 +156,12 @@ public class NodeImpl implements Node {
 
     public void unregisterFromNetwork() {
 
-        String reply = null; // dirty fix
+        String unregisterMessage = " " + "UNREG" + " " + ip + " " + Integer.toString(port) + " " + username;
+        int length = unregisterMessage.length() + 4;
 
-        String registerMessage = " " + "UNREG" + " " + ip + " " + Integer.toString(port) + " " + username;
-        int length = registerMessage.length() + 4;
+        unregisterMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + unregisterMessage;
 
-        registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + registerMessage;
-
-        socketConnector.sendToBS(registerMessage);
-        System.out.println("Reply from bootstrap server:- " + reply);
-
-        String[] replyList = reply.split(" ");
-
-        if ("UNROK".equals(replyList[1])) {
-            switch (replyList[2]) {
-                case "0":
-                    System.out.println("Successfully unregistered.");
-                    break;
-                case "9999":
-                    System.out.println("Error while unregistering. IP and port may not be in the registry or command is incorrect.");
-                    break;
-                default:
-                    System.out.println("Some error while unregistering.");
-                    break;
-            }
-        } else if ("Failed".equals(replyList[0])) {
-            System.out.println(reply);
-        } else {
-            System.out.println("Error in unregistration message or the server is offline");
-        }
+        socketConnector.sendToBS(unregisterMessage);
     }
 
     public void search(String searchString) {
@@ -364,18 +247,14 @@ public class NodeImpl implements Node {
 
     @Override
     public void routeMessge(String message, int key) {
-        if (this.id >= key) {
-            //handle request
-        } else {
-            Node next;
-            if ((next = fingerTable.getNode(key)) == null) {
-                next = fingerTable.getClosestPredecessorToKey(key);
-                if (next == null) {
-                    next = this.successor;
-                }
+        Node next;
+        if ((next = fingerTable.getNode(key)) == null) {
+            next = fingerTable.getClosestPredecessorToKey(key);
+            if (next == null) {
+                next = this.successor;
             }
-            redirectMessage(message, next);
         }
+        redirectMessage(message, next);
     }
 
     @Override
@@ -415,7 +294,7 @@ public class NodeImpl implements Node {
 
     private void distributeFileMetadata() {
         for (String file : files) {
-            int hash = Math.abs(file.hashCode())% MAX_NODES;
+            int hash = Math.abs(file.hashCode()) % MAX_NODES;
             String message = "REGMD " + hash;
 //            System.out.println(message);
             //routeMessge(message, hash);
@@ -450,14 +329,15 @@ public class NodeImpl implements Node {
         String[] messageList = message.split(" ");
 
         if (null != messageList[0] && messageList.length > 1) {
-            switch (messageList[0]) {
 
-                case "FS"://find successor
+            switch (messageList[0]) {
+                case "FS"://find successor    
                     int key = Integer.parseInt(messageList[3]);
 
-                    if (fingerTable.getClosestPredecessorToKey(key).getID() > this.id) {
+                    if (this.id < key) {
                         routeMessge(message, key);
                     } else {
+
                         //Ask to update new nodes successor to my successor
                         socketConnector.send("US " + successor.getIp() + " " + successor.getPort(), messageList[1], Integer.parseInt(messageList[2]));
                         this.setSuccessor(new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport()));
@@ -467,8 +347,10 @@ public class NodeImpl implements Node {
                         socketConnector.send("RFT " + this.getIp() + " " + this.getPort(), incomingIP, incomingPort);
                     }
                     break;
+
                 case "US": //update succesor
                     this.setSuccessor(new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport()));
+
                 case "RFT": //request finger table
                     //Update finger table
                     //UFT <ip_1> <port_1> <ip_2> <port_2> <ip_3> <port_3>.....
@@ -479,6 +361,7 @@ public class NodeImpl implements Node {
                     }
 
                     socketConnector.send(reply, messageList[1], Integer.parseInt(messageList[2]));
+
                 case "UFT"://update finger table
                     for (int i = 0; i < MAX_FINGERS; i++) {
                         Node temp = new NodeImpl(null, messageList[(2 * i) + 1], Integer.parseInt(messageList[(2 * i) + 2]), this.getBSip(), this.getBSport());
@@ -487,6 +370,7 @@ public class NodeImpl implements Node {
                     stabilizer.start();
                     fingerFixer.start();
                     predecessorCheckor.start();
+
                 case "NOTIFY_S":    // notify succoessor
                     Node tempPredecessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport());
                     if (predecessor == null) {
@@ -503,15 +387,18 @@ public class NodeImpl implements Node {
                         predecessor = tempPredecessor;
                     }
                     break;
+
                 case "GET_PRED":    // get predecessor request from Stabilizer
                     String rep = "GET_PRED_OK " + this.predecessor.getIp() + " " + this.predecessor.getPort();
                     redirectMessage(rep, new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport));
                     break;
+
                 case "GET_PRED_OK":     // respond from get predecessor request
                     Node newPred = new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport);
                     stabilizer.setNewPredessor(newPred);
                     stabilizer.interrupt();
                     break;
+
                 case "FIND_S":   // find successor message from findSuccosser
                     Node succosser = findSuccessorOf(Integer.parseInt(messageList[1]), Integer.parseInt(messageList[2]), messageList[3], Integer.parseInt(messageList[4]));
                     if (succosser != null) {
@@ -519,14 +406,17 @@ public class NodeImpl implements Node {
                         redirectMessage(response, new NodeImpl("", messageList[3], Integer.parseInt(messageList[4]), BSip, BSport));
                     }
                     break;
+
                 case "FIND_S_OK":   // reply to findSuccessor
                     fingerFixer.setSuccossorReply(message.substring(10));
                     fingerFixer.setWaitingForSuccessor(true);
                     fingerFixer.interrupt();
                     break;
+
                 case "HB":      // heartbeat
                     redirectMessage("HB_OK", new NodeImpl(null, incomingIP, incomingPort, BSip, BSport));
                     break;
+
                 case "HB_OK":
                     predecessorCheckor.setPredecessorHBOK(true);
                     break;
@@ -538,21 +428,25 @@ public class NodeImpl implements Node {
 
                 switch (messageList[2]) {
                     case "0":
-                        System.out.println("This is the first node.");
+                        System.out.println("This is the first node.\n");
                         for (int i = 0; i < MAX_FINGERS; i++) {
                             this.fingerTable.updateEntry(i, this);
                         }
                         stabilizer.start();
                         fingerFixer.start();
-                        predecessorCheckor.start();
+                        //predecessorCheckor.start();
                         break;
+
                     case "1": {
+                        System.out.println("This is the second node.\n");
                         SimpleNeighbor firstNeighbor = new SimpleNeighbor(messageList[3], Integer.parseInt(messageList[4]));
                         neighborList.add(firstNeighbor);
                         joinNetwork();
                         break;
                     }
+
                     case "2": {
+                        System.out.println("This is the third or later node.\n");
                         SimpleNeighbor firstNeighbor = new SimpleNeighbor(messageList[3], Integer.parseInt(messageList[4]));
                         neighborList.add(firstNeighbor);
                         SimpleNeighbor secondNeighbor = new SimpleNeighbor(messageList[5], Integer.parseInt(messageList[6]));
@@ -560,23 +454,40 @@ public class NodeImpl implements Node {
                         joinNetwork();
                         break;
                     }
+
                     case "9999":
                         System.out.println(" Failed, there is some error in the command.");
                         break;
+
                     case "9998":
                         System.out.println("Failed, already registered to you, unregister first.");
                         break;
+
                     case "9997":
                         System.out.println("Failed, registered to another user, try a different IP and port.");
                         break;
+
                     case "9996":
                         System.out.println("Failed, can’t register. Bootstrap Server full.");
                         break;
+
                     default:
                         break;
                 }
-            } else {
-                System.out.println("Error in registration message or the server is offline");
+            } else if ("UNROK".equals(messageList[1])) {
+                switch (messageList[2]) {
+                    case "0":
+                        System.out.println("Successfully unregistered.\n");
+                        this.socketConnector.stop(); //stop listning, equivelent to leave the network
+                        break;
+
+                    case "9999":
+                        System.out.println("Error while unregistering. IP and port may not be in the registry or command is incorrect.");
+                        break;
+                    default:
+                        System.out.println("Some error while unregistering.");
+                        break;
+                }
             }
         }
     }
@@ -596,22 +507,27 @@ public class NodeImpl implements Node {
      */
     @Override
     public Node findSuccessorOf(int finger, int key, String originIP, int originPort) {
-        int successorID = this.successor.getID();
-        // this node and successor are in opposite side of 0
-        if (successorID < this.id) {
-            if ((this.id < key && key < MAX_NODES) || (0 <= key && key <= successorID)) {
-                return this.successor;
-            }
-        } else if (this.id < key && key <= successorID) // normal successor
-        {
-            return this.successor;
+        if (this.successor == null) {
+            return null;
         } else {
-            Node nextNode = this.fingerTable.getClosestPredecessorToKey(key);
-            String message = "FIND_S " + finger + " " + key + " " + originIP + " " + originPort;
-            redirectMessage(message, nextNode);
+            int successorID = this.successor.getID();
+            // this node and successor are in opposite side of 0
+            if (successorID < this.id) {
+                if ((this.id < key && key < MAX_NODES) || (0 <= key && key <= successorID)) {
+                    return this.successor;
+                }
+            } else if (this.id < key && key <= successorID) // normal successor
+            {
+                return this.successor;
+            } else {
+                Node nextNode = this.fingerTable.getClosestPredecessorToKey(key);
+                String message = "FIND_S " + finger + " " + key + " " + originIP + " " + originPort;
+                redirectMessage(message, nextNode);
+                return null;
+            }
             return null;
         }
-        return null;
+
     }
 
     public String getIP() {
