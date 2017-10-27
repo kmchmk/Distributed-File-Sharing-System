@@ -47,6 +47,7 @@ public class NodeImpl implements Node {
 
     private Stabilizer stabilizer;
     private FingerFixer fingerFixer;
+    private PredecessorCheckor predecessorCheckor;
 
     public NodeImpl(String username, String ip, int port, String BSip, int BSport) {
         fingerTable = new FingertableImpl(MAX_FINGERS);
@@ -62,6 +63,10 @@ public class NodeImpl implements Node {
         this.id = Math.abs((this.ip + this.port).hashCode()) % MAX_NODES;
 
         this.socketConnector = new SocketConnector(this);
+        
+        this.stabilizer = new Stabilizer(this);
+        this.fingerFixer = new FingerFixer(this);
+        this.predecessorCheckor = new PredecessorCheckor(this);
 
         initialize();
     }
@@ -214,9 +219,6 @@ public class NodeImpl implements Node {
             return null;
         }
     }*/
-    private boolean updateFingerTable() {
-        return true;
-    }
 
     private static String getMyIP() {
         if (1 == 1) {
@@ -402,7 +404,8 @@ public class NodeImpl implements Node {
         this.predecessor = predecessor;
     }
 
-    private void redirectMessage(String message, Node next) {
+    @Override
+    public void redirectMessage(String message, Node next) {
         socketConnector.send(message, next.getIp(), next.getPort());
     }
 
@@ -413,7 +416,7 @@ public class NodeImpl implements Node {
 
     private void distributeFileMetadata() {
         for (String file : files) {
-            int hash = Math.abs(file.hashCode());
+            int hash = Math.abs(file.hashCode())% MAX_NODES;
             String message = "REGMD " + hash;
 //            System.out.println(message);
             //routeMessge(message, hash);
@@ -482,7 +485,10 @@ public class NodeImpl implements Node {
                         Node temp = new NodeImpl(null, messageList[(2 * i) + 1], Integer.parseInt(messageList[(2 * i) + 2]), this.getBSip(), this.getBSport());
                         fingerTable.updateEntry(i, temp);
                     }
-                case "NOTIFY_S":
+                    stabilizer.start();
+                    fingerFixer.start();
+                    predecessorCheckor.start();
+                case "NOTIFY_S":    // notify succoessor
                     Node tempPredecessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport());
                     if (predecessor == null) {
                         predecessor = tempPredecessor;
@@ -498,26 +504,33 @@ public class NodeImpl implements Node {
                         predecessor = tempPredecessor;
                     }
                     break;
-                case "GET_PRED":
+                case "GET_PRED":    // get predecessor request from Stabilizer
                     String rep = "GET_PRED_OK " + this.predecessor.getIp() + " " + this.predecessor.getPort();
                     redirectMessage(rep, new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport));
                     break;
-                case "GET_PRED_OK":
+                case "GET_PRED_OK":     // respond from get predecessor request
                     Node newPred = new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport);
                     stabilizer.setNewPredessor(newPred);
                     stabilizer.interrupt();
                     break;
-                case "FIND_S":
+                case "FIND_S":   // find successor message from findSuccosser
                     Node succosser = findSuccessorOf(Integer.parseInt(messageList[1]),Integer.parseInt(messageList[2]), messageList[3], Integer.parseInt(messageList[4]));
                     if (succosser != null){
                         String response = "FIND_S_OK " + messageList[1] + " " + ip + " " + port;
                         redirectMessage(response, new NodeImpl("", messageList[3], Integer.parseInt(messageList[4]), BSip, BSport));
                     }
                     break;
-                case "FIND_S_OK":
+                case "FIND_S_OK":   // reply to findSuccessor
                     fingerFixer.setSuccossorReply(message.substring(10));
                     fingerFixer.setWaitingForSuccessor(true);
                     fingerFixer.interrupt();
+                    break;
+                case "HB":      // heartbeat
+                    redirectMessage("HB_OK", new NodeImpl(null, incomingIP, incomingPort, BSip, BSport));
+                    break;
+                case "HB_OK":
+                    predecessorCheckor.setPredecessorHBOK(true);
+                    break;
                 default:
                     break;
             }
@@ -530,6 +543,9 @@ public class NodeImpl implements Node {
                         for (int i = 0; i < MAX_FINGERS; i++) {
                             this.fingerTable.updateEntry(i, this);
                         }
+                        stabilizer.start();
+                        fingerFixer.start();
+                        predecessorCheckor.start();
                         break;
                     case "1": {
                         SimpleNeighbor firstNeighbor = new SimpleNeighbor(messageList[3], Integer.parseInt(messageList[4]));
@@ -597,6 +613,14 @@ public class NodeImpl implements Node {
             return null;
         }
         return null;
+    }
+    
+     public String getIP(){
+        return ip;
+    }
+    
+    public int getthePort(){
+        return port;
     }
 
 }
