@@ -38,7 +38,7 @@ public class FingerFixer extends Thread {
         while (true) {
             try {
                 Thread.sleep(1000);
-                System.out.println("FingerFixer running...");
+                this.thisNode.echo("FingerFixer running...\n");
                 if (!waitingForSuccussor) {
                     fingerToFixNext++;
                     if (fingerToFixNext >= NodeImpl.MAX_FINGERS) {

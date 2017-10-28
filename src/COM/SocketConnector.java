@@ -23,6 +23,7 @@ import java.util.logging.Logger;
  */
 public class SocketConnector implements Connector {
 
+    private DatagramSocket socket;
     Node myNode;
     Thread listner;
     boolean live;
@@ -41,9 +42,10 @@ public class SocketConnector implements Connector {
         try {
 
             byte[] bytes = OutgoingMessage.getBytes();
+            //System.out.println(bytes.length);
             DatagramPacket packet = new DatagramPacket(bytes, bytes.length, InetAddress.getByName(OutgoingIP), OutgoingPort);
-
-            DatagramSocket socket = new DatagramSocket();
+            
+            socket = new DatagramSocket();
             socket.send(packet);
 
         } catch (UnknownHostException ex) {
@@ -64,7 +66,7 @@ public class SocketConnector implements Connector {
             @Override
             public void run() {
                 try {
-                    DatagramSocket socket = new DatagramSocket(port);
+                    socket = new DatagramSocket(port);
 
                     byte[] buffer = new byte[65536];
                     DatagramPacket incomingPacket = new DatagramPacket(buffer, buffer.length);
@@ -75,7 +77,7 @@ public class SocketConnector implements Connector {
                         byte[] data = incomingPacket.getData();
 
                         String incomingMessage = new String(data, 0, incomingPacket.getLength());
-//                        System.out.println("Message Received: " + incomingMessage);
+                        System.out.println("Message Received: " + incomingMessage);
 
                         myNode.handleMessage(incomingMessage, incomingPacket.getAddress().getHostAddress(), incomingPacket.getPort());
 
@@ -94,18 +96,18 @@ public class SocketConnector implements Connector {
     @Override
     public void sendToBS(String message) {
         try {
-            DatagramSocket sock = new DatagramSocket();
+            socket = new DatagramSocket();
 
             byte[] b = message.getBytes();
 
             DatagramPacket dp = new DatagramPacket(b, b.length, InetAddress.getByName(myNode.getBSip()), myNode.getBSport());
-            sock.send(dp);
+            socket.send(dp);
 
             //now receive reply
             //buffer to receive incoming data
             byte[] buffer = new byte[65536];
             DatagramPacket repl = new DatagramPacket(buffer, buffer.length);
-            sock.receive(repl);
+            socket.receive(repl);
 
             byte[] data = repl.getData();
             String reply = new String(data, 0, repl.getLength());
