@@ -30,7 +30,7 @@ public class Stabilizer extends Thread {
         while (true) {
             try {
                 Thread.sleep(5000);
-                System.out.println("Stabilizing...");
+                this.thisNode.echo("Stabilizing...\n");
                 
                 if (thisNode.getSuccessor() == null) {
                     waitingForSuccessor =  true;

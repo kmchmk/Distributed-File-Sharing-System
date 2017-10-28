@@ -19,8 +19,6 @@ public interface Node {
 
     public void routeMessge(String message, int key);
 
-    public String search();
-
     public Node getSuccessor();
 
     public Node getPredeccessor();
@@ -46,5 +44,7 @@ public interface Node {
     public Node findSuccessorOf(int finger, int id, String originIP, int originPort);
     
     public void redirectMessage(String message, Node next);
+    
+    public void echo(String output);
 
 }

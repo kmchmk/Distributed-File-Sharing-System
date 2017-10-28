@@ -21,9 +21,9 @@ import java.util.Random;
  *
  * @author erang
  */
-public class NodeImpl implements Node {
+public final class NodeImpl implements Node {
 
-    public static final int MAX_FINGERS = 10;
+    public static final int MAX_FINGERS = 4;
     public static final int MAX_NODES = (int) Math.pow(2, MAX_FINGERS);
 
     private final String BSip;
@@ -71,6 +71,20 @@ public class NodeImpl implements Node {
         initialize();
     }
 
+    public NodeImpl(String username, String ip, int port, boolean proxy) {
+        fingerTable = new FingertableImpl(MAX_FINGERS);
+        metaData = new HashMap<>();
+        files = new ArrayList<>();
+        neighborList = new ArrayList<>();
+
+        this.username = username;
+        this.ip = ip;
+        this.port = port;
+        this.BSip = null;
+        this.BSport = 0;
+        this.id = Math.abs((this.ip + this.port).hashCode()) % MAX_NODES;
+    }
+
 //    public NodeImpl(String username, int port, String BSip, int BSport) {
 //        this(username, getMyIP(), port, BSip, BSport);
 //    }
@@ -83,6 +97,7 @@ public class NodeImpl implements Node {
 //        System.out.println("Init (" + this.username + ")");
         populateWithFiles();
         this.socketConnector.listen(port);
+        echo("initializing key:" + this.id);
 //        System.out.println("Start listening...(" + port + ") ");
     }
 
@@ -107,171 +122,16 @@ public class NodeImpl implements Node {
     }
 
     @Override
-    public void joinNetwork() {
-
-        sendMessageToSuccessor();
-
-        sendMessageToPredecessor();//not implemented yet
-
+    public int getID() {
+        return this.id;
     }
 
-    public void sendMessageToSuccessor() {
-        String message = "FS " + this.username.hashCode() + " " + this.ip + " " + this.port + " " + this.username;
-        this.socketConnector.send(message, this.successor.getIp(), this.successor.getPort());
-        System.out.println("Sending message to successor port(" + this.successor.getPort() + "), Routing to self (" + message + ")");
+    public String getIP() {
+        return ip;
     }
 
-    public void sendMessageToPredecessor() {
-        //not implemented yet
-    }
-
-    private static String getMyIP() {
-        if (1 == 1) {
-            return "localhost";
-        }
-        try {
-            final DatagramSocket socket = new DatagramSocket();
-            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
-            return socket.getLocalAddress().getHostAddress();
-        } catch (SocketException | UnknownHostException ex) {
-            System.err.println(ex);
-            return null;
-        }
-    }
-
-    public void registerToNetwork() {
-
-        System.out.println("Registering to network: (" + username + ")");
-
-        String registerMessage = " " + "REG" + " " + ip + " " + Integer.toString(port) + " " + username;
-        int length = registerMessage.length() + 4;
-
-        registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0"))
-                + Integer.toString(length) + registerMessage;
-
-//        System.out.println("register message - (" + registerMessage + ")");
-        socketConnector.sendToBS(registerMessage);
-
-    }
-
-    public void unregisterFromNetwork() {
-
-        String unregisterMessage = " " + "UNREG" + " " + ip + " " + Integer.toString(port) + " " + username;
-        int length = unregisterMessage.length() + 4;
-
-        unregisterMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + unregisterMessage;
-
-        socketConnector.sendToBS(unregisterMessage);
-    }
-
-    private String[] getFiles(String searchString) {
-
-        String[] files = null;
-        //files = get all files inside me for a given searchString
-        return files;
-    }
-
-    public void search(String searchString) {
-        System.out.println("\n\n");
-
-        String[] files = getFiles(searchString);
-        if (files == null) {
-
-            String searchQuery = " " + "SER" + " " + ip + " " + Integer.toString(port) + " " + searchString;
-            int length = searchQuery.length() + 4;
-
-            searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
-
-            int hashedID = Math.abs(searchString.hashCode());
-            
-            routeMessge(searchQuery, hashedID);
-            
-            /*//asking from the first neighbor
-            if (neighborList.size() > 0) {
-                //here, IP should be neighborList.get(0).getIP()
-                socketConnector.send(searchQuery, "localhost", neighborList.get(0).getPort());
-            }
-            if (neighborList.size() > 1) {
-                //here, IP should be neighborList.get(0).getIP()
-                socketConnector.send(searchQuery, "localhost", neighborList.get(1).getPort());
-            }*/
-        }
-    }
-
-    public void populateWithFiles() {
-
-//        System.out.println("Populating files:");
-        ArrayList<String> filelist = new ArrayList<>(Arrays.asList(
-                "Adventures of Tintin",
-                "Jack and Jill",
-                "Glee",
-                "The Vampire Diarie",
-                "King Arthur",
-                "Windows XP",
-                "Harry Potter",
-                "Kung Fu Panda",
-                "Lady Gaga",
-                "Twilight",
-                "Windows 8",
-                "Mission Impossible",
-                "Turn Up The Music",
-                "Super Mario",
-                "American Pickers",
-                "Microsoft Office 2010",
-                "Happy Feet",
-                "Modern Family",
-                "American Idol",
-                "Hacking for Dummies"));
-
-        for (int i = 0; i < 3; i++) {
-            int rand = new Random().nextInt(filelist.size());
-            String file = filelist.get(rand);
-            files.add(file);
-//            System.out.println(file);
-            filelist.remove(rand);
-        }
-
-        distributeFileMetadata();
-    }
-
-    public String searchMetaData(String queryMessage) {
-        System.out.println(queryMessage);
-        String[] messageList = queryMessage.split(" ");
-
-        if ("SER".equals(messageList[1])) {
-
-            String queryWord = messageList[4];
-            System.out.println("Searching for (" + queryWord + ")");
-
-            if (metaData.containsKey(queryWord.hashCode())) {
-                return ("Found - " + queryWord);
-            } else {
-                return ("Not found - " + queryWord);
-            }
-        }
-        return "Search query is in wrong format";
-    }
-
-    @Override
-    public boolean leaveNetwork() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void routeMessge(String message, int key) {
-        Node next;
-        if ((next = fingerTable.getNode(key)) == null) {
-            next = fingerTable.getClosestPredecessorToKey(key);
-            if (next == null) {
-                next = this.successor;
-            }
-        }
-        redirectMessage(message, next);
-    }
-
-    @Override
-    public String search() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public int getthePort() {
+        return port;
     }
 
     @Override
@@ -297,6 +157,7 @@ public class NodeImpl implements Node {
     @Override
     public void redirectMessage(String message, Node next) {
         socketConnector.send(message, next.getIp(), next.getPort());
+        echo("redirecting message to: " + next.getPort() + "(" + message + ")");
     }
 
     @Override
@@ -315,6 +176,137 @@ public class NodeImpl implements Node {
 
     private void insertFileMetadata(int key, String file) {
         this.metaData.put(key, file);
+    }
+
+    private static String getMyIP() {
+        if (1 == 1) {
+            return "localhost";
+        }
+        try {
+            final DatagramSocket socket = new DatagramSocket();
+            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+            return socket.getLocalAddress().getHostAddress();
+        } catch (SocketException | UnknownHostException ex) {
+            System.err.println(ex);
+            return null;
+        }
+    }
+
+    public void populateWithFiles() {
+
+//        System.out.println("Populating files:");
+        ArrayList<String> filelist = new ArrayList<>(Arrays.asList("Adventures of Tintin", "Jack and Jill", "Glee", "The Vampire Diarie", "King Arthur", "Windows XP", "Harry Potter", "Kung Fu Panda", "Lady Gaga", "Twilight", "Windows 8", "Mission Impossible", "Turn Up The Music", "Super Mario", "American Pickers", "Microsoft Office 2010", "Happy Feet", "Modern Family", "American Idol", "Hacking for Dummies"));
+
+        for (int i = 0; i < 3; i++) {
+            int rand = new Random().nextInt(filelist.size());
+            String file = filelist.get(rand);
+            files.add(file);
+//            System.out.println(file);
+            filelist.remove(rand);
+        }
+
+        distributeFileMetadata();
+    }
+
+    @Override
+    public void routeMessge(String message, int key) {
+        Node next;
+        if ((next = fingerTable.getNode(key)) == null) {
+            next = fingerTable.getClosestPredecessorToKey(key);
+        }
+        if (next == null) {
+            next = this.successor;
+        }
+        redirectMessage(message, next);
+    }
+
+    public void registerToNetwork() {
+
+        echo("Registering to network as: (" + username + ")");
+
+        String registerMessage = " " + "REG" + " " + ip + " " + Integer.toString(port) + " " + username;
+        int length = registerMessage.length() + 4;
+
+        registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0"))
+                + Integer.toString(length) + registerMessage;
+
+//        System.out.println("register message - (" + registerMessage + ")");
+        socketConnector.sendToBS(registerMessage);
+
+    }
+
+    public void unregisterFromNetwork() {
+
+        echo("Unregistering from network as: (" + username + ")");
+
+        String unregisterMessage = " " + "UNREG" + " " + ip + " " + Integer.toString(port) + " " + username;
+        int length = unregisterMessage.length() + 4;
+
+        unregisterMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + unregisterMessage;
+
+        socketConnector.sendToBS(unregisterMessage);
+    }
+
+    @Override
+    public void joinNetwork() {
+
+        sendMessageToSuccessor();
+        sendMessageToPredecessor();//not implemented yet
+    }
+
+    @Override
+    public boolean leaveNetwork() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void sendMessageToSuccessor() {
+        String message = "FS " + this.id + " " + this.ip + " " + this.port;
+        this.socketConnector.send(message, this.neighborList.get(0).getIp(), this.neighborList.get(0).getPort());
+        echo("Sending message to neighbor (" + this.neighborList.get(0).getPort() + "), Routing to self (" + message + ")");
+    }
+
+    public void sendMessageToPredecessor() {
+        //not implemented yet
+    }
+
+    public void search(String searchString) {
+        System.out.println("\n\n");
+
+        String reply = null; // dirty fix
+
+        String searchQuery = " " + "SER" + " " + ip + " " + Integer.toString(port) + " " + searchString;
+        int length = searchQuery.length() + 4;
+
+        searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
+        //asking from the first user
+        if (neighborList.size() > 0) {
+            //here, IP should be neighborList.get(0).getIP()
+            socketConnector.send(searchQuery, "localhost", neighborList.get(0).getPort());
+            System.out.println("Reply from first neighbor:- " + reply);
+        }
+        if (neighborList.size() > 1) {
+            //here, IP should be neighborList.get(0).getIP()
+            socketConnector.send(searchQuery, "localhost", neighborList.get(1).getPort());
+            System.out.println("Reply from second neighbor:- " + reply);
+        }
+    }
+
+    public String searchMetaData(String queryMessage) {
+        System.out.println(queryMessage);
+        String[] messageList = queryMessage.split(" ");
+
+        if ("SER".equals(messageList[1])) {
+
+            String queryWord = messageList[4];
+            System.out.println("Searching for (" + queryWord + ")");
+
+            if (metaData.containsKey(queryWord.hashCode())) {
+                return ("Found - " + queryWord);
+            } else {
+                return ("Not found - " + queryWord);
+            }
+        }
+        return "Search query is in wrong format";
     }
 
     /*
@@ -338,45 +330,86 @@ public class NodeImpl implements Node {
      */
     @Override
     public void handleMessage(String message, String incomingIP, int incomingPort) {
+        echo(message);
+        
         String[] messageList = message.split(" ");
 
         if (null != messageList[0] && messageList.length > 1) {
 
+            //echo("message received: (" + messageList[0] + ")");
             switch (messageList[0]) {
-                case "FS"://find successor    
-                    int key = Integer.parseInt(messageList[3]);
+                case "FS"://find successor
+                    echo("message received: (" + messageList[0] + ")");
 
-                    if (this.id < key) {
-                        routeMessge(message, key);
+                    int key = Integer.parseInt(messageList[1]);
+
+                    if (this.getSuccessor() == null) {
+                        ///send me as the successor for new node
+                        String tempMsg = "US " + this.getIp() + " " + this.getPort();
+                        socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
+
+                        //set new node as my successor
+                        Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
+                        this.setSuccessor(tempSuccessor);
+                        System.out.println(this.getPort() + ": my successor is : " + this.successor.getPort());
+
                     } else {
 
-                        //Ask to update new nodes successor to my successor
-                        socketConnector.send("US " + successor.getIp() + " " + successor.getPort(), messageList[1], Integer.parseInt(messageList[2]));
-                        this.setSuccessor(new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport()));
+                        if (this.id >= key) {
+                            //Ask to update new nodes successor to my successor
+                            //"US <successorIP> <successorPort>"
+                            String tempMsg = "US " + successor.getIp() + " " + successor.getPort();
+                            socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
 
-                        //request the finger tabel from my successor
-                        //"RFT <myIP> <myPort>"
-                        socketConnector.send("RFT " + this.getIp() + " " + this.getPort(), incomingIP, incomingPort);
+                            Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
+                            this.setSuccessor(tempSuccessor);
+                            System.out.println(this.getPort() + ": my successor is : " + this.successor.getPort());
+
+                            //request the finger tabel from my successor
+                            //"RFT <myIP> <myPort>"
+                            tempMsg = "RFT " + this.getIp() + " " + this.getPort();
+                            socketConnector.send(tempMsg, incomingIP, incomingPort);
+                            System.out.println(this.getPort() + ": request finger table : (" + tempMsg + ")");
+                        } else {
+                            routeMessge(message, key);
+                        }
                     }
                     break;
 
                 case "US": //update succesor
-                    this.setSuccessor(new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport()));
+                    echo("message received: (" + messageList[0] + ")");
+
+                    Node tempSuccessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), true);
+                    this.setSuccessor(tempSuccessor);
+                    System.out.println(this.getPort() + ": my successor is : " + this.successor.getPort());
 
                 case "RFT": //request finger table
-                    //Update finger table
+                    echo("message received: (" + messageList[0] + ")");
+
+                    //send finger table
                     //UFT <ip_1> <port_1> <ip_2> <port_2> <ip_3> <port_3>.....
-                    String reply = "UFT "; //update finger table
-                    for (int i = 0; i < MAX_FINGERS; i++) {
-                        Node entry = fingerTable.getEntryByIndex(i);
-                        reply += entry.getIp() + " " + entry.getPort();
+                    if (this.fingerTable.getFingerEntries()[0] == null) {
+                        for (int i = 0; i < MAX_FINGERS; i++) {
+                            this.fingerTable.updateEntry(i, this);
+                        }
                     }
 
-                    socketConnector.send(reply, messageList[1], Integer.parseInt(messageList[2]));
+                    String tempMsg = "UFT "; //update finger table
+                    for (int i = 0; i < MAX_FINGERS; i++) {
+                        Node entry = fingerTable.getEntryByIndex(i);
+                        tempMsg += entry.getIp() + " " + entry.getPort() + " ";
+                    }
+                    socketConnector.send(tempMsg, messageList[1], Integer.parseInt(messageList[2]));
+                    System.out.println(this.getPort() + ": sending finger table to : " + messageList[2] + " (" + tempMsg + ")");
 
                 case "UFT"://update finger table
-                    for (int i = 0; i < MAX_FINGERS; i++) {
-                        Node temp = new NodeImpl(null, messageList[(2 * i) + 1], Integer.parseInt(messageList[(2 * i) + 2]), this.getBSip(), this.getBSport());
+                    echo("message received: (" + messageList[0] + ")");
+
+                    int i = 0;
+                    Node temp = new NodeImpl(null, messageList[(2 * i) + 1], Integer.parseInt(messageList[(2 * i) + 2]), true);
+                    
+                    for (; i < MAX_FINGERS; i++) {
+                        
                         fingerTable.updateEntry(i, temp);
                     }
                     stabilizer.start();
@@ -384,6 +417,7 @@ public class NodeImpl implements Node {
                     predecessorCheckor.start();
 
                 case "NOTIFY_S":    // notify succoessor
+
                     Node tempPredecessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport());
                     if (predecessor == null) {
                         predecessor = tempPredecessor;
@@ -437,13 +471,14 @@ public class NodeImpl implements Node {
             }
 
             if ("REGOK".equals(messageList[1])) {
+                //echo("message received: (" + messageList[1] + ")");
 
                 switch (messageList[2]) {
                     case "0":
                         System.out.println("This is the first node.\n");
-                        for (int i = 0; i < MAX_FINGERS; i++) {
-                            this.fingerTable.updateEntry(i, this);
-                        }
+//                        for (int i = 0; i < MAX_FINGERS; i++) {
+//                            this.fingerTable.updateEntry(i, this);
+//                        }
                         stabilizer.start();
                         fingerFixer.start();
                         //predecessorCheckor.start();
@@ -487,6 +522,7 @@ public class NodeImpl implements Node {
                         break;
                 }
             } else if ("UNROK".equals(messageList[1])) {
+                //("message received: (" + messageList[1] + ")");
                 switch (messageList[2]) {
                     case "0":
                         System.out.println("Successfully unregistered.\n");
@@ -514,16 +550,6 @@ public class NodeImpl implements Node {
                 }
             }
         }
-    }
-
-    public static void main(String[] args) {
-        Node n = new NodeImpl("NodeOne", 7);
-        n.initialize();
-    }
-
-    @Override
-    public int getID() {
-        return this.id;
     }
 
     /* 
@@ -554,12 +580,9 @@ public class NodeImpl implements Node {
 
     }
 
-    public String getIP() {
-        return ip;
-    }
-
-    public int getthePort() {
-        return port;
+    @Override
+    public void echo(String output) {
+        System.out.println(this.id + "," + this.port + ": " + output + "\n");
     }
 
 }
