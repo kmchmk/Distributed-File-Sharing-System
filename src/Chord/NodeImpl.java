@@ -164,25 +164,37 @@ public class NodeImpl implements Node {
         socketConnector.sendToBS(unregisterMessage);
     }
 
+    private String[] getFiles(String searchString) {
+
+        String[] files = null;
+        //files = get all files inside me for a given searchString
+        return files;
+    }
+
     public void search(String searchString) {
         System.out.println("\n\n");
 
-        String reply = null; // dirty fix
+        String[] files = getFiles(searchString);
+        if (files == null) {
 
-        String searchQuery = " " + "SER" + " " + ip + " " + Integer.toString(port) + " " + searchString;
-        int length = searchQuery.length() + 4;
+            String searchQuery = " " + "SER" + " " + ip + " " + Integer.toString(port) + " " + searchString;
+            int length = searchQuery.length() + 4;
 
-        searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
-        //asking from the first user
-        if (neighborList.size() > 0) {
-            //here, IP should be neighborList.get(0).getIP()
-            socketConnector.send(searchQuery, "localhost", neighborList.get(0).getPort());
-            System.out.println("Reply from first neighbor:- " + reply);
-        }
-        if (neighborList.size() > 1) {
-            //here, IP should be neighborList.get(0).getIP()
-            socketConnector.send(searchQuery, "localhost", neighborList.get(1).getPort());
-            System.out.println("Reply from second neighbor:- " + reply);
+            searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
+
+            int hashedID = Math.abs(searchString.hashCode());
+            
+            routeMessge(searchQuery, hashedID);
+            
+            /*//asking from the first neighbor
+            if (neighborList.size() > 0) {
+                //here, IP should be neighborList.get(0).getIP()
+                socketConnector.send(searchQuery, "localhost", neighborList.get(0).getPort());
+            }
+            if (neighborList.size() > 1) {
+                //here, IP should be neighborList.get(0).getIP()
+                socketConnector.send(searchQuery, "localhost", neighborList.get(1).getPort());
+            }*/
         }
     }
 
@@ -487,6 +499,18 @@ public class NodeImpl implements Node {
                     default:
                         System.out.println("Some error while unregistering.");
                         break;
+                }
+            }
+            else if("SER".equals(messageList[1])){
+                String tempIP = messageList[2];
+                int TempPort = Integer.parseInt(messageList[3]);
+                String searchString = messageList[4];
+                int hashedID = Math.abs(searchString.hashCode());
+                if(hashedID > this.id){
+                    System.out.println("Handle the request here / route");
+                }
+                else{
+                    System.out.println("Handle the request here / route");
                 }
             }
         }
