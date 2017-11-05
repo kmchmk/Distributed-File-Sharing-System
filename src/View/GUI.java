@@ -529,15 +529,21 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton4ActionPerformed
 
     public void UpdateSuccessor(Node succ) {
-        table1.setValueAt(succ.getID(), 1, 1);
-        table1.setValueAt(succ.getIp(), 1, 2);
-        table1.setValueAt(succ.getPort(), 1, 3);
+        table1.setValueAt(succ == null ? "": succ.getID(), 1, 1);
+        table1.setValueAt(succ == null ? "": succ.getIp(), 1, 2);
+        table1.setValueAt(succ == null ? "": succ.getPort(), 1, 3);
     }
 
     public void UpdateFingerTable(int index, Node temp) {
         table1.setValueAt(temp.getID(), index, 1);
         table1.setValueAt(temp.getIp(), index, 2);
         table1.setValueAt(temp.getPort(), index, 3);
+    }
+    
+    public void UpdatePredecessor(Node pred) {
+        table1.setValueAt(pred == null ? "": pred.getID(), 1, 1);
+        table1.setValueAt(pred == null ? "": pred.getIp(), 1, 2);
+        table1.setValueAt(pred == null ? "": pred.getPort(), 1, 3);
     }
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed

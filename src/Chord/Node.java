@@ -5,6 +5,8 @@
  */
 package Chord;
 
+import View.GUI;
+
 /**
  *
  * @author erang
@@ -48,5 +50,9 @@ public interface Node {
     public void redirectMessage(String message, Node next);
 
     public void echo(String output);
+    
+    public GUI getGUI();
+    
+    public void setGUI(GUI gui);
 
 }

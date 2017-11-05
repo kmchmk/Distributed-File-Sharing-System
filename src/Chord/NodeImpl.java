@@ -150,11 +150,13 @@ public final class NodeImpl implements Node {
     @Override
     public void setSuccessor(Node successor) {
         this.successor = successor;
+        gui.UpdateSuccessor(successor);
     }
 
     @Override
     public void setPredecessor(Node predecessor) {
         this.predecessor = predecessor;
+        gui.UpdatePredecessor(predecessor);
     }
 
     @Override
@@ -413,6 +415,7 @@ public final class NodeImpl implements Node {
                     if (this.fingerTable.getFingerEntries()[0] == null) {
                         for (int i = 0; i < MAX_FINGERS; i++) {
                             this.fingerTable.updateEntry(i, this);
+                            gui.UpdateFingerTable(i, this);
                         }
                     }
 
@@ -433,6 +436,7 @@ public final class NodeImpl implements Node {
                     for (; i < MAX_FINGERS; i++) {
 
                         fingerTable.updateEntry(i, temp);
+                        gui.UpdateFingerTable(i, temp);
                     }
                     stabilizer.start();
                     fingerFixer.start();
@@ -442,17 +446,17 @@ public final class NodeImpl implements Node {
 
                     Node tempPredecessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport());
                     if (predecessor == null) {
-                        predecessor = tempPredecessor;
+                        this.setPredecessor(tempPredecessor);
                         System.out.println("NOTIFY_S: Update predecessor of " + id + " to " + tempPredecessor.getID());
                     } else if (predecessor.getID() > this.id) {
                         if ((predecessor.getID() < tempPredecessor.getID() && tempPredecessor.getID() < MAX_NODES)
                                 || (0 <= tempPredecessor.getID() && tempPredecessor.getID() < this.id)) {
                             System.out.println("NOTIFY_S: Update predecessor of " + id + " from  " + predecessor.getID() + " to " + tempPredecessor.getID());
-                            predecessor = tempPredecessor;
+                            this.setPredecessor(tempPredecessor);
                         }
                     } else if (predecessor.getID() < tempPredecessor.getID() && tempPredecessor.getID() < this.id) {
                         System.out.println("NOTIFY_S: Update predecessor of " + id + " from  " + predecessor.getID() + " to " + tempPredecessor.getID());
-                        predecessor = tempPredecessor;
+                        this.setPredecessor(tempPredecessor);
                     }
                     break;
 
@@ -511,6 +515,7 @@ public final class NodeImpl implements Node {
                         System.out.println("This is the first node.\n");
                         for (int i = 0; i < MAX_FINGERS; i++) {
                             this.fingerTable.updateEntry(i, this);
+                            gui.UpdateFingerTable(i, this);
                         }
                         stabilizer.start();
                         fingerFixer.start();

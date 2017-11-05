@@ -53,6 +53,7 @@ public class FingerFixer extends Thread {
                     } else {
                         System.out.println("FixFinger: Update finger " + fingerToFixNext + " of " + thisNode.getID() + " from  " + fingerTable.getNodeAt(fingerToFixNext).getID() + " to " + fingerEntry.getID());
                         fingerTable.updateEntry(fingerToFixNext, fingerEntry);
+                        thisNode.getGUI().UpdateFingerTable(fingerToFixNext, fingerEntry);
                     }
                 }
             } catch (InterruptedException ex) {
@@ -60,6 +61,7 @@ public class FingerFixer extends Thread {
                     String[] replyParts = succossorReply.split(" ");
                     int fingerIndex = Integer.parseInt(replyParts[0]);
                     fingerTable.updateEntry(fingerIndex, new NodeImpl(null, replyParts[1], Integer.parseInt(replyParts[2]), thisNode.getBSip(), thisNode.getBSport()));
+                    thisNode.getGUI().UpdateFingerTable(fingerToFixNext, fingerTable.getNodeAt(fingerIndex));
                     System.out.println("FixFinger: Update finger " + fingerIndex + " of " + thisNode.getID() + " to  " + fingerTable.getNodeAt(fingerIndex).getID());
                     waitingForSuccussor = false;
                 }
