@@ -73,15 +73,15 @@ public class SocketConnector implements Connector {
                         int incomingPort = incomingPacket.getPort();
                         String incomingMessage = new String(data, 0, incomingPacket.getLength());
                         System.out.println("Message Received: " + incomingMessage);
-//                        new Thread() {
-//                            public void run() {
+                        new Thread() {
+                            public void run() {
                         System.out.println("++++++++++++++++" + incomingMessage + "+++++++++++++");
                         System.out.println("IP: " + incomingIP);
                         System.out.println("Port: " + incomingPort);
                         myNode.handleMessage(incomingMessage, incomingIP);
                         System.out.println("Message handled...");
-//                            }
-//                        }.start();
+                            }
+                        }.start();
                     }
                 } catch (SocketException ex) {
                     System.err.println(ex);
