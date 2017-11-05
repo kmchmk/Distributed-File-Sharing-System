@@ -378,6 +378,10 @@ public final class NodeImpl implements Node {
                     Node tempSuccessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), true);
                     this.setSuccessor(tempSuccessor);
                     System.out.println(this.getPort() + ": my successor is : " + this.successor.getPort());
+                    
+                    String tempREFTMsg = "RFT " + this.getIp() + " " + this.getPort();
+                    socketConnector.send(tempREFTMsg, messageList[1], Integer.parseInt(messageList[2]));
+                    
                     break;
                 case "RFT": //request finger table
                     echo("message received: (" + messageList[0] + ")");
