@@ -35,7 +35,7 @@ public class SocketConnector implements Connector {
 
     @Override
     public void send(String OutgoingMessage, String OutgoingIP, int OutgoingPort) {
-        System.out.println("Sending message is: " + OutgoingMessage + " (to" + OutgoingIP + ":" + OutgoingPort + ")");
+        System.out.println("Sending message is: " + OutgoingMessage + " (to " + OutgoingIP + ":" + OutgoingPort + ")");
         try {
 
             byte[] bytes = OutgoingMessage.getBytes();
@@ -72,16 +72,14 @@ public class SocketConnector implements Connector {
                         String incomingIP = incomingPacket.getAddress().getHostAddress();
                         int incomingPort = incomingPacket.getPort();
                         String incomingMessage = new String(data, 0, incomingPacket.getLength());
-                        System.out.println("Message Received: " + incomingMessage);
-//                        new Thread() {
-//                            public void run() {
-                        System.out.println("++++++++++++++++" + incomingMessage + "+++++++++++++");
-                        System.out.println("IP: " + incomingIP);
-                        System.out.println("Port: " + incomingPort);
-                        myNode.handleMessage(incomingMessage, incomingIP);
-                        System.out.println("Message handled...");
-//                            }
-//                        }.start();
+                        System.out.println("Message Received: " + incomingMessage + " (from "+incomingIP+":"+incomingPort+")");
+                        new Thread() {
+                            public void run() {
+                                System.out.println("++++++++++++++++" + incomingMessage + "+++++++++++++");
+                                myNode.handleMessage(incomingMessage, incomingIP);
+                                System.out.println("Message handled...");
+                            }
+                        }.start();
                     }
                 } catch (SocketException ex) {
                     System.err.println(ex);

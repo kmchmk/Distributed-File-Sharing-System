@@ -338,16 +338,17 @@ public final class NodeImpl implements Node {
                     int key = Integer.parseInt(messageList[1]);
 
                     if (this.getSuccessor() == null) {
-                        System.out.println("succ null");
-                        ///send me as the successor for new node
-                        String tempMsg = "US " + this.getIp() + " " + this.getPort();
-                        socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
 
                         //set new node as my successor
                         Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
                         this.setSuccessor(tempSuccessor);
                         System.out.println(this.getPort() + ": my successor is :- " + this.successor.getIp() + ":" + this.successor.getPort());
 
+                        System.out.println("succ null");
+                        ///send me as the successor for new node
+                        String tempMsg = "US " + this.getIp() + " " + this.getPort();
+                        socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
+                        
                     } else if (this.id >= key) {
                         //Ask to update new nodes successor to my successor
                         //"US <successorIP> <successorPort>"
