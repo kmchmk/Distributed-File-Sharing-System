@@ -488,8 +488,8 @@ public final class NodeImpl implements Node {
                         for (int i = 0; i < MAX_FINGERS; i++) {
                             this.fingerTable.updateEntry(i, this);
                         }
-//                        stabilizer.start();
-//                        fingerFixer.start();
+                        stabilizer.start();
+                        fingerFixer.start();
 //                        predecessorCheckor.start();
                         break;
 
