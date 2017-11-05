@@ -10,8 +10,7 @@ import java.util.Random;
 import java.util.StringTokenizer;
 
 public class BootstrapServer {
-
-    
+   
     public static void main(String[] args) {
         runBootstrapServer();
     }
@@ -126,6 +125,27 @@ public class BootstrapServer {
     {
         System.out.println(msg);
     }
+    
+    private static String ip;
+    private static int port;
+
+    public static String getIp() {
+        return ip;
+    }
+
+    public static void setIp(String ip) {
+        BootstrapServer.ip = ip;
+    }
+
+    public static int getPort() {
+        return port;
+    }
+
+    public static void setPort(int port) {
+        BootstrapServer.port = port;
+    }
+   
+    
     
     
 }
