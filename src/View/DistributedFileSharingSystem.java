@@ -35,7 +35,7 @@ public class DistributedFileSharingSystem {
                     
                     Thread.sleep(2000);
                     
-                    NodeImpl node1 = new NodeImpl("One", 3001);
+                    NodeImpl node1 = new NodeImpl("Three", 3003);
                     System.out.println("My ip is: " + node1.getIp());
 //                    NodeImpl node2 = new NodeImpl("Two", 3002);
                     //NodeImpl node3 = new NodeImpl("Three", 3003);
