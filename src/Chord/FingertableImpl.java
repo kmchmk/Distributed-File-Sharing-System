@@ -66,6 +66,9 @@ public class FingertableImpl implements FingerTable {
         if (found) {
             ClosestPredecessor = this.fingerEntries[maxKeyIndex];
         }
+        if (ClosestPredecessor == null){
+            System.out.println("NO PRED");
+        }
         return ClosestPredecessor;
     }
 

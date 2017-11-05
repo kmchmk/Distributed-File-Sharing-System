@@ -50,6 +50,8 @@ public class Stabilizer extends Thread {
 
             } catch (InterruptedException ex) {
                 if (predMsgSent) {
+
+                    boolean notify = false;
                     if (newPredessor != null) {
                         System.out.println("GET_PRED Success");
                         int predOfSuccessorID = newPredessor.getID();
@@ -58,15 +60,19 @@ public class Stabilizer extends Thread {
                         if (currentSuccessorID < thisNode.getID()) {
                             if ((thisNode.getID() < predOfSuccessorID && predOfSuccessorID < NodeImpl.MAX_NODES) || (0 <= predOfSuccessorID && predOfSuccessorID < currentSuccessorID)) {
                                 thisNode.setSuccessor(newPredessor);
+                                notify = true;
                                 System.out.println("Update Successor of" + thisNode.getID() + " to " + predOfSuccessorID);
                             }
                         } else if (thisNode.getID() < predOfSuccessorID && predOfSuccessorID < currentSuccessorID) { // normal successor
                             thisNode.setSuccessor(newPredessor);
+                            notify = true;
                             System.out.println("Update Successor of" + thisNode.getID() + " to " + predOfSuccessorID);
                         }
-                        String msg = "NOTIFY_S " + thisNode.getIp() + " " + thisNode.getPort();
-                        thisNode.redirectMessage(msg, thisNode.getSuccessor());
                     } else if (nullPredecessor) {
+                        System.out.println("Sucessors predecessor is null, Notifying successor to update predecessor as me");
+                        notify = true;
+                    }
+                    if (notify) {
                         String msg = "NOTIFY_S " + thisNode.getIp() + " " + thisNode.getPort();
                         thisNode.redirectMessage(msg, thisNode.getSuccessor());
                     }
