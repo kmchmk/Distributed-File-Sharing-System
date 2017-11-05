@@ -36,14 +36,15 @@ public class DistributedFileSharingSystem {
                     Thread.sleep(2000);
                     
                     NodeImpl node1 = new NodeImpl("One", 3001);
-                    NodeImpl node2 = new NodeImpl("Two", 3002);
+                    System.out.println("My ip is: " + node1.getIp());
+//                    NodeImpl node2 = new NodeImpl("Two", 3002);
                     //NodeImpl node3 = new NodeImpl("Three", 3003);
                     
                     node1.registerToNetwork();
-                    Thread.sleep(2000);
+//                    Thread.sleep(2000);
                     
-                    node2.registerToNetwork();
-                    Thread.sleep(2000);
+//                    node2.registerToNetwork();
+//                    Thread.sleep(2000);
                     
 //                    node3.registerToNetwork();
 //                    Thread.sleep(2000);

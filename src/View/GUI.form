@@ -147,7 +147,7 @@
               <Font name="Tahoma" size="12" style="1"/>
             </Property>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="node.getIP()" type="code"/>
+              <Connection code="node.getIp()" type="code"/>
             </Property>
           </Properties>
         </Component>

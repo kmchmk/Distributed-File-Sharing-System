@@ -64,7 +64,7 @@ public class GUI extends javax.swing.JFrame {
         PortNo.setText(String.valueOf(node.getPort()));
 
         IP.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        IP.setText(node.getIP());
+        IP.setText(node.getIp());
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -222,7 +222,7 @@ public class GUI extends javax.swing.JFrame {
     }
 
     private void setLabel(){
-        System.out.print("My IP "+ node.getIP());
+        System.out.print("My IP "+ node.getIp());
         //IP.setText("nrw");
         //PortNo.setText(String.valueOf(node.getPort()));
         

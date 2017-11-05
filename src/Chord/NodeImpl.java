@@ -126,10 +126,6 @@ public final class NodeImpl implements Node {
         return this.id;
     }
 
-    public String getIP() {
-        return ip;
-    }
-
     public int getthePort() {
         return port;
     }
@@ -179,9 +175,9 @@ public final class NodeImpl implements Node {
     }
 
     private static String getMyIP() {
-        if (1 == 1) {
-            return "localhost";
-        }
+//        if (1 == 1) {
+//            return "localhost";
+//        }
         try {
             final DatagramSocket socket = new DatagramSocket();
             socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
