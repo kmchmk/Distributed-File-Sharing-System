@@ -218,8 +218,6 @@ public final class NodeImpl implements Node {
 
     public void registerToNetwork() {
 
-        echo("Registering to network as: (" + username + ")");
-
         String registerMessage = " " + "REG" + " " + ip + " " + Integer.toString(port) + " " + username;
         int length = registerMessage.length() + 4;
 

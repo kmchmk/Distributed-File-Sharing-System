@@ -8,8 +8,6 @@ package View;
 import BootstrapServer.BootstrapServer;
 import Chord.Node;
 import Chord.NodeImpl;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -69,6 +67,7 @@ public class GUI extends javax.swing.JFrame {
         jTable1 = new javax.swing.JTable();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
+        jButton5 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(204, 0, 0));
@@ -378,6 +377,13 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        jButton5.setText("jButton5");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -395,7 +401,10 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(18, 18, 18))))
+                        .addGap(18, 18, 18))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jButton5))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -411,7 +420,8 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGap(18, 18, 18)
                 .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(34, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
+                .addComponent(jButton5))
         );
 
         pack();
@@ -467,35 +477,21 @@ public class GUI extends javax.swing.JFrame {
         new Thread("DHT") {
             @Override
             public void run() {
-                try {
+                node.registerToNetwork();
+                if (node.getSuccessor() != null) {
+                    String succid = node.getSuccessor().getIp();
+                    String succport = String.valueOf(node.getSuccessor().getPort());
 
-                    Thread.sleep(2000);
-
-                    //NodeImpl node1 = new NodeImpl("Three", 3003);
-                    System.out.println("My ip is: " + node.getIp());
-
-                    node.registerToNetwork();
-//                    
-
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(DistributedFileSharingSystem.class
-                            .getName()).log(Level.SEVERE, null, ex);
-                } finally {
-                    if (node.getSuccessor() != null) {
-                        String succid = node.getSuccessor().getIp();
-                        String succport = String.valueOf(node.getSuccessor().getPort());
-
-                        table1.setValueAt((Object) succid, 1, 1);
-                        table1.setValueAt((Object) succport, 1, 2);
-                    }
-                    if (node.getPredeccessor() != null) {
-                        String preid = node.getPredeccessor().getIp();
-                        String preport = String.valueOf(node.getPredeccessor().getPort());
-                        table1.setValueAt((Object) preid, 2, 1);
-                        table1.setValueAt((Object) preport, 2, 2);
-                    }
-
+                    table1.setValueAt((Object) succid, 1, 1);
+                    table1.setValueAt((Object) succport, 1, 2);
                 }
+                if (node.getPredeccessor() != null) {
+                    String preid = node.getPredeccessor().getIp();
+                    String preport = String.valueOf(node.getPredeccessor().getPort());
+                    table1.setValueAt((Object) preid, 2, 1);
+                    table1.setValueAt((Object) preport, 2, 2);
+                }
+
             }
         }.start();
 
@@ -544,6 +540,10 @@ public class GUI extends javax.swing.JFrame {
     private void enterPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enterPortActionPerformed
         jButton6ActionPerformed(evt);
     }//GEN-LAST:event_enterPortActionPerformed
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        UpdateSuccessor(new NodeImpl("Test", "192.101.10.10", 1111, "192.168.43.96", 55555));
+    }//GEN-LAST:event_jButton5ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -608,6 +608,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel12;
