@@ -31,7 +31,7 @@ public class PredecessorCheckor extends Thread {
                 if (thisNode.getPredeccessor() != null) {   
                     thisNode.redirectMessage("HB", thisNode.getPredeccessor());
                     System.out.println("HB Sent from " + thisNode.getID() + " to predecessor" + thisNode.getPredeccessor().getID());
-                    Thread.sleep(2 * 60 * 1000);
+                    Thread.sleep(30 * 1000);
                     if (!predecessorHBOK) {
                         System.out.println("No reply for HB. Setting predecessor to null");
                         thisNode.setPredecessor(null);
@@ -40,7 +40,8 @@ public class PredecessorCheckor extends Thread {
                     }
                     predecessorHBOK = false;
                 }else{  // no predecessor, sleep for 3 min
-                    Thread.sleep(2 * 60 * 1000);
+                    System.out.println("Predecessor null. Check again in 1 min");
+                    Thread.sleep(60 * 1000);
                 }
             } catch (InterruptedException ex) {
                 System.out.println("predecessorChecker-Thread interrupted.");

@@ -373,12 +373,12 @@ public final class NodeImpl implements Node {
                     break;
 
                 case "US": //update succesor
-                    echo("message received: (" + messageList[0] + ")");
+//                    echo("message received: (" + messageList[0] + ")");
 
                     Node tempSuccessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), true);
                     this.setSuccessor(tempSuccessor);
                     System.out.println(this.getPort() + ": my successor is : " + this.successor.getPort());
-
+                    break;
                 case "RFT": //request finger table
                     echo("message received: (" + messageList[0] + ")");
 
@@ -397,7 +397,7 @@ public final class NodeImpl implements Node {
                     }
                     socketConnector.send(tempMsg, messageList[1], Integer.parseInt(messageList[2]));
                     System.out.println(this.getPort() + ": sending finger table to : " + messageList[2] + " (" + tempMsg + ")");
-
+                    break;
                 case "UFT"://update finger table
                     echo("message received: (" + messageList[0] + ")");
 
@@ -411,7 +411,7 @@ public final class NodeImpl implements Node {
                     stabilizer.start();
                     fingerFixer.start();
                     predecessorCheckor.start();
-
+                    break;
                 case "NOTIFY_S":    // notify succoessor
 
                     Node tempPredecessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport());
@@ -456,10 +456,12 @@ public final class NodeImpl implements Node {
                     break;
 
                 case "HB":      // heartbeat
+                    System.out.println("HB recieved. Sending HB_OK");
                     redirectMessage("HB_OK", new NodeImpl(null, incomingIP, incomingPort, BSip, BSport));
                     break;
 
                 case "HB_OK":
+                    System.out.println("HB_OK received");
                     predecessorCheckor.setPredecessorHBOK(true);
                     break;
                 default:
