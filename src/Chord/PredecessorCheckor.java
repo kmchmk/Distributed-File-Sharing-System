@@ -28,8 +28,9 @@ public class PredecessorCheckor extends Thread {
     public void run() {
         while (true) {
             try {
-                if (thisNode.getPredeccessor() != null) {   
-                    thisNode.redirectMessage("HB", thisNode.getPredeccessor());
+                if (thisNode.getPredeccessor() != null) {
+                    String hbMsg = "HB " + thisNode.getIp() + " " + thisNode.getPort();
+                    thisNode.redirectMessage(hbMsg, thisNode.getPredeccessor());
                     System.out.println("HB Sent from " + thisNode.getID() + " to predecessor" + thisNode.getPredeccessor().getID());
                     Thread.sleep(30 * 1000);
                     if (!predecessorHBOK) {
