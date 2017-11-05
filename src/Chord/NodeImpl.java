@@ -458,7 +458,7 @@ public final class NodeImpl implements Node {
 
                 case "HB":      // heartbeat
                     System.out.println("HB recieved. Sending HB_OK");
-                    redirectMessage("HB_OK", new NodeImpl(null, incomingIP, incomingPort, BSip, BSport));
+                    redirectMessage("HB_OK", new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport));
                     break;
 
                 case "HB_OK":
