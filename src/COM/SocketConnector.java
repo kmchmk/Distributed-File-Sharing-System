@@ -78,10 +78,13 @@ public class SocketConnector implements Connector {
 
                         String incomingMessage = new String(data, 0, incomingPacket.getLength());
                         System.out.println("Message Received: " + incomingMessage);
-
-                        myNode.handleMessage(incomingMessage, incomingPacket.getAddress().getHostAddress(), incomingPacket.getPort());
-
-                    }
+//                        new Thread() {
+//                            public void run() {
+//                                System.out.println(incomingMessage + incomingPacket.getAddress().getHostAddress() + incomingPacket.getPort());
+                                myNode.handleMessage(incomingMessage, incomingPacket.getAddress().getHostAddress(), incomingPacket.getPort());
+                            }
+//                        }.start();
+//                    }
                 } catch (SocketException ex) {
                     System.err.println(ex);
                 } catch (IOException ex) {

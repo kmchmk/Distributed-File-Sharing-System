@@ -335,11 +335,12 @@ public final class NodeImpl implements Node {
             //echo("message received: (" + messageList[0] + ")");
             switch (messageList[0]) {
                 case "FS"://find successor
-//                    echo("message received: (" + messageList[0] + ")");
+                    echo("message received: (" + messageList[0] + ")");
 
                     int key = Integer.parseInt(messageList[1]);
 
                     if (this.getSuccessor() == null) {
+                        System.out.println("succ null");
                         ///send me as the successor for new node
                         String tempMsg = "US " + this.getIp() + " " + this.getPort();
                         socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
