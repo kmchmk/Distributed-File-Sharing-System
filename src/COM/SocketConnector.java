@@ -31,20 +31,20 @@ public class SocketConnector implements Connector {
     public SocketConnector(Node myNode) {
         this.myNode = myNode;
     }
-    
-    public void stop(){
-        this.live =  false;
+
+    public void stop() {
+        this.live = false;
     }
 
     @Override
     public void send(String OutgoingMessage, String OutgoingIP, int OutgoingPort) {
-
+        System.out.println("Sending message is: " + OutgoingMessage + " (to" + OutgoingIP + ":" + OutgoingPort + ")");
         try {
 
             byte[] bytes = OutgoingMessage.getBytes();
             //System.out.println(bytes.length);
             DatagramPacket packet = new DatagramPacket(bytes, bytes.length, InetAddress.getByName(OutgoingIP), OutgoingPort);
-            
+
             socket = new DatagramSocket();
             socket.send(packet);
 
@@ -89,7 +89,7 @@ public class SocketConnector implements Connector {
                 }
             }
         };
-                
+
         listner.start();
     }
 

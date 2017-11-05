@@ -327,7 +327,7 @@ public final class NodeImpl implements Node {
     @Override
     public void handleMessage(String message, String incomingIP, int incomingPort) {
 //        echo(message);//this is also implemented in listener
-        
+
         String[] messageList = message.split(" ");
 
         if (null != messageList[0] && messageList.length > 1) {
@@ -347,28 +347,25 @@ public final class NodeImpl implements Node {
                         //set new node as my successor
                         Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
                         this.setSuccessor(tempSuccessor);
-                        System.out.println(this.getPort() + ": my successor is :- " + this.successor.getIp()+":"+this.successor.getPort());
+                        System.out.println(this.getPort() + ": my successor is :- " + this.successor.getIp() + ":" + this.successor.getPort());
 
+                    } else if (this.id >= key) {
+                        //Ask to update new nodes successor to my successor
+                        //"US <successorIP> <successorPort>"
+                        String tempMsg = "US " + successor.getIp() + " " + successor.getPort();
+                        socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
+
+                        Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
+                        this.setSuccessor(tempSuccessor);
+                        System.out.println(this.getPort() + ": my successor is : " + this.successor.getPort());
+
+                        //request the finger tabel from my successor
+                        //"RFT <myIP> <myPort>"
+                        tempMsg = "RFT " + this.getIp() + " " + this.getPort();
+                        socketConnector.send(tempMsg, incomingIP, incomingPort);
+                        System.out.println(this.getPort() + ": request finger table : (" + tempMsg + ")");
                     } else {
-
-                        if (this.id >= key) {
-                            //Ask to update new nodes successor to my successor
-                            //"US <successorIP> <successorPort>"
-                            String tempMsg = "US " + successor.getIp() + " " + successor.getPort();
-                            socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
-
-                            Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
-                            this.setSuccessor(tempSuccessor);
-                            System.out.println(this.getPort() + ": my successor is : " + this.successor.getPort());
-
-                            //request the finger tabel from my successor
-                            //"RFT <myIP> <myPort>"
-                            tempMsg = "RFT " + this.getIp() + " " + this.getPort();
-                            socketConnector.send(tempMsg, incomingIP, incomingPort);
-                            System.out.println(this.getPort() + ": request finger table : (" + tempMsg + ")");
-                        } else {
-                            routeMessge(message, key);
-                        }
+                        routeMessge(message, key);
                     }
                     break;
 
@@ -378,10 +375,11 @@ public final class NodeImpl implements Node {
                     Node tempSuccessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), true);
                     this.setSuccessor(tempSuccessor);
                     System.out.println(this.getPort() + ": my successor is : " + this.successor.getPort());
-                    
-                    String tempREFTMsg = "RFT " + this.getIp() + " " + this.getPort();
-                    socketConnector.send(tempREFTMsg, messageList[1], Integer.parseInt(messageList[2]));
-                    
+
+                    String tempRFTMsg = "RFT " + this.getIp() + " " + this.getPort();
+                    socketConnector.send(tempRFTMsg, incomingIP, incomingPort);
+                    System.out.println(this.getPort() + ": request finger table : (" + tempRFTMsg + ")");
+
                     break;
                 case "RFT": //request finger table
                     echo("message received: (" + messageList[0] + ")");
@@ -407,9 +405,9 @@ public final class NodeImpl implements Node {
 
                     int i = 0;
                     Node temp = new NodeImpl(null, messageList[(2 * i) + 1], Integer.parseInt(messageList[(2 * i) + 2]), true);
-                    
+
                     for (; i < MAX_FINGERS; i++) {
-                        
+
                         fingerTable.updateEntry(i, temp);
                     }
                     stabilizer.start();
@@ -541,16 +539,14 @@ public final class NodeImpl implements Node {
                         System.out.println("Some error while unregistering.");
                         break;
                 }
-            }
-            else if("SER".equals(messageList[1])){
+            } else if ("SER".equals(messageList[1])) {
                 String tempIP = messageList[2];
                 int TempPort = Integer.parseInt(messageList[3]);
                 String searchString = messageList[4];
                 int hashedID = Math.abs(searchString.hashCode());
-                if(hashedID > this.id){
+                if (hashedID > this.id) {
                     System.out.println("Handle the request here / route");
-                }
-                else{
+                } else {
                     System.out.println("Handle the request here / route");
                 }
             }
