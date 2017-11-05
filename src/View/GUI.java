@@ -6,6 +6,7 @@
 package View;
 
 import BootstrapServer.BootstrapServer;
+import Chord.Node;
 import Chord.NodeImpl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -140,8 +141,6 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap(22, Short.MAX_VALUE))
         );
 
-        PortNo.getAccessibleContext().setAccessibleName("");
-
         jPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         search.addActionListener(new java.awt.event.ActionListener() {
@@ -241,6 +240,12 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        enterPort.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                enterPortActionPerformed(evt);
+            }
+        });
+
         jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel5.setText("PORT?");
 
@@ -299,36 +304,44 @@ public class GUI extends javax.swing.JFrame {
 
         table1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {"Bootstrap Server", null, null},
-                {"Successor", null, null},
-                {"Predecessor", null, null}
+                {"Bootstrap Server", null, null, null},
+                {"Successor", null, null, null},
+                {"Predecessor", null, null, null}
             },
             new String [] {
-                "", "IP", "Port"
+                "", "ID", "IP", "Port"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
         jScrollPane1.setViewportView(table1);
-        if (table1.getColumnModel().getColumnCount() > 0) {
-            table1.getColumnModel().getColumn(0).setPreferredWidth(15);
-            table1.getColumnModel().getColumn(2).setPreferredWidth(15);
-        }
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {"1", null, null},
-                {"2", null, null},
-                {"4", null, null},
-                {"8", null, null}
+                {"1", null, null, null},
+                {"2", null, null, null},
+                {"4", null, null, null},
+                {"8", null, null, null}
             },
             new String [] {
-                "Index", "IP", "Port"
+                "Index", "ID", "IP", "Port"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Object.class, java.lang.Object.class, java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
         jScrollPane3.setViewportView(jTable1);
-        if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(0).setPreferredWidth(15);
-            jTable1.getColumnModel().getColumn(2).setPreferredWidth(15);
-        }
 
         jLabel12.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel12.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -504,17 +517,33 @@ public class GUI extends javax.swing.JFrame {
 
     }//GEN-LAST:event_jButton4ActionPerformed
 
+    public void UpdateSuccessor(Node succ) {
+        table1.setValueAt(succ.getID(), 1, 1);
+        table1.setValueAt(succ.getIp(), 1, 2);
+        table1.setValueAt(succ.getPort(), 1, 3);
+    }
+
+    public void UpdateFingerTable(int index, Node temp) {
+        table1.setValueAt(temp.getID(), index, 1);
+        table1.setValueAt(temp.getIp(), index, 2);
+        table1.setValueAt(temp.getPort(), index, 3);
+    }
+
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
         // TODO add your handling code here:
         int pno = Integer.parseInt(enterPort.getText());
 
 //        public NodeImpl(String username, String ip, int port, String BSip, int BSport) {
-        node = new NodeImpl("Three", pno);
+        node = new NodeImpl("Three", pno);//^
         IP.setText(node.getIp());
         PortNo.setText(String.valueOf(node.getPort()));
         name.setText(node.getIp());
         portID.setText(String.valueOf(node.getID()));
     }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void enterPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enterPortActionPerformed
+        jButton6ActionPerformed(evt);
+    }//GEN-LAST:event_enterPortActionPerformed
 
     /**
      * @param args the command line arguments
