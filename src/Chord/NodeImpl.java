@@ -326,7 +326,7 @@ public final class NodeImpl implements Node {
      */
     @Override
     public void handleMessage(String message, String incomingIP, int incomingPort) {
-        echo(message);
+//        echo(message);//this is also implemented in listener
         
         String[] messageList = message.split(" ");
 
@@ -335,7 +335,7 @@ public final class NodeImpl implements Node {
             //echo("message received: (" + messageList[0] + ")");
             switch (messageList[0]) {
                 case "FS"://find successor
-                    echo("message received: (" + messageList[0] + ")");
+//                    echo("message received: (" + messageList[0] + ")");
 
                     int key = Integer.parseInt(messageList[1]);
 
@@ -347,7 +347,7 @@ public final class NodeImpl implements Node {
                         //set new node as my successor
                         Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
                         this.setSuccessor(tempSuccessor);
-                        System.out.println(this.getPort() + ": my successor is : " + this.successor.getPort());
+                        System.out.println(this.getPort() + ": my successor is :- " + this.successor.getIp()+":"+this.successor.getPort());
 
                     } else {
 
@@ -525,6 +525,9 @@ public final class NodeImpl implements Node {
                     case "0":
                         System.out.println("Successfully unregistered.\n");
                         this.socketConnector.stop(); //stop listning, equivelent to leave the network
+                        stabilizer.stop();
+                        fingerFixer.stop();
+                        //predecessorCheckor.stop();
                         break;
 
                     case "9999":
@@ -580,7 +583,7 @@ public final class NodeImpl implements Node {
 
     @Override
     public void echo(String output) {
-        System.out.println(this.id + "," + this.port + ": " + output + "\n");
+        System.out.println("The message received is: " + output + "\n");
     }
 
 }
