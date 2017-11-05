@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package View;
+
 import BootstrapServer.BootstrapServer;
 import Chord.NodeImpl;
 import java.util.logging.Level;
@@ -19,10 +20,11 @@ public class GUI extends javax.swing.JFrame {
      * Creates new form GUI
      */
     NodeImpl node;
+
     public GUI() {
         //node.registerToNetwork();
         initComponents();
-        
+
     }
 
     /**
@@ -416,45 +418,34 @@ public class GUI extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-         new Thread("BS Thread"){
+        new Thread("BS Thread") {
             @Override
             public void run() {
-                try {
-                    //Thread.sleep(2000);
-                    BootstrapServer.runBootstrapServer();
-                    BootstrapServer.setIp(node.getBSip());
-                    BootstrapServer.setPort(node.getBSport());
-                    //BootID.setText(BootstrapServer.getIp()+ " - " + BootstrapServer.getPort());
-                    Thread.sleep(2000);
-                    
-                    
-//                    
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(DistributedFileSharingSystem.class.getName()).log(Level.SEVERE, null, ex);
-                } finally {
-                    String bootId = BootstrapServer.getIp();
-                    String bootport = String.valueOf(BootstrapServer.getPort());
-                    table1.setValueAt((Object)bootId, 0, 1);
-                    table1.setValueAt((Object)bootId, 0, 2);
-                }
-                
+                BootstrapServer.runBootstrapServer();
+
             }
         }.start();
+
+        String bootId = node.getBSip();//BootstrapServer.getIp();
+        String bootport = String.valueOf(node.getBSport());//BootstrapServer.getPort());
+        table1.setValueAt(bootId, 0, 1);
+        table1.setValueAt(bootport, 0, 2);
+
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton3MouseClicked
         // TODO add your handling code here:
-        
+
     }//GEN-LAST:event_jButton3MouseClicked
 
     private void jButton4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton4MouseClicked
         // TODO add your handling code here:
-        
+
     }//GEN-LAST:event_jButton4MouseClicked
 
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
         // TODO add your handling code here:
-       
+
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
@@ -464,26 +455,33 @@ public class GUI extends javax.swing.JFrame {
             @Override
             public void run() {
                 try {
-                    
+
                     Thread.sleep(2000);
-                    
+
                     //NodeImpl node1 = new NodeImpl("Three", 3003);
                     System.out.println("My ip is: " + node.getIp());
-                    
+
                     node.registerToNetwork();
 //                    
+
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(DistributedFileSharingSystem.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(DistributedFileSharingSystem.class
+                            .getName()).log(Level.SEVERE, null, ex);
                 } finally {
-                    String succid = node.getSuccessor().getIp();
-                    String succport = String.valueOf(node.getSuccessor().getPort());
-                    String preid = node.getPredeccessor().getIp();
-                    String preport = String.valueOf(node.getPredeccessor().getPort());
-                    
-                    table1.setValueAt((Object)succid, 1, 1);
-                    table1.setValueAt((Object)succport, 1, 2);
-                    table1.setValueAt((Object)preid, 2, 1);
-                    table1.setValueAt((Object)preport, 2, 2);
+                    if (node.getSuccessor() != null) {
+                        String succid = node.getSuccessor().getIp();
+                        String succport = String.valueOf(node.getSuccessor().getPort());
+
+                        table1.setValueAt((Object) succid, 1, 1);
+                        table1.setValueAt((Object) succport, 1, 2);
+                    }
+                    if (node.getPredeccessor() != null) {
+                        String preid = node.getPredeccessor().getIp();
+                        String preport = String.valueOf(node.getPredeccessor().getPort());
+                        table1.setValueAt((Object) preid, 2, 1);
+                        table1.setValueAt((Object) preport, 2, 2);
+                    }
+
                 }
             }
         }.start();
@@ -492,23 +490,15 @@ public class GUI extends javax.swing.JFrame {
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         // TODO add your handling code here:
-        
+
         new Thread("UN") {
             @Override
             public void run() {
-                try {
-                    
-                    Thread.sleep(2000);
-                    
-                    //NodeImpl node1 = new NodeImpl("Three", 3003);
-                   
-                    
-                    node.unregisterFromNetwork();
-                     System.out.println("Unregistered from network: " + node.getIp());
+
+                //NodeImpl node1 = new NodeImpl("Three", 3003);
+                node.unregisterFromNetwork();
+                System.out.println("Unregistered from network: " + node.getIp());
 //                    
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(DistributedFileSharingSystem.class.getName()).log(Level.SEVERE, null, ex);
-                }
             }
         }.start();
 
@@ -517,6 +507,8 @@ public class GUI extends javax.swing.JFrame {
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
         // TODO add your handling code here:
         int pno = Integer.parseInt(enterPort.getText());
+
+//        public NodeImpl(String username, String ip, int port, String BSip, int BSport) {
         node = new NodeImpl("Three", pno);
         IP.setText(node.getIp());
         PortNo.setText(String.valueOf(node.getPort()));
@@ -533,22 +525,30 @@ public class GUI extends javax.swing.JFrame {
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
-        
+
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                     break;
+                    break;
+
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(GUI.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(GUI.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(GUI.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(GUI.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
         //</editor-fold>
@@ -561,14 +561,14 @@ public class GUI extends javax.swing.JFrame {
                 new GUI().setVisible(true);
             }
         });
-        
+
     }
 
-    private void setLabel(){
-        System.out.print("My IP "+ node.getIp());
+    private void setLabel() {
+        System.out.print("My IP " + node.getIp());
         //IP.setText("nrw");
         //PortNo.setText(String.valueOf(node.getPort()));
-        
+
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel IP;

@@ -124,28 +124,5 @@ public class BootstrapServer {
     public static void echo(String msg)
     {
         System.out.println(msg);
-    }
-    
-    private static String ip;
-    private static int port;
-
-    public static String getIp() {
-        return ip;
-    }
-
-    public static void setIp(String ip) {
-        BootstrapServer.ip = ip;
-    }
-
-    public static int getPort() {
-        return port;
-    }
-
-    public static void setPort(int port) {
-        BootstrapServer.port = port;
-    }
-   
-    
-    
-    
+    } 
 }
