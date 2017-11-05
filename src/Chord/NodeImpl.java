@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -374,10 +376,19 @@ public final class NodeImpl implements Node {
                     Node tempSuccessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), true);
                     this.setSuccessor(tempSuccessor);
                     System.out.println(this.getPort() + ": my successor is : " + this.successor.getPort());
+                    new Thread() {
+                        public void run() {
+                            try {
+                                Thread.sleep(1000);
+                                String tempRFTMsg = "RFT " + ip + " " + port;
+                                socketConnector.send(tempRFTMsg, incomingIP, Integer.parseInt(messageList[2]));
+                                System.out.println(port + ": request finger table : (" + tempRFTMsg + ")");
+                            } catch (InterruptedException ex) {
+                                ex.printStackTrace();
+                            }
 
-                    String tempRFTMsg = "RFT " + this.getIp() + " " + this.getPort();
-                    socketConnector.send(tempRFTMsg, incomingIP, Integer.parseInt(messageList[2]));
-                    System.out.println(this.getPort() + ": request finger table : (" + tempRFTMsg + ")");
+                        }
+                    }.start();
 
                     break;
                 case "RFT": //request finger table
