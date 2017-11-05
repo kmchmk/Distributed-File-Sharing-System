@@ -44,7 +44,7 @@ public class GUI extends javax.swing.JFrame {
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         name = new javax.swing.JLabel();
-        portID = new javax.swing.JLabel();
+        ID = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         search = new javax.swing.JTextField();
         jButton2 = new javax.swing.JButton();
@@ -60,6 +60,8 @@ public class GUI extends javax.swing.JFrame {
         jButton6 = new javax.swing.JButton();
         enterPort = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        Textuser = new javax.swing.JTextField();
         jPanel5 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         table1 = new javax.swing.JTable();
@@ -95,10 +97,6 @@ public class GUI extends javax.swing.JFrame {
 
         jLabel9.setText("ID");
 
-        name.setText("jLabel10");
-
-        portID.setText("jLabel11");
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -119,7 +117,7 @@ public class GUI extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(PortNo, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(portID))
+                    .addComponent(ID))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -136,7 +134,7 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(jLabel9)
                     .addComponent(jLabel8)
                     .addComponent(name)
-                    .addComponent(portID))
+                    .addComponent(ID))
                 .addContainerGap(22, Short.MAX_VALUE))
         );
 
@@ -248,6 +246,16 @@ public class GUI extends javax.swing.JFrame {
         jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel5.setText("PORT?");
 
+        jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel10.setText("USER?");
+
+        Textuser.setText("test");
+        Textuser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                TextuserActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -272,7 +280,11 @@ public class GUI extends javax.swing.JFrame {
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(enterPort, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(enterPort, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(Textuser, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(44, 44, 44))))
         );
         jPanel3Layout.setVerticalGroup(
@@ -284,6 +296,10 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(enterPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(Textuser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel10))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton6)
                 .addGap(27, 27, 27)
@@ -528,12 +544,11 @@ public class GUI extends javax.swing.JFrame {
         // TODO add your handling code here:
         int pno = Integer.parseInt(enterPort.getText());
 
-//        public NodeImpl(String username, String ip, int port, String BSip, int BSport) {
-        node = new NodeImpl("Three", pno);//^
+        node = new NodeImpl(Textuser.getText(), node.getMyIP(), pno, "192.168.43.96", 55555);
         IP.setText(node.getIp());
         PortNo.setText(String.valueOf(node.getPort()));
-        name.setText(node.getIp());
-        portID.setText(String.valueOf(node.getID()));
+        name.setText(node.getUserName());
+        ID.setText(String.valueOf(node.getID()));
         jButton6.setEnabled(false);
     }//GEN-LAST:event_jButton6ActionPerformed
 
@@ -544,6 +559,10 @@ public class GUI extends javax.swing.JFrame {
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         UpdateSuccessor(new NodeImpl("Test", "192.101.10.10", 1111, "192.168.43.96", 55555));
     }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void TextuserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TextuserActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_TextuserActionPerformed
 
     /**
      * @param args the command line arguments
@@ -600,8 +619,10 @@ public class GUI extends javax.swing.JFrame {
 
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel ID;
     private javax.swing.JLabel IP;
     private javax.swing.JLabel PortNo;
+    private javax.swing.JTextField Textuser;
     private javax.swing.JTextArea display;
     private javax.swing.JTextField enterPort;
     private javax.swing.JButton jButton1;
@@ -611,6 +632,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
@@ -630,7 +652,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTable jTable1;
     private javax.swing.JLabel name;
-    private javax.swing.JLabel portID;
     private javax.swing.JTextField search;
     private javax.swing.JTable table1;
     // End of variables declaration//GEN-END:variables

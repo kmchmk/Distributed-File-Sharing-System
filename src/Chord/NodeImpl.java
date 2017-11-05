@@ -122,6 +122,11 @@ public final class NodeImpl implements Node {
     }
 
     @Override
+    public String getUserName() {
+        return this.username;
+    }
+
+    @Override
     public int getID() {
         return this.id;
     }
@@ -174,7 +179,7 @@ public final class NodeImpl implements Node {
         this.metaData.put(key, file);
     }
 
-    private static String getMyIP() {
+    public static String getMyIP() {
 //        if (1 == 1) {
 //            return "localhost";
 //        }
@@ -348,7 +353,7 @@ public final class NodeImpl implements Node {
                         ///send me as the successor for new node
                         String tempMsg = "US " + this.getIp() + " " + this.getPort();
                         socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
-                        
+
                     } else if (this.id >= key) {
                         //Ask to update new nodes successor to my successor
                         //"US <successorIP> <successorPort>"
