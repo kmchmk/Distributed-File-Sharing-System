@@ -449,11 +449,11 @@ public class GUI extends javax.swing.JFrame {
             }
         }.start();
 
-        String bootId = node.getBSip();//BootstrapServer.getIp();
-        String bootport = String.valueOf(node.getBSport());//BootstrapServer.getPort());
+        String bootId = node.getBSip();
+        String bootport = String.valueOf(node.getBSport());
         table1.setValueAt(bootId, 0, 1);
         table1.setValueAt(bootport, 0, 2);
-
+        jButton1.setEnabled(false);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton3MouseClicked
@@ -472,8 +472,7 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // TODO add your handling code here:
-        //node.registerToNetwork();
+
         new Thread("DHT") {
             @Override
             public void run() {
@@ -494,7 +493,7 @@ public class GUI extends javax.swing.JFrame {
 
             }
         }.start();
-
+        jButton3.setEnabled(false);
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
@@ -535,6 +534,7 @@ public class GUI extends javax.swing.JFrame {
         PortNo.setText(String.valueOf(node.getPort()));
         name.setText(node.getIp());
         portID.setText(String.valueOf(node.getID()));
+        jButton6.setEnabled(false);
     }//GEN-LAST:event_jButton6ActionPerformed
 
     private void enterPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enterPortActionPerformed
