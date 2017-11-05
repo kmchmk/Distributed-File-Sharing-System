@@ -11,9 +11,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Only handles communication. sends and receive messages and delegate handling
@@ -48,12 +45,8 @@ public class SocketConnector implements Connector {
             socket = new DatagramSocket();
             socket.send(packet);
 
-        } catch (UnknownHostException ex) {
-            Logger.getLogger(SocketConnector.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SocketException ex) {
-            Logger.getLogger(SocketConnector.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(SocketConnector.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            System.out.println(ex);
         }
     }
 
@@ -76,15 +69,20 @@ public class SocketConnector implements Connector {
 
                         byte[] data = incomingPacket.getData();
 
+                        String incomingIP = incomingPacket.getAddress().getHostAddress();
+                        int incomingPort = incomingPacket.getPort();
                         String incomingMessage = new String(data, 0, incomingPacket.getLength());
                         System.out.println("Message Received: " + incomingMessage);
 //                        new Thread() {
 //                            public void run() {
-//                                System.out.println(incomingMessage + incomingPacket.getAddress().getHostAddress() + incomingPacket.getPort());
-                                myNode.handleMessage(incomingMessage, incomingPacket.getAddress().getHostAddress(), incomingPacket.getPort());
-                            }
+                        System.out.println("++++++++++++++++" + incomingMessage + "+++++++++++++");
+                        System.out.println("IP: " + incomingIP);
+                        System.out.println("Port: " + incomingPort);
+                        myNode.handleMessage(incomingMessage, incomingIP);
+                        System.out.println("Message handled...");
+//                            }
 //                        }.start();
-//                    }
+                    }
                 } catch (SocketException ex) {
                     System.err.println(ex);
                 } catch (IOException ex) {
@@ -115,7 +113,7 @@ public class SocketConnector implements Connector {
             byte[] data = repl.getData();
             String reply = new String(data, 0, repl.getLength());
 
-            myNode.handleMessage(reply, repl.getAddress().getHostAddress(), repl.getPort());
+            myNode.handleMessage(reply, repl.getAddress().getHostAddress());
 
         } catch (IOException e) {
             System.err.println("IOException " + e);

@@ -35,7 +35,7 @@ public interface Node {
 
     public int getBSport();
 
-    public void handleMessage(String message, String incomingIP, int incomingPort);
+    public void handleMessage(String message, String incomingIP);
 
     public FingerTable getFingerTable();
 

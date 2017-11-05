@@ -323,7 +323,7 @@ public final class NodeImpl implements Node {
     length ERROR
      */
     @Override
-    public void handleMessage(String message, String incomingIP, int incomingPort) {
+    public void handleMessage(String message, String incomingIP) {
 //        echo(message);//this is also implemented in listener
 
         String[] messageList = message.split(" ");
@@ -361,7 +361,7 @@ public final class NodeImpl implements Node {
                         //request the finger tabel from my successor
                         //"RFT <myIP> <myPort>"
                         tempMsg = "RFT " + this.getIp() + " " + this.getPort();
-                        socketConnector.send(tempMsg, incomingIP, incomingPort);
+                        socketConnector.send(tempMsg, incomingIP, Integer.parseInt(messageList[3]));
                         System.out.println(this.getPort() + ": request finger table : (" + tempMsg + ")");
                     } else {
                         routeMessge(message, key);
@@ -376,7 +376,7 @@ public final class NodeImpl implements Node {
                     System.out.println(this.getPort() + ": my successor is : " + this.successor.getPort());
 
                     String tempRFTMsg = "RFT " + this.getIp() + " " + this.getPort();
-                    socketConnector.send(tempRFTMsg, incomingIP, incomingPort);
+                    socketConnector.send(tempRFTMsg, incomingIP, Integer.parseInt(messageList[2]));
                     System.out.println(this.getPort() + ": request finger table : (" + tempRFTMsg + ")");
 
                     break;
