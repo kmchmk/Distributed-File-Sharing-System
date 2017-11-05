@@ -29,6 +29,8 @@ public interface Node {
 
     public String getIp();
 
+    public String getUserName();
+
     public int getPort();
 
     public String getBSip();
@@ -42,9 +44,9 @@ public interface Node {
     public int getID();
 
     public Node findSuccessorOf(int finger, int id, String originIP, int originPort);
-    
+
     public void redirectMessage(String message, Node next);
-    
+
     public void echo(String output);
 
 }

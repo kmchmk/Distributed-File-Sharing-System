@@ -6,6 +6,7 @@
 package Chord;
 
 import COM.SocketConnector;
+import View.GUI;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -23,6 +24,7 @@ import java.util.Random;
  */
 public final class NodeImpl implements Node {
 
+    private GUI gui;
     public static final int MAX_FINGERS = 4;
     public static final int MAX_NODES = (int) Math.pow(2, MAX_FINGERS);
 
@@ -122,6 +124,11 @@ public final class NodeImpl implements Node {
     }
 
     @Override
+    public String getUserName() {
+        return this.username;
+    }
+
+    @Override
     public int getID() {
         return this.id;
     }
@@ -161,6 +168,10 @@ public final class NodeImpl implements Node {
         return fingerTable;
     }
 
+    public void setGUI(GUI gui) {
+        this.gui = gui;
+    }
+
     private void distributeFileMetadata() {
         for (String file : files) {
             int hash = Math.abs(file.hashCode()) % MAX_NODES;
@@ -174,7 +185,7 @@ public final class NodeImpl implements Node {
         this.metaData.put(key, file);
     }
 
-    private static String getMyIP() {
+    public static String getMyIP() {
 //        if (1 == 1) {
 //            return "localhost";
 //        }
@@ -348,7 +359,7 @@ public final class NodeImpl implements Node {
                         ///send me as the successor for new node
                         String tempMsg = "US " + this.getIp() + " " + this.getPort();
                         socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
-                        
+
                     } else if (this.id >= key) {
                         //Ask to update new nodes successor to my successor
                         //"US <successorIP> <successorPort>"
@@ -497,8 +508,8 @@ public final class NodeImpl implements Node {
                         for (int i = 0; i < MAX_FINGERS; i++) {
                             this.fingerTable.updateEntry(i, this);
                         }
-//                        stabilizer.start();
-//                        fingerFixer.start();
+                        stabilizer.start();
+                        fingerFixer.start();
 //                        predecessorCheckor.start();
                         break;
 
