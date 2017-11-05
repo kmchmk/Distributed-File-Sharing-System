@@ -545,6 +545,7 @@ public class GUI extends javax.swing.JFrame {
         int pno = Integer.parseInt(enterPort.getText());
 
         node = new NodeImpl(Textuser.getText(), node.getMyIP(), pno, "192.168.43.96", 55555);
+        node.setGUI(this);
         IP.setText(node.getIp());
         PortNo.setText(String.valueOf(node.getPort()));
         name.setText(node.getUserName());

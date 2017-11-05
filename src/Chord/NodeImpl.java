@@ -6,6 +6,7 @@
 package Chord;
 
 import COM.SocketConnector;
+import View.GUI;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -23,6 +24,7 @@ import java.util.Random;
  */
 public final class NodeImpl implements Node {
 
+    private GUI gui;
     public static final int MAX_FINGERS = 4;
     public static final int MAX_NODES = (int) Math.pow(2, MAX_FINGERS);
 
@@ -164,6 +166,10 @@ public final class NodeImpl implements Node {
     @Override
     public FingerTable getFingerTable() {
         return fingerTable;
+    }
+
+    public void setGUI(GUI gui) {
+        this.gui = gui;
     }
 
     private void distributeFileMetadata() {
