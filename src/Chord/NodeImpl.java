@@ -442,13 +442,22 @@ public final class NodeImpl implements Node {
                     break;
 
                 case "GET_PRED":    // get predecessor request from Stabilizer
-                    String rep = "GET_PRED_OK " + this.predecessor.getIp() + " " + this.predecessor.getPort();
+                    String rep = "GET_PRED_OK ";
+                    if (this.predecessor != null){
+                        rep += this.predecessor.getIp() + " " + this.predecessor.getPort();
+                    }else{
+                        rep += "NULL";
+                    }
                     redirectMessage(rep, new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport));
                     break;
 
                 case "GET_PRED_OK":     // respond from get predecessor request
+                    if (!messageList[1].equals("NULL")){
                     Node newPred = new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport);
                     stabilizer.setNewPredessor(newPred);
+                    }else{
+                        stabilizer.setNullPredecessor(true);
+                    }
                     stabilizer.interrupt();
                     break;
 

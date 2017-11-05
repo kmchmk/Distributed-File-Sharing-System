@@ -108,7 +108,7 @@ public class SocketConnector implements Connector {
     @Override
     public void sendToBS(String message) {
         try {
-            socket = new DatagramSocket();
+            DatagramSocket socket = new DatagramSocket();
 
             byte[] b = message.getBytes();
 

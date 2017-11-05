@@ -15,6 +15,7 @@ public class Stabilizer extends Thread {
     private Node newPredessor = null;
     private boolean predMsgSent;
     private boolean waitingForSuccessor;
+    private boolean nullPredecessor;
 
     public Stabilizer(Node thisNode) {
         this.thisNode = thisNode;
@@ -25,24 +26,28 @@ public class Stabilizer extends Thread {
         this.newPredessor = newPredessor;
     }
 
+    public void setNullPredecessor(boolean nullPredecessor) {
+        this.nullPredecessor = nullPredecessor;
+    }
+
     @Override
     public void run() {
         while (true) {
             try {
                 Thread.sleep(5000);
                 this.thisNode.echo("Stabilizing...\n");
-                
+
                 if (thisNode.getSuccessor() == null) {
-                    waitingForSuccessor =  true;
+                    waitingForSuccessor = true;
                 }
                 if (!waitingForSuccessor && !predMsgSent) {
                     String msg = "GET_PRED " + thisNode.getIp() + " " + thisNode.getPort();
                     thisNode.redirectMessage(msg, thisNode.getSuccessor());
                     predMsgSent = true;
-                    
+
                 }
                 Thread.sleep(60 * 1000);
-                
+
             } catch (InterruptedException ex) {
                 if (predMsgSent) {
                     if (newPredessor != null) {
@@ -61,9 +66,13 @@ public class Stabilizer extends Thread {
                         }
                         String msg = "NOTIFY_S " + thisNode.getIp() + " " + thisNode.getPort();
                         thisNode.redirectMessage(msg, thisNode.getSuccessor());
-                        newPredessor = null;
-                        predMsgSent = false;
+                    } else if (nullPredecessor) {
+                        String msg = "NOTIFY_S " + thisNode.getIp() + " " + thisNode.getPort();
+                        thisNode.redirectMessage(msg, thisNode.getSuccessor());
                     }
+                    newPredessor = null;
+                    predMsgSent = false;
+                    nullPredecessor = false;
                 }
             }
         }
