@@ -28,15 +28,22 @@ public class PredecessorCheckor extends Thread {
     public void run() {
         while (true) {
             try {
-                predecessorHBOK = false;
-                thisNode.redirectMessage("HB", thisNode.getPredeccessor());
-                System.out.println("HB Sent from " + thisNode.getID() + " to predecessor" + thisNode.getPredeccessor().getID());
-                Thread.sleep(3 * 60 * 1000);
-                if (!predecessorHBOK) {
-                    System.out.println("No reply for HB");
-                    thisNode.setPredecessor(null);
+                if (thisNode.getPredeccessor() != null) {   
+                    thisNode.redirectMessage("HB", thisNode.getPredeccessor());
+                    System.out.println("HB Sent from " + thisNode.getID() + " to predecessor" + thisNode.getPredeccessor().getID());
+                    Thread.sleep(2 * 60 * 1000);
+                    if (!predecessorHBOK) {
+                        System.out.println("No reply for HB. Setting predecessor to null");
+                        thisNode.setPredecessor(null);
+                    }else{
+                        System.out.println("Predecessor " + thisNode.getPredeccessor().getID() + "is alive.");
+                    }
+                    predecessorHBOK = false;
+                }else{  // no predecessor, sleep for 3 min
+                    Thread.sleep(2 * 60 * 1000);
                 }
             } catch (InterruptedException ex) {
+                System.out.println("predecessorChecker-Thread interrupted.");
             }
         }
     }

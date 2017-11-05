@@ -89,7 +89,7 @@ public final class NodeImpl implements Node {
 //        this(username, getMyIP(), port, BSip, BSport);
 //    }
     public NodeImpl(String username, int port) {
-        this(username, getMyIP(), port, getMyIP(), 55555);
+        this(username, getMyIP(), port, "192.168.43.96", 55555);
     }
 
     @Override
