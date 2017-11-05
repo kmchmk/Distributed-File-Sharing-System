@@ -610,8 +610,10 @@ public final class NodeImpl implements Node {
                 return this.successor;
             } else {
                 Node nextNode = this.fingerTable.getClosestPredecessorToKey(key);
-                String message = "FIND_S " + finger + " " + key + " " + originIP + " " + originPort;
-                redirectMessage(message, nextNode);
+                if (nextNode != null) {
+                    String message = "FIND_S " + finger + " " + key + " " + originIP + " " + originPort;
+                    redirectMessage(message, nextNode);
+                }
                 return null;
             }
             return null;
