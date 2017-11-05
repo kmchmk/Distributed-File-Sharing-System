@@ -18,7 +18,7 @@ public class GUI extends javax.swing.JFrame {
     /**
      * Creates new form GUI
      */
-    NodeImpl node = new NodeImpl("Three", 3003);
+    NodeImpl node = new NodeImpl("One", 3001);
     public GUI() {
         //node.registerToNetwork();
         initComponents();
