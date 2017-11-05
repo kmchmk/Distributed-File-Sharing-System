@@ -523,6 +523,9 @@ public final class NodeImpl implements Node {
                     case "0":
                         System.out.println("Successfully unregistered.\n");
                         this.socketConnector.stop(); //stop listning, equivelent to leave the network
+                        stabilizer.stop();
+                        fingerFixer.stop();
+                        //predecessorCheckor.stop();
                         break;
 
                     case "9999":

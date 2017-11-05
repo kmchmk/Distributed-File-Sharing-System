@@ -41,7 +41,7 @@ public class Stabilizer extends Thread {
                     predMsgSent = true;
                     
                 }
-                Thread.sleep(20 * 1000);
+                Thread.sleep(60 * 1000);
                 
             } catch (InterruptedException ex) {
                 if (predMsgSent) {
