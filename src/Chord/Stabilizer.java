@@ -37,11 +37,11 @@ public class Stabilizer extends Thread {
                 }
                 if (!waitingForSuccessor && !predMsgSent) {
                     String msg = "GET_PRED " + thisNode.getIp() + " " + thisNode.getPort();
-                    thisNode.routeMessge(msg, thisNode.getSuccessor().getID());
+                    thisNode.redirectMessage(msg, thisNode.getSuccessor());
                     predMsgSent = true;
                     
                 }
-                Thread.sleep(5 * 60 * 1000);
+                Thread.sleep(60 * 1000);
                 
             } catch (InterruptedException ex) {
                 if (predMsgSent) {
@@ -60,7 +60,7 @@ public class Stabilizer extends Thread {
                             System.out.println("Update Successor of" + thisNode.getID() + " to " + predOfSuccessorID);
                         }
                         String msg = "NOTIFY_S " + thisNode.getIp() + " " + thisNode.getPort();
-                        thisNode.routeMessge(msg, thisNode.getSuccessor().getID());
+                        thisNode.redirectMessage(msg, thisNode.getSuccessor());
                         newPredessor = null;
                         predMsgSent = false;
                     }

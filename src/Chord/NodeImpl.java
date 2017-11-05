@@ -326,8 +326,8 @@ public final class NodeImpl implements Node {
      */
     @Override
     public void handleMessage(String message, String incomingIP, int incomingPort) {
-        echo(message);
-        
+//        echo(message);//this is also implemented in listener
+
         String[] messageList = message.split(" ");
 
         if (null != messageList[0] && messageList.length > 1) {
@@ -335,7 +335,7 @@ public final class NodeImpl implements Node {
             //echo("message received: (" + messageList[0] + ")");
             switch (messageList[0]) {
                 case "FS"://find successor
-                    echo("message received: (" + messageList[0] + ")");
+//                    echo("message received: (" + messageList[0] + ")");
 
                     int key = Integer.parseInt(messageList[1]);
 
@@ -347,38 +347,40 @@ public final class NodeImpl implements Node {
                         //set new node as my successor
                         Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
                         this.setSuccessor(tempSuccessor);
+                        System.out.println(this.getPort() + ": my successor is :- " + this.successor.getIp() + ":" + this.successor.getPort());
+
+                    } else if (this.id >= key) {
+                        //Ask to update new nodes successor to my successor
+                        //"US <successorIP> <successorPort>"
+                        String tempMsg = "US " + successor.getIp() + " " + successor.getPort();
+                        socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
+
+                        Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
+                        this.setSuccessor(tempSuccessor);
                         System.out.println(this.getPort() + ": my successor is : " + this.successor.getPort());
 
+                        //request the finger tabel from my successor
+                        //"RFT <myIP> <myPort>"
+                        tempMsg = "RFT " + this.getIp() + " " + this.getPort();
+                        socketConnector.send(tempMsg, incomingIP, incomingPort);
+                        System.out.println(this.getPort() + ": request finger table : (" + tempMsg + ")");
                     } else {
-
-                        if (this.id >= key) {
-                            //Ask to update new nodes successor to my successor
-                            //"US <successorIP> <successorPort>"
-                            String tempMsg = "US " + successor.getIp() + " " + successor.getPort();
-                            socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
-
-                            Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
-                            this.setSuccessor(tempSuccessor);
-                            System.out.println(this.getPort() + ": my successor is : " + this.successor.getPort());
-
-                            //request the finger tabel from my successor
-                            //"RFT <myIP> <myPort>"
-                            tempMsg = "RFT " + this.getIp() + " " + this.getPort();
-                            socketConnector.send(tempMsg, incomingIP, incomingPort);
-                            System.out.println(this.getPort() + ": request finger table : (" + tempMsg + ")");
-                        } else {
-                            routeMessge(message, key);
-                        }
+                        routeMessge(message, key);
                     }
                     break;
 
                 case "US": //update succesor
-                    echo("message received: (" + messageList[0] + ")");
+//                    echo("message received: (" + messageList[0] + ")");
 
                     Node tempSuccessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), true);
                     this.setSuccessor(tempSuccessor);
                     System.out.println(this.getPort() + ": my successor is : " + this.successor.getPort());
 
+                    String tempRFTMsg = "RFT " + this.getIp() + " " + this.getPort();
+                    socketConnector.send(tempRFTMsg, incomingIP, incomingPort);
+                    System.out.println(this.getPort() + ": request finger table : (" + tempRFTMsg + ")");
+
+                    break;
                 case "RFT": //request finger table
                     echo("message received: (" + messageList[0] + ")");
 
@@ -397,21 +399,21 @@ public final class NodeImpl implements Node {
                     }
                     socketConnector.send(tempMsg, messageList[1], Integer.parseInt(messageList[2]));
                     System.out.println(this.getPort() + ": sending finger table to : " + messageList[2] + " (" + tempMsg + ")");
-
+                    break;
                 case "UFT"://update finger table
                     echo("message received: (" + messageList[0] + ")");
 
                     int i = 0;
                     Node temp = new NodeImpl(null, messageList[(2 * i) + 1], Integer.parseInt(messageList[(2 * i) + 2]), true);
-                    
+
                     for (; i < MAX_FINGERS; i++) {
-                        
+
                         fingerTable.updateEntry(i, temp);
                     }
                     stabilizer.start();
                     fingerFixer.start();
                     predecessorCheckor.start();
-
+                    break;
                 case "NOTIFY_S":    // notify succoessor
 
                     Node tempPredecessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport());
@@ -456,10 +458,12 @@ public final class NodeImpl implements Node {
                     break;
 
                 case "HB":      // heartbeat
+                    System.out.println("HB recieved. Sending HB_OK");
                     redirectMessage("HB_OK", new NodeImpl(null, incomingIP, incomingPort, BSip, BSport));
                     break;
 
                 case "HB_OK":
+                    System.out.println("HB_OK received");
                     predecessorCheckor.setPredecessorHBOK(true);
                     break;
                 default:
@@ -472,9 +476,9 @@ public final class NodeImpl implements Node {
                 switch (messageList[2]) {
                     case "0":
                         System.out.println("This is the first node.\n");
-//                        for (int i = 0; i < MAX_FINGERS; i++) {
-//                            this.fingerTable.updateEntry(i, this);
-//                        }
+                        for (int i = 0; i < MAX_FINGERS; i++) {
+                            this.fingerTable.updateEntry(i, this);
+                        }
                         stabilizer.start();
                         fingerFixer.start();
                         //predecessorCheckor.start();
@@ -523,6 +527,9 @@ public final class NodeImpl implements Node {
                     case "0":
                         System.out.println("Successfully unregistered.\n");
                         this.socketConnector.stop(); //stop listning, equivelent to leave the network
+                        stabilizer.stop();
+                        fingerFixer.stop();
+                        //predecessorCheckor.stop();
                         break;
 
                     case "9999":
@@ -532,16 +539,14 @@ public final class NodeImpl implements Node {
                         System.out.println("Some error while unregistering.");
                         break;
                 }
-            }
-            else if("SER".equals(messageList[1])){
+            } else if ("SER".equals(messageList[1])) {
                 String tempIP = messageList[2];
                 int TempPort = Integer.parseInt(messageList[3]);
                 String searchString = messageList[4];
                 int hashedID = Math.abs(searchString.hashCode());
-                if(hashedID > this.id){
+                if (hashedID > this.id) {
                     System.out.println("Handle the request here / route");
-                }
-                else{
+                } else {
                     System.out.println("Handle the request here / route");
                 }
             }
@@ -578,7 +583,7 @@ public final class NodeImpl implements Node {
 
     @Override
     public void echo(String output) {
-        System.out.println(this.id + "," + this.port + ": " + output + "\n");
+        System.out.println("The message received is: " + output + "\n");
     }
 
 }

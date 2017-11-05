@@ -5,7 +5,6 @@
  */
 package View;
 
-import BootstrapServer.BootstrapServer;
 import Chord.NodeImpl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,12 +20,12 @@ public class DistributedFileSharingSystem {
      */
     public static void main(String[] args) {
 
-        new Thread("BS Thread"){
-            @Override
-            public void run() {
-                BootstrapServer.runBootstrapServer();
-            }
-        }.start();
+//        new Thread("BS Thread"){
+//            @Override
+//            public void run() {
+//                BootstrapServer.runBootstrapServer();
+//            }
+//        }.start();
 
         new Thread("DHT") {
             @Override
@@ -35,8 +34,8 @@ public class DistributedFileSharingSystem {
                     
                     Thread.sleep(2000);
                     
-                    NodeImpl node1 = new NodeImpl("Three", 3003);
-                    System.out.println("My ip is: " + node1.getIp());
+                    NodeImpl node1 = new NodeImpl("Four", 3004);
+//                    System.out.println("My ip is: " + node1.getIp());
 //                    NodeImpl node2 = new NodeImpl("Two", 3002);
                     //NodeImpl node3 = new NodeImpl("Three", 3003);
                     
