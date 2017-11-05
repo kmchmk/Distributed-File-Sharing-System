@@ -20,7 +20,7 @@ import java.net.SocketException;
  */
 public class SocketConnector implements Connector {
 
-    private DatagramSocket socket;
+//    private DatagramSocket socket;
     Node myNode;
     Thread listner;
     boolean live;
@@ -42,12 +42,13 @@ public class SocketConnector implements Connector {
             //System.out.println(bytes.length);
             DatagramPacket packet = new DatagramPacket(bytes, bytes.length, InetAddress.getByName(OutgoingIP), OutgoingPort);
 
-            socket = new DatagramSocket();
+            DatagramSocket socket = new DatagramSocket();
             socket.send(packet);
 
         } catch (Exception ex) {
             System.out.println(ex);
         }
+        System.out.println("Message sent...");
     }
 
     @Override
@@ -59,31 +60,43 @@ public class SocketConnector implements Connector {
             @Override
             public void run() {
                 try {
-                    socket = new DatagramSocket(port);
+                    DatagramSocket socket = new DatagramSocket(port);
 
                     byte[] buffer = new byte[65536];
                     DatagramPacket incomingPacket = new DatagramPacket(buffer, buffer.length);
-
+                    System.out.println("1");
                     while (live) {
+                        System.out.println("2");
                         socket.receive(incomingPacket);
-
+                        System.out.println("3");
                         byte[] data = incomingPacket.getData();
-
+                        System.out.println("4");
                         String incomingIP = incomingPacket.getAddress().getHostAddress();
+                        System.out.println("5");
                         int incomingPort = incomingPacket.getPort();
+                        System.out.println("6");
                         String incomingMessage = new String(data, 0, incomingPacket.getLength());
-                        System.out.println("Message Received: " + incomingMessage + " (from "+incomingIP+":"+incomingPort+")");
-                        new Thread() {
-                            public void run() {
-                                System.out.println("++++++++++++++++" + incomingMessage + "+++++++++++++");
-                                myNode.handleMessage(incomingMessage, incomingIP);
-                                System.out.println("Message handled...");
-                            }
-                        }.start();
+                        System.out.println("7");
+                        System.out.println("Message Received: " + incomingMessage + " (from " + incomingIP + ":" + incomingPort + ")");
+                        System.out.println("8");
+//                        new Thread() {
+//                            public void run() {
+                        System.out.println("9");
+                        System.out.println("++++++++++++++++" + incomingMessage + "+++++++++++++");
+                        System.out.println("10");
+                        myNode.handleMessage(incomingMessage, incomingIP);
+                        System.out.println("11");
+                        System.out.println("Message handled...");
+                        System.out.println("12");
+//                            }
+//                        }.start();
+                        System.out.println("13");
                     }
                 } catch (SocketException ex) {
+                    System.out.println("15");
                     System.err.println(ex);
                 } catch (IOException ex) {
+                    System.out.println("16");
                     System.err.println(ex);
                 }
             }
