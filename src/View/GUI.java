@@ -64,9 +64,9 @@ public class GUI extends javax.swing.JFrame {
         Textuser = new javax.swing.JTextField();
         jPanel5 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        table1 = new javax.swing.JTable();
-        jScrollPane3 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTable2 = new javax.swing.JTable();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
         jButton5 = new javax.swing.JButton();
@@ -317,7 +317,7 @@ public class GUI extends javax.swing.JFrame {
 
         jPanel5.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
-        table1.setModel(new javax.swing.table.DefaultTableModel(
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {"Bootstrap Server", null, null, null},
                 {"Successor", null, null, null},
@@ -335,9 +335,9 @@ public class GUI extends javax.swing.JFrame {
                 return types [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(table1);
+        jScrollPane1.setViewportView(jTable1);
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        jTable2.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {"1", null, null, null},
                 {"2", null, null, null},
@@ -356,7 +356,7 @@ public class GUI extends javax.swing.JFrame {
                 return types [columnIndex];
             }
         });
-        jScrollPane3.setViewportView(jTable1);
+        jScrollPane3.setViewportView(jTable2);
 
         jLabel12.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel12.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -467,8 +467,8 @@ public class GUI extends javax.swing.JFrame {
 
         String bootId = node.getBSip();
         String bootport = String.valueOf(node.getBSport());
-        table1.setValueAt(bootId, 0, 1);
-        table1.setValueAt(bootport, 0, 2);
+        jTable1.setValueAt(bootId, 0, 1);
+        jTable1.setValueAt(bootport, 0, 2);
         jButton1.setEnabled(false);
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -497,14 +497,14 @@ public class GUI extends javax.swing.JFrame {
                     String succid = node.getSuccessor().getIp();
                     String succport = String.valueOf(node.getSuccessor().getPort());
 
-                    table1.setValueAt((Object) succid, 1, 1);
-                    table1.setValueAt((Object) succport, 1, 2);
+                    jTable1.setValueAt((Object) succid, 1, 1);
+                    jTable1.setValueAt((Object) succport, 1, 2);
                 }
                 if (node.getPredeccessor() != null) {
                     String preid = node.getPredeccessor().getIp();
                     String preport = String.valueOf(node.getPredeccessor().getPort());
-                    table1.setValueAt((Object) preid, 2, 1);
-                    table1.setValueAt((Object) preport, 2, 2);
+                    jTable1.setValueAt((Object) preid, 2, 1);
+                    jTable1.setValueAt((Object) preport, 2, 2);
                 }
 
             }
@@ -529,21 +529,21 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton4ActionPerformed
 
     public void UpdateSuccessor(Node succ) {
-        table1.setValueAt(succ == null ? "": succ.getID(), 1, 1);
-        table1.setValueAt(succ == null ? "": succ.getIp(), 1, 2);
-        table1.setValueAt(succ == null ? "": succ.getPort(), 1, 3);
+        jTable1.setValueAt(succ == null ? "" : succ.getID(), 1, 1);
+        jTable1.setValueAt(succ == null ? "" : succ.getIp(), 1, 2);
+        jTable1.setValueAt(succ == null ? "" : succ.getPort(), 1, 3);
+    }
+
+    public void UpdatePredecessor(Node pred) {
+        jTable1.setValueAt(pred == null ? "" : pred.getID(), 2, 1);
+        jTable1.setValueAt(pred == null ? "" : pred.getIp(), 2, 2);
+        jTable1.setValueAt(pred == null ? "" : pred.getPort(), 2, 3);
     }
 
     public void UpdateFingerTable(int index, Node temp) {
-        table1.setValueAt(temp.getID(), index, 1);
-        table1.setValueAt(temp.getIp(), index, 2);
-        table1.setValueAt(temp.getPort(), index, 3);
-    }
-    
-    public void UpdatePredecessor(Node pred) {
-        table1.setValueAt(pred == null ? "": pred.getID(), 1, 1);
-        table1.setValueAt(pred == null ? "": pred.getIp(), 1, 2);
-        table1.setValueAt(pred == null ? "": pred.getPort(), 1, 3);
+        jTable2.setValueAt(temp.getID(), index, 1);
+        jTable2.setValueAt(temp.getIp(), index, 2);
+        jTable2.setValueAt(temp.getPort(), index, 3);
     }
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
@@ -658,8 +658,8 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTable2;
     private javax.swing.JLabel name;
     private javax.swing.JTextField search;
-    private javax.swing.JTable table1;
     // End of variables declaration//GEN-END:variables
 }
