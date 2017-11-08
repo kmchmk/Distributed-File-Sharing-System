@@ -95,11 +95,11 @@ public final class NodeImpl implements Node {
 //    }
     @Override
     public void initialize() {
-//        System.out.println("Init (" + this.username + ")");
+//        gui.echo("Init (" + this.username + ")");
         populateWithFiles();
         this.socketConnector.listen(port);
         echo("initializing key:" + this.id);
-//        System.out.println("Start listening...(" + port + ") ");
+//        gui.echo("Start listening...(" + port + ") ");
     }
 
     @Override
@@ -181,7 +181,7 @@ public final class NodeImpl implements Node {
         for (String file : files) {
             int hash = getHash(file);
             String message = "REGMD " + hash;
-//            System.out.println(message);
+//            gui.echo(message);
             //routeMessge(message, hash);
         }
     }
@@ -206,19 +206,20 @@ public final class NodeImpl implements Node {
 
     public void populateWithFiles() {
 
-//        System.out.println("Populating files:");
+//        gui.echo("Populating files:");
         ArrayList<String> filelist = new ArrayList<>(Arrays.asList("Adventures of Tintin", "Jack and Jill", "Glee", "The Vampire Diarie", "King Arthur", "Windows XP", "Harry Potter", "Kung Fu Panda", "Lady Gaga", "Twilight", "Windows 8", "Mission Impossible", "Turn Up The Music", "Super Mario", "American Pickers", "Microsoft Office 2010", "Happy Feet", "Modern Family", "American Idol", "Hacking for Dummies"));
-
+        String text = "<html>";
         for (int i = 0; i < 3; i++) {
             int rand = new Random().nextInt(filelist.size());
             String file = filelist.get(rand);
             files.add(file);
-            if (gui != null) {
-                gui.updateDisplay("My file " + getHash(file) + " is: " + file);
-            }
+            text += "My file " + getHash(file) + " is: " + file + "<br>";
             filelist.remove(rand);
         }
-
+        text += "</html>";
+        if (gui != null) {
+            gui.updateFileLabel(text);
+        }
         distributeFileMetadata();
     }
 
@@ -242,7 +243,7 @@ public final class NodeImpl implements Node {
         registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0"))
                 + Integer.toString(length) + registerMessage;
 
-//        System.out.println("register message - (" + registerMessage + ")");
+//        gui.echo("register message - (" + registerMessage + ")");
         socketConnector.sendToBS(registerMessage);
 
     }
@@ -281,7 +282,7 @@ public final class NodeImpl implements Node {
 //        //not implemented yet
 //    }
     public void search(String searchString) {
-        System.out.println("\n\n");
+        gui.echo("\n\n");
 
         String searchQuery = " " + "SER" + " " + ip + " " + port + " @" + searchString;
         int length = searchQuery.length() + 4;
@@ -308,17 +309,17 @@ public final class NodeImpl implements Node {
     }
 
     private void foundFile(String searchString, Node result) {
-        gui.updateDisplay("Found the file \"" + searchString + "\" on node " + result.getIp() + " : " + result.getPort() + "(" + result.getUserName() + ")");
+        gui.updateDisplay("Found the file \"" + searchString + "\" on node " + result.getIp() + " : " + result.getPort() + " (" + result.getUserName() + ")");
     }
 
     public String searchMetaData(String queryMessage) {
-        System.out.println(queryMessage);
+        gui.echo(queryMessage);
         String[] messageList = queryMessage.split(" ");
 
         if ("SER".equals(messageList[1])) {
 
             String queryWord = messageList[4];
-            System.out.println("Searching for (" + queryWord + ")");
+            gui.echo("Searching for (" + queryWord + ")");
 
             if (metaData.containsKey(getHash(queryWord))) {
                 return ("Found - " + queryWord);
@@ -368,9 +369,9 @@ public final class NodeImpl implements Node {
                         //set new node as my successor
                         Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
                         this.setSuccessor(tempSuccessor);
-                        System.out.println(this.getPort() + ": my successor is :- " + this.successor.getIp() + ":" + this.successor.getPort());
+                        gui.echo(this.getPort() + ": my successor is :- " + this.successor.getIp() + ":" + this.successor.getPort());
 
-                        System.out.println("succ null");
+                        gui.echo("succ null");
                         ///send me as the successor for new node
                         String tempMsg = "US " + this.getIp() + " " + this.getPort();
                         socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
@@ -383,13 +384,13 @@ public final class NodeImpl implements Node {
 
                         Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
                         this.setSuccessor(tempSuccessor);
-                        System.out.println(this.getPort() + ": my successor is : " + this.successor.getPort());
+                        gui.echo(this.getPort() + ": my successor is : " + this.successor.getPort());
 
                         //request the finger tabel from my successor
                         //"RFT <myIP> <myPort>"
                         tempMsg = "RFT " + this.getIp() + " " + this.getPort();
                         socketConnector.send(tempMsg, incomingIP, Integer.parseInt(messageList[3]));
-                        System.out.println(this.getPort() + ": request finger table : (" + tempMsg + ")");
+                        gui.echo(this.getPort() + ": request finger table : (" + tempMsg + ")");
                     } else {
                         routeMessge(message, key);
                     }
@@ -400,14 +401,14 @@ public final class NodeImpl implements Node {
 
                     Node tempSuccessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), true);
                     this.setSuccessor(tempSuccessor);
-                    System.out.println(this.getPort() + ": my successor is : " + this.successor.getPort());
+                    gui.echo(this.getPort() + ": my successor is : " + this.successor.getPort());
                     new Thread() {
                         public void run() {
                             try {
                                 Thread.sleep(1000);
                                 String tempRFTMsg = "RFT " + ip + " " + port;
                                 socketConnector.send(tempRFTMsg, incomingIP, Integer.parseInt(messageList[2]));
-                                System.out.println(port + ": request finger table : (" + tempRFTMsg + ")");
+                                gui.echo(port + ": request finger table : (" + tempRFTMsg + ")");
                             } catch (InterruptedException ex) {
                                 ex.printStackTrace();
                             }
@@ -434,7 +435,7 @@ public final class NodeImpl implements Node {
                         tempMsg += entry.getIp() + " " + entry.getPort() + " ";
                     }
                     socketConnector.send(tempMsg, messageList[1], Integer.parseInt(messageList[2]));
-                    System.out.println(this.getPort() + ": sending finger table to : " + messageList[2] + " (" + tempMsg + ")");
+                    gui.echo(this.getPort() + ": sending finger table to : " + messageList[2] + " (" + tempMsg + ")");
                     break;
                 case "UFT"://update finger table
                     echo("message received: (" + messageList[0] + ")");
@@ -456,15 +457,15 @@ public final class NodeImpl implements Node {
                     Node tempPredecessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport(), null);
                     if (predecessor == null) {
                         this.setPredecessor(tempPredecessor);
-                        System.out.println("NOTIFY_S: Update predecessor of " + id + " to " + tempPredecessor.getID());
+                        gui.echo("NOTIFY_S: Update predecessor of " + id + " to " + tempPredecessor.getID());
                     } else if (predecessor.getID() > this.id) {
                         if ((predecessor.getID() < tempPredecessor.getID() && tempPredecessor.getID() < MAX_NODES)
                                 || (0 <= tempPredecessor.getID() && tempPredecessor.getID() < this.id)) {
-                            System.out.println("NOTIFY_S: Update predecessor of " + id + " from  " + predecessor.getID() + " to " + tempPredecessor.getID());
+                            gui.echo("NOTIFY_S: Update predecessor of " + id + " from  " + predecessor.getID() + " to " + tempPredecessor.getID());
                             this.setPredecessor(tempPredecessor);
                         }
                     } else if (predecessor.getID() < tempPredecessor.getID() && tempPredecessor.getID() < this.id) {
-                        System.out.println("NOTIFY_S: Update predecessor of " + id + " from  " + predecessor.getID() + " to " + tempPredecessor.getID());
+                        gui.echo("NOTIFY_S: Update predecessor of " + id + " from  " + predecessor.getID() + " to " + tempPredecessor.getID());
                         this.setPredecessor(tempPredecessor);
                     }
                     break;
@@ -504,12 +505,12 @@ public final class NodeImpl implements Node {
                     break;
 
                 case "HB":      // heartbeat
-                    System.out.println("HB recieved. Sending HB_OK");
+                    gui.echo("HB recieved. Sending HB_OK");
                     redirectMessage("HB_OK", new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport, null));
                     break;
 
                 case "HB_OK":
-                    System.out.println("HB_OK received");
+                    gui.echo("HB_OK received");
                     predecessorCheckor.setPredecessorHBOK(true);
                     break;
 
@@ -553,7 +554,7 @@ public final class NodeImpl implements Node {
 
                 switch (messageList[2]) {
                     case "0":
-                        System.out.println("This is the first node.\n");
+                        gui.echo("This is the first node.\n");
                         for (int i = 0; i < MAX_FINGERS; i++) {
                             this.fingerTable.updateEntry(i, this);
                             gui.UpdateFingerTable(i, this);
@@ -564,7 +565,7 @@ public final class NodeImpl implements Node {
                         break;
 
                     case "1": {
-                        System.out.println("This is the second node.\n");
+                        gui.echo("This is the second node.\n");
                         SimpleNeighbor firstNeighbor = new SimpleNeighbor(messageList[3], Integer.parseInt(messageList[4]));
                         neighborList.add(firstNeighbor);
                         joinNetwork();
@@ -572,7 +573,7 @@ public final class NodeImpl implements Node {
                     }
 
                     case "2": {
-                        System.out.println("This is the third or later node.\n");
+                        gui.echo("This is the third or later node.\n");
                         SimpleNeighbor firstNeighbor = new SimpleNeighbor(messageList[3], Integer.parseInt(messageList[4]));
                         neighborList.add(firstNeighbor);
                         SimpleNeighbor secondNeighbor = new SimpleNeighbor(messageList[5], Integer.parseInt(messageList[6]));
@@ -582,19 +583,19 @@ public final class NodeImpl implements Node {
                     }
 
                     case "9999":
-                        System.out.println(" Failed, there is some error in the command.");
+                        gui.echo(" Failed, there is some error in the command.");
                         break;
 
                     case "9998":
-                        System.out.println("Failed, already registered to you, unregister first.");
+                        gui.echo("Failed, already registered to you, unregister first.");
                         break;
 
                     case "9997":
-                        System.out.println("Failed, registered to another user, try a different IP and port.");
+                        gui.echo("Failed, registered to another user, try a different IP and port.");
                         break;
 
                     case "9996":
-                        System.out.println("Failed, can’t register. Bootstrap Server full.");
+                        gui.echo("Failed, can’t register. Bootstrap Server full.");
                         break;
 
                     default:
@@ -604,7 +605,7 @@ public final class NodeImpl implements Node {
                 //("message received: (" + messageList[1] + ")");
                 switch (messageList[2]) {
                     case "0":
-                        System.out.println("Successfully unregistered.\n");
+                        gui.echo("Successfully unregistered.\n");
                         this.socketConnector.stop(); //stop listning, equivelent to leave the network
                         stabilizer.stop();
                         fingerFixer.stop();
@@ -612,10 +613,10 @@ public final class NodeImpl implements Node {
                         break;
 
                     case "9999":
-                        System.out.println("Error while unregistering. IP and port may not be in the registry or command is incorrect.");
+                        gui.echo("Error while unregistering. IP and port may not be in the registry or command is incorrect.");
                         break;
                     default:
-                        System.out.println("Some error while unregistering.");
+                        gui.echo("Some error while unregistering.");
                         break;
                 }
             }
@@ -658,7 +659,7 @@ public final class NodeImpl implements Node {
 
     @Override
     public void echo(String output) {
-        System.out.println("The message received is: " + output + "\n");
+        gui.echo("The message received is: " + output + "\n");
     }
 
 }
