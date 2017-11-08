@@ -213,7 +213,9 @@ public final class NodeImpl implements Node {
             int rand = new Random().nextInt(filelist.size());
             String file = filelist.get(rand);
             files.add(file);
-            gui.updateDisplay("My file " + i + " is: " + file);
+            if (gui != null) {
+                gui.updateDisplay("My file " + getHash(file) + " is: " + file);
+            }
             filelist.remove(rand);
         }
 
@@ -261,7 +263,7 @@ public final class NodeImpl implements Node {
     public void joinNetwork() {
 
         sendMessageToSuccessor();
-        sendMessageToPredecessor();//not implemented yet
+//        sendMessageToPredecessor();//not implemented yet
     }
 
     @Override
@@ -272,13 +274,12 @@ public final class NodeImpl implements Node {
     public void sendMessageToSuccessor() {
         String message = "FS " + this.id + " " + this.ip + " " + this.port;
         this.socketConnector.send(message, this.neighborList.get(0).getIp(), this.neighborList.get(0).getPort());
-        echo("Sending message to neighbor (" + this.neighborList.get(0).getPort() + "), Routing to self (" + message + ")");
+//        echo("Sending message to neighbor (" + this.neighborList.get(0).getPort() + "), Routing to self (" + message + ")");
     }
 
-    public void sendMessageToPredecessor() {
-        //not implemented yet
-    }
-
+//    public void sendMessageToPredecessor() {
+//        //not implemented yet
+//    }
     public void search(String searchString) {
         System.out.println("\n\n");
 
@@ -286,7 +287,6 @@ public final class NodeImpl implements Node {
         int length = searchQuery.length() + 4;
 
         searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
-        //asking from the first user
 
         //check whether I have the file.
         if (files.contains(searchString)) {
@@ -295,13 +295,15 @@ public final class NodeImpl implements Node {
         else {
             Node receiver = null;
             int hashKey = getHash(searchString);
-            if (fingerTable.getNode(hashKey) != null) {
-                receiver = fingerTable.getNode(hashKey);
-            } else {
-                fingerTable.getClosestPredecessorToKey(hashKey);
+            receiver = fingerTable.getNode(hashKey);
+            if (receiver == null) {
+                receiver = fingerTable.getClosestPredecessorToKey(hashKey);
             }
-            socketConnector.send(searchQuery, receiver.getIp(), receiver.getPort());
-
+            if (receiver != null) {
+                socketConnector.send(searchQuery, receiver.getIp(), receiver.getPort());
+            } else {
+                gui.updateDisplay("No receiver found");
+            }
         }
     }
 
@@ -445,9 +447,9 @@ public final class NodeImpl implements Node {
                         fingerTable.updateEntry(i, temp);
                         gui.UpdateFingerTable(i, temp);
                     }
-                    stabilizer.start();
+//                    stabilizer.start();
                     fingerFixer.start();
-                    predecessorCheckor.start();
+//                    predecessorCheckor.start();
                     break;
                 case "NOTIFY_S":    // notify succoessor
 
@@ -510,6 +512,38 @@ public final class NodeImpl implements Node {
                     System.out.println("HB_OK received");
                     predecessorCheckor.setPredecessorHBOK(true);
                     break;
+
+                case "SER":
+                    String tempIP = messageList[2];
+                    int TempPort = Integer.parseInt(messageList[3]);
+                    String searchString = message.split("@")[1];
+                    //check whether I have the file.
+                    if (files.contains(searchString)) {
+                        //notify the user
+                        String searchQuery = " " + "FOUND_FILE" + " " + this.ip + " " + this.port + " " + this.username + " @" + searchString;
+                        int length = searchQuery.length() + 4;
+
+                        searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
+
+                        socketConnector.send(searchQuery, tempIP, TempPort);
+                    } //else do this
+                    else {
+                        Node receiver = null;
+                        int hashKey = getHash(searchString);
+                        if (fingerTable.getNode(hashKey) != null) {
+                            receiver = fingerTable.getNode(hashKey);
+                        } else {
+                            receiver = fingerTable.getClosestPredecessorToKey(hashKey);
+                        }
+                        socketConnector.send(message, receiver.getIp(), receiver.getPort());
+                    }
+                    break;
+                case "FOUND_FILE":
+                    String resultIP = messageList[2];
+                    int resultPort = Integer.parseInt(messageList[3]);
+                    String resultUserName = messageList[4];
+                    String resultSearchText = message.split("@")[1];
+                    foundFile(resultSearchText, new NodeImpl(resultUserName, resultIP, resultPort, null, 55555, null));
                 default:
                     break;
             }
@@ -524,7 +558,7 @@ public final class NodeImpl implements Node {
                             this.fingerTable.updateEntry(i, this);
                             gui.UpdateFingerTable(i, this);
                         }
-                        stabilizer.start();
+//                        stabilizer.start();
                         fingerFixer.start();
 //                        predecessorCheckor.start();
                         break;
@@ -583,16 +617,6 @@ public final class NodeImpl implements Node {
                     default:
                         System.out.println("Some error while unregistering.");
                         break;
-                }
-            } else if ("SER".equals(messageList[1])) {
-                String tempIP = messageList[2];
-                String TempPort = messageList[3];
-                String searchString = message.split("@")[1];
-                int hashedID = getHash(searchString);
-                if (hashedID > this.id) {
-                    System.out.println("Handle the request here / route");
-                } else {
-                    System.out.println("Handle the request here / route");
                 }
             }
         }
