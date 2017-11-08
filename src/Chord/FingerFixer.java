@@ -60,7 +60,7 @@ public class FingerFixer extends Thread {
                 if (waitingForSuccussor) {
                     String[] replyParts = succossorReply.split(" ");
                     int fingerIndex = Integer.parseInt(replyParts[0]);
-                    fingerTable.updateEntry(fingerIndex, new NodeImpl(null, replyParts[1], Integer.parseInt(replyParts[2]), thisNode.getBSip(), thisNode.getBSport()));
+                    fingerTable.updateEntry(fingerIndex, new NodeImpl(null, replyParts[1], Integer.parseInt(replyParts[2]), thisNode.getBSip(), thisNode.getBSport(), null));
                     thisNode.getGUI().UpdateFingerTable(fingerToFixNext, fingerTable.getNodeAt(fingerIndex));
                     System.out.println("FixFinger: Update finger " + fingerIndex + " of " + thisNode.getID() + " to  " + fingerTable.getNodeAt(fingerIndex).getID());
                     waitingForSuccussor = false;

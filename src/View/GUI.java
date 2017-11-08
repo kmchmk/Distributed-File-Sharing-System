@@ -477,15 +477,13 @@ public class GUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void searchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchActionPerformed
-        // TODO add your handling code here:
+        jButton2ActionPerformed(evt);
     }//GEN-LAST:event_searchActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
         String fileName = search.getText();
-        System.out.println(fileName);
         node.search(fileName);
-        display.setText(fileName);
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -579,13 +577,15 @@ public class GUI extends javax.swing.JFrame {
         jTable2.setValueAt(temp.getPort(), index, 3);
     }
 
+    public void updateDisplay(String text) {
+        display.setText(display.getText() + "\n" + text);
+    }
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
         // TODO add your handling code here:
         int pno = Integer.parseInt(enterPort.getText());
         String BSHost = Textuser1.getText();
         int bsPort = Integer.parseInt(Textuser2.getText());
-        node = new NodeImpl(Textuser.getText(), node.getMyIP(), pno, BSHost, bsPort);
-        node.setGUI(this);
+        node = new NodeImpl(Textuser.getText(), node.getMyIP(), pno, BSHost, bsPort, this);
 
         IP.setText(node.getIp());
         PortNo.setText(String.valueOf(node.getPort()));
@@ -621,7 +621,7 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_enterPortActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        UpdateSuccessor(new NodeImpl("Test", "192.101.10.10", 1111, "192.168.43.96", 55555));
+        UpdateSuccessor(new NodeImpl("Test", "192.101.10.10", 1111, "192.168.43.96", 55555, null));
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void TextuserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TextuserActionPerformed
