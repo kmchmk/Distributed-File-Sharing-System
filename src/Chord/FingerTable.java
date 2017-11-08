@@ -18,4 +18,5 @@ public interface FingerTable {
     //public void removeEntry(int key);
     public Node getClosestPredecessorToKey(int key);
     public Node getEntryByIndex(int index);
+    public Node getClosestPredecessorToKey(int myID, int destKey);
 }

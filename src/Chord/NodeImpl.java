@@ -360,7 +360,7 @@ public final class NodeImpl implements Node {
                         Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
                         this.setSuccessor(tempSuccessor);
                         System.out.println(this.getPort() + ": my successor is :- " + this.successor.getIp() + ":" + this.successor.getPort());
-
+                        fingerFixer.setWaitingForSuccessor(false);
                         System.out.println("succ null");
                         ///send me as the successor for new node
                         String tempMsg = "US " + this.getIp() + " " + this.getPort();
@@ -483,7 +483,7 @@ public final class NodeImpl implements Node {
                 case "FIND_S":   // find successor message from findSuccosser
                     Node succosser = findSuccessorOf(Integer.parseInt(messageList[1]), Integer.parseInt(messageList[2]), messageList[3], Integer.parseInt(messageList[4]));
                     if (succosser != null) {
-                        String response = "FIND_S_OK " + messageList[1] + " " + ip + " " + port;
+                        String response = "FIND_S_OK " + messageList[1] + " " + succosser.getIp() + " " + succosser.getPort();
                         redirectMessage(response, new NodeImpl("", messageList[3], Integer.parseInt(messageList[4]), BSip, BSport));
                     }
                     break;
@@ -609,7 +609,7 @@ public final class NodeImpl implements Node {
             {
                 return this.successor;
             } else {
-                Node nextNode = this.fingerTable.getClosestPredecessorToKey(key);
+                Node nextNode = this.fingerTable.getClosestPredecessorToKey(id, key);
                 if (nextNode != null) {
                     String message = "FIND_S " + finger + " " + key + " " + originIP + " " + originPort;
                     redirectMessage(message, nextNode);
