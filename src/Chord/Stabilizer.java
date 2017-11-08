@@ -14,7 +14,6 @@ public class Stabilizer extends Thread {
     private final Node thisNode;
     private Node newPredessor = null;
     private boolean predMsgSent;
-    private boolean waitingForSuccessor;
     private boolean nullPredecessor;
 
     public Stabilizer(Node thisNode) {
@@ -34,23 +33,22 @@ public class Stabilizer extends Thread {
     public void run() {
         while (true) {
             try {
-                Thread.sleep(5000);
-                this.thisNode.echo("Stabilizing...\n");
-
                 if (thisNode.getSuccessor() == null) {
-                    waitingForSuccessor = true;
+                    System.out.println("Successor is null. Stabilizer will run in 10 seconds");
+                    Thread.sleep(10 * 1000);
                 }
-                if (!waitingForSuccessor && !predMsgSent) {
-                    String msg = "GET_PRED " + thisNode.getIp() + " " + thisNode.getPort();
-                    thisNode.redirectMessage(msg, thisNode.getSuccessor());
-                    predMsgSent = true;
+                if (thisNode.getSuccessor() != null) {
+                    System.out.println("Stabilizing...\n");
+                    if (!predMsgSent) {
+                        String msg = "GET_PRED " + thisNode.getIp() + " " + thisNode.getPort();
+                        thisNode.redirectMessage(msg, thisNode.getSuccessor());
+                        predMsgSent = true;
 
+                    }
+                    Thread.sleep(20 * 1000);
                 }
-                Thread.sleep(60 * 1000);
-
             } catch (InterruptedException ex) {
                 if (predMsgSent) {
-
                     boolean notify = false;
                     if (newPredessor != null) {
                         System.out.println("GET_PRED Success");
