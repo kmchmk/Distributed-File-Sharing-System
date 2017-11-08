@@ -62,7 +62,7 @@ public final class NodeImpl implements Node {
         this.port = port;
         this.BSip = BSip;
         this.BSport = BSport;
-        this.id = Math.abs((this.ip + this.port).hashCode()) % MAX_NODES;
+        this.id = getHash(this.ip + this.port);
 
         this.socketConnector = new SocketConnector(this);
 
@@ -84,7 +84,7 @@ public final class NodeImpl implements Node {
         this.port = port;
         this.BSip = null;
         this.BSport = 0;
-        this.id = Math.abs((this.ip + this.port).hashCode()) % MAX_NODES;
+        this.id = getHash(this.ip + this.port) % MAX_NODES;
     }
 
 //    public NodeImpl(String username, int port, String BSip, int BSport) {
@@ -93,7 +93,6 @@ public final class NodeImpl implements Node {
 //    public NodeImpl(String username, int port) {
 //        this(username, getMyIP(), port, "192.168.43.96", 55555);
 //    }
-
     @Override
     public void initialize() {
 //        System.out.println("Init (" + this.username + ")");
@@ -180,7 +179,7 @@ public final class NodeImpl implements Node {
 
     private void distributeFileMetadata() {
         for (String file : files) {
-            int hash = Math.abs(file.hashCode()) % MAX_NODES;
+            int hash = getHash(file);
             String message = "REGMD " + hash;
 //            System.out.println(message);
             //routeMessge(message, hash);
@@ -295,7 +294,7 @@ public final class NodeImpl implements Node {
         } //else do this
         else {
             Node receiver = null;
-            int hashKey = searchString.hashCode();
+            int hashKey = getHash(searchString);
             if (fingerTable.getNode(hashKey) != null) {
                 receiver = fingerTable.getNode(hashKey);
             } else {
@@ -307,7 +306,7 @@ public final class NodeImpl implements Node {
     }
 
     private void foundFile(String searchString, Node result) {
-        gui.updateDisplay("Found the file \""+searchString+"\" on node " + result.getIp() + " : " + result.getPort() + "(" + result.getUserName() + ")");
+        gui.updateDisplay("Found the file \"" + searchString + "\" on node " + result.getIp() + " : " + result.getPort() + "(" + result.getUserName() + ")");
     }
 
     public String searchMetaData(String queryMessage) {
@@ -319,7 +318,7 @@ public final class NodeImpl implements Node {
             String queryWord = messageList[4];
             System.out.println("Searching for (" + queryWord + ")");
 
-            if (metaData.containsKey(queryWord.hashCode())) {
+            if (metaData.containsKey(getHash(queryWord))) {
                 return ("Found - " + queryWord);
             } else {
                 return ("Not found - " + queryWord);
@@ -589,7 +588,7 @@ public final class NodeImpl implements Node {
                 String tempIP = messageList[2];
                 String TempPort = messageList[3];
                 String searchString = message.split("@")[1];
-                int hashedID = Math.abs(searchString.hashCode());
+                int hashedID = getHash(searchString);
                 if (hashedID > this.id) {
                     System.out.println("Handle the request here / route");
                 } else {
@@ -597,6 +596,10 @@ public final class NodeImpl implements Node {
                 }
             }
         }
+    }
+
+    private int getHash(String text) {
+        return Math.abs(text.hashCode()) % MAX_NODES;
     }
 
     /* 
