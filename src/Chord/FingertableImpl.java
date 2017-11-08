@@ -71,6 +71,23 @@ public class FingertableImpl implements FingerTable {
         }
         return ClosestPredecessor;
     }
+    
+    @Override
+    public Node getClosestPredecessorToKey(int myID, int destKey){
+        for (int i=maxEntries-1; i>=0; i--){
+            int fingerKey = fingerEntries[i].getID();
+            if (myID < destKey){
+                if (fingerKey <= destKey){
+                    return fingerEntries[i];
+                }
+            }else{
+                if ((myID < fingerKey && fingerKey < NodeImpl.MAX_NODES) || (0 <= fingerKey && fingerKey <= destKey)){
+                    return fingerEntries[i];
+                }
+            }
+        }
+        return null;
+    }
 
     /*@Override
     public void removeEntry(int key) {
