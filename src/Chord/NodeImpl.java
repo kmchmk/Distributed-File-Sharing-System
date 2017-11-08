@@ -44,14 +44,14 @@ public final class NodeImpl implements Node {
 
     private ArrayList<SimpleNeighbor> neighborList;
 
-    private Map<Integer, String> metaData;
+    private Map<Integer, String> metaData;//these are the pointers
     private ArrayList<String> files;
 
     private Stabilizer stabilizer;
     private FingerFixer fingerFixer;
     private PredecessorCheckor predecessorCheckor;
 
-    public NodeImpl(String username, String ip, int port, String BSip, int BSport) {
+    public NodeImpl(String username, String ip, int port, String BSip, int BSport, GUI gui) {
         fingerTable = new FingertableImpl(MAX_FINGERS);
         metaData = new HashMap<>();
         files = new ArrayList<>();
@@ -62,14 +62,14 @@ public final class NodeImpl implements Node {
         this.port = port;
         this.BSip = BSip;
         this.BSport = BSport;
-        this.id = Math.abs((this.ip + this.port).hashCode()) % MAX_NODES;
+        this.id = getHash(this.ip + this.port);
 
         this.socketConnector = new SocketConnector(this);
 
         this.stabilizer = new Stabilizer(this);
         this.fingerFixer = new FingerFixer(this);
         this.predecessorCheckor = new PredecessorCheckor(this);
-
+        this.gui = gui;
         initialize();
     }
 
@@ -84,16 +84,15 @@ public final class NodeImpl implements Node {
         this.port = port;
         this.BSip = null;
         this.BSport = 0;
-        this.id = Math.abs((this.ip + this.port).hashCode()) % MAX_NODES;
+        this.id = getHash(this.ip + this.port) % MAX_NODES;
     }
 
 //    public NodeImpl(String username, int port, String BSip, int BSport) {
 //        this(username, getMyIP(), port, BSip, BSport);
 //    }
-    public NodeImpl(String username, int port) {
-        this(username, getMyIP(), port, "192.168.43.96", 55555);
-    }
-
+//    public NodeImpl(String username, int port) {
+//        this(username, getMyIP(), port, "192.168.43.96", 55555);
+//    }
     @Override
     public void initialize() {
 //        System.out.println("Init (" + this.username + ")");
@@ -180,7 +179,7 @@ public final class NodeImpl implements Node {
 
     private void distributeFileMetadata() {
         for (String file : files) {
-            int hash = Math.abs(file.hashCode()) % MAX_NODES;
+            int hash = getHash(file);
             String message = "REGMD " + hash;
 //            System.out.println(message);
             //routeMessge(message, hash);
@@ -214,7 +213,9 @@ public final class NodeImpl implements Node {
             int rand = new Random().nextInt(filelist.size());
             String file = filelist.get(rand);
             files.add(file);
-//            System.out.println(file);
+            if (gui != null) {
+                gui.updateDisplay("My file " + getHash(file) + " is: " + file);
+            }
             filelist.remove(rand);
         }
 
@@ -262,7 +263,7 @@ public final class NodeImpl implements Node {
     public void joinNetwork() {
 
         sendMessageToSuccessor();
-        sendMessageToPredecessor();//not implemented yet
+//        sendMessageToPredecessor();//not implemented yet
     }
 
     @Override
@@ -273,33 +274,41 @@ public final class NodeImpl implements Node {
     public void sendMessageToSuccessor() {
         String message = "FS " + this.id + " " + this.ip + " " + this.port;
         this.socketConnector.send(message, this.neighborList.get(0).getIp(), this.neighborList.get(0).getPort());
-        echo("Sending message to neighbor (" + this.neighborList.get(0).getPort() + "), Routing to self (" + message + ")");
+//        echo("Sending message to neighbor (" + this.neighborList.get(0).getPort() + "), Routing to self (" + message + ")");
     }
 
-    public void sendMessageToPredecessor() {
-        //not implemented yet
-    }
-
+//    public void sendMessageToPredecessor() {
+//        //not implemented yet
+//    }
     public void search(String searchString) {
         System.out.println("\n\n");
 
-        String reply = null; // dirty fix
-
-        String searchQuery = " " + "SER" + " " + ip + " " + Integer.toString(port) + " " + searchString;
+        String searchQuery = " " + "SER" + " " + ip + " " + port + " @" + searchString;
         int length = searchQuery.length() + 4;
 
         searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
-        //asking from the first user
-        if (neighborList.size() > 0) {
-            //here, IP should be neighborList.get(0).getIP()
-            socketConnector.send(searchQuery, "localhost", neighborList.get(0).getPort());
-            System.out.println("Reply from first neighbor:- " + reply);
+
+        //check whether I have the file.
+        if (files.contains(searchString)) {
+            foundFile(searchString, this);
+        } //else do this
+        else {
+            Node receiver = null;
+            int hashKey = getHash(searchString);
+            receiver = fingerTable.getNode(hashKey);
+            if (receiver == null) {
+                receiver = fingerTable.getClosestPredecessorToKey(hashKey);
+            }
+            if (receiver != null) {
+                socketConnector.send(searchQuery, receiver.getIp(), receiver.getPort());
+            } else {
+                gui.updateDisplay("No receiver found");
+            }
         }
-        if (neighborList.size() > 1) {
-            //here, IP should be neighborList.get(0).getIP()
-            socketConnector.send(searchQuery, "localhost", neighborList.get(1).getPort());
-            System.out.println("Reply from second neighbor:- " + reply);
-        }
+    }
+
+    private void foundFile(String searchString, Node result) {
+        gui.updateDisplay("Found the file \"" + searchString + "\" on node " + result.getIp() + " : " + result.getPort() + "(" + result.getUserName() + ")");
     }
 
     public String searchMetaData(String queryMessage) {
@@ -311,7 +320,7 @@ public final class NodeImpl implements Node {
             String queryWord = messageList[4];
             System.out.println("Searching for (" + queryWord + ")");
 
-            if (metaData.containsKey(queryWord.hashCode())) {
+            if (metaData.containsKey(getHash(queryWord))) {
                 return ("Found - " + queryWord);
             } else {
                 return ("Not found - " + queryWord);
@@ -444,7 +453,7 @@ public final class NodeImpl implements Node {
                     break;
                 case "NOTIFY_S":    // notify succoessor
 
-                    Node tempPredecessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport());
+                    Node tempPredecessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport(), null);
                     if (predecessor == null) {
                         this.setPredecessor(tempPredecessor);
                         System.out.println("NOTIFY_S: Update predecessor of " + id + " to " + tempPredecessor.getID());
@@ -467,12 +476,12 @@ public final class NodeImpl implements Node {
                     } else {
                         rep += "NULL";
                     }
-                    redirectMessage(rep, new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport));
+                    redirectMessage(rep, new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport, null));
                     break;
 
                 case "GET_PRED_OK":     // respond from get predecessor request
                     if (!messageList[1].equals("NULL")) {
-                        Node newPred = new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport);
+                        Node newPred = new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport, null);
                         stabilizer.setNewPredessor(newPred);
                     } else {
                         stabilizer.setNullPredecessor(true);
@@ -484,7 +493,7 @@ public final class NodeImpl implements Node {
                     Node succosser = findSuccessorOf(Integer.parseInt(messageList[1]), Integer.parseInt(messageList[2]), messageList[3], Integer.parseInt(messageList[4]));
                     if (succosser != null) {
                         String response = "FIND_S_OK " + messageList[1] + " " + succosser.getIp() + " " + succosser.getPort();
-                        redirectMessage(response, new NodeImpl("", messageList[3], Integer.parseInt(messageList[4]), BSip, BSport));
+                        redirectMessage(response, new NodeImpl("", messageList[3], Integer.parseInt(messageList[4]), BSip, BSport, null));
                     }
                     break;
 
@@ -496,13 +505,45 @@ public final class NodeImpl implements Node {
 
                 case "HB":      // heartbeat
                     System.out.println("HB recieved. Sending HB_OK");
-                    redirectMessage("HB_OK", new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport));
+                    redirectMessage("HB_OK", new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport, null));
                     break;
 
                 case "HB_OK":
                     System.out.println("HB_OK received");
                     predecessorCheckor.setPredecessorHBOK(true);
                     break;
+
+                case "SER":
+                    String tempIP = messageList[2];
+                    int TempPort = Integer.parseInt(messageList[3]);
+                    String searchString = message.split("@")[1];
+                    //check whether I have the file.
+                    if (files.contains(searchString)) {
+                        //notify the user
+                        String searchQuery = " " + "FOUND_FILE" + " " + this.ip + " " + this.port + " " + this.username + " @" + searchString;
+                        int length = searchQuery.length() + 4;
+
+                        searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
+
+                        socketConnector.send(searchQuery, tempIP, TempPort);
+                    } //else do this
+                    else {
+                        Node receiver = null;
+                        int hashKey = getHash(searchString);
+                        if (fingerTable.getNode(hashKey) != null) {
+                            receiver = fingerTable.getNode(hashKey);
+                        } else {
+                            receiver = fingerTable.getClosestPredecessorToKey(hashKey);
+                        }
+                        socketConnector.send(message, receiver.getIp(), receiver.getPort());
+                    }
+                    break;
+                case "FOUND_FILE":
+                    String resultIP = messageList[2];
+                    int resultPort = Integer.parseInt(messageList[3]);
+                    String resultUserName = messageList[4];
+                    String resultSearchText = message.split("@")[1];
+                    foundFile(resultSearchText, new NodeImpl(resultUserName, resultIP, resultPort, null, 55555, null));
                 default:
                     break;
             }
@@ -577,18 +618,12 @@ public final class NodeImpl implements Node {
                         System.out.println("Some error while unregistering.");
                         break;
                 }
-            } else if ("SER".equals(messageList[1])) {
-                String tempIP = messageList[2];
-                int TempPort = Integer.parseInt(messageList[3]);
-                String searchString = messageList[4];
-                int hashedID = Math.abs(searchString.hashCode());
-                if (hashedID > this.id) {
-                    System.out.println("Handle the request here / route");
-                } else {
-                    System.out.println("Handle the request here / route");
-                }
-            }
+            } 
         }
+    }
+
+    private int getHash(String text) {
+        return Math.abs(text.hashCode()) % MAX_NODES;
     }
 
     /* 

@@ -8,8 +8,8 @@ package View;
 import BootstrapServer.BootstrapServer;
 import Chord.Node;
 import Chord.NodeImpl;
-import java.net.BindException;
 import java.net.DatagramSocket;
+import java.net.BindException;
 import java.net.SocketException;
 
 /**
@@ -170,13 +170,13 @@ public class GUI extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jScrollPane2)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(search, javax.swing.GroupLayout.PREFERRED_SIZE, 425, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(search, javax.swing.GroupLayout.DEFAULT_SIZE, 425, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
                         .addComponent(jButton2)))
-                .addContainerGap(17, Short.MAX_VALUE))
+                .addGap(17, 17, 17))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -186,8 +186,8 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(search, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jScrollPane2)
+                .addContainerGap())
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -440,20 +440,21 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addContainerGap())
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jButton5))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE)
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(18, 18, 18))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 539, Short.MAX_VALUE)
+                                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(8, 8, 8)))
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -477,15 +478,12 @@ public class GUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void searchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchActionPerformed
-        // TODO add your handling code here:
+        jButton2ActionPerformed(evt);
     }//GEN-LAST:event_searchActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
         String fileName = search.getText();
-        System.out.println(fileName);
         node.search(fileName);
-        display.setText(fileName);
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -579,13 +577,15 @@ public class GUI extends javax.swing.JFrame {
         jTable2.setValueAt(temp.getPort(), index, 3);
     }
 
+    public void updateDisplay(String text) {
+        display.setText(display.getText() + "\n" + text);
+    }
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
         // TODO add your handling code here:
         int pno = Integer.parseInt(enterPort.getText());
         String BSHost = Textuser1.getText();
         int bsPort = Integer.parseInt(Textuser2.getText());
-        node = new NodeImpl(Textuser.getText(), node.getMyIP(), pno, BSHost, bsPort);
-        node.setGUI(this);
+        node = new NodeImpl(Textuser.getText(), node.getMyIP(), pno, BSHost, bsPort, this);
 
         IP.setText(node.getIp());
         PortNo.setText(String.valueOf(node.getPort()));
@@ -597,11 +597,11 @@ public class GUI extends javax.swing.JFrame {
         Textuser1.setEnabled(false);
         Textuser2.setEnabled(false);
 
-        if (isBSServerRunning(BSHost, bsPort)) {
+        if (isBSServerRunning(bsPort)) {
             jButton1.setEnabled(false);
         }
     }//GEN-LAST:event_jButton6ActionPerformed
-    private boolean isBSServerRunning(String host, int bsPort) {
+    boolean isBSServerRunning(int bsPort) {
         DatagramSocket sock = null;
         try {
             sock = new DatagramSocket(bsPort);
@@ -614,12 +614,14 @@ public class GUI extends javax.swing.JFrame {
             return true;
         }
     }
+
+
     private void enterPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enterPortActionPerformed
         jButton6ActionPerformed(evt);
     }//GEN-LAST:event_enterPortActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        UpdateSuccessor(new NodeImpl("Test", "192.101.10.10", 1111, "192.168.43.96", 55555));
+        UpdateSuccessor(new NodeImpl("Test", "192.101.10.10", 1111, "192.168.43.96", 55555, null));
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void TextuserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TextuserActionPerformed
