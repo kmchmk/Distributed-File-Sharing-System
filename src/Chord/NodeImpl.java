@@ -370,7 +370,6 @@ public final class NodeImpl implements Node {
                         Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
                         this.setSuccessor(tempSuccessor);
                         gui.echo(this.getPort() + ": my successor is :- " + this.successor.getIp() + ":" + this.successor.getPort());
-                        fingerFixer.setWaitingForSuccessor(false);
                         gui.echo("succ null");
                         ///send me as the successor for new node
                         String tempMsg = "US " + this.getIp() + " " + this.getPort();
@@ -491,17 +490,31 @@ public final class NodeImpl implements Node {
                     break;
 
                 case "FIND_S":   // find successor message from findSuccosser
-                    Node succosser = findSuccessorOf(Integer.parseInt(messageList[1]), Integer.parseInt(messageList[2]), messageList[3], Integer.parseInt(messageList[4]));
-                    if (succosser != null) {
-                        String response = "FIND_S_OK " + messageList[1] + " " + succosser.getIp() + " " + succosser.getPort();
-                        redirectMessage(response, new NodeImpl("", messageList[3], Integer.parseInt(messageList[4]), BSip, BSport, null));
+                    String originIP = messageList[3];
+                    int originPort = Integer.parseInt(messageList[4]);
+                    if (originIP.equals(ip) && originPort == port) {
+                        int fingerIndex = Integer.parseInt(messageList[1]);
+                        fingerTable.updateEntry(fingerIndex, this);
+                        this.gui.UpdateFingerTable(fingerIndex, fingerTable.getNodeAt(fingerIndex));
+                        System.out.println("FixFinger: Update finger " + fingerIndex + " of " + id + " to  " + fingerTable.getNodeAt(fingerIndex).getID());
+                        fingerFixer.setWaitingForReply(fingerIndex, false);
+                        fingerFixer.setLasFindSIssue(fingerIndex, System.currentTimeMillis());
+                    } else {
+                        Node succosser = findSuccessorOf(Integer.parseInt(messageList[1]), Integer.parseInt(messageList[2]), originIP, originPort, false);
+                        if (succosser != null) {
+                            String response = "FIND_S_OK " + messageList[1] + " " + succosser.getIp() + " " + succosser.getPort();
+                            redirectMessage(response, new NodeImpl("", messageList[3], Integer.parseInt(messageList[4]), BSip, BSport, null));
+                        }
                     }
                     break;
 
                 case "FIND_S_OK":   // reply to findSuccessor
-                    fingerFixer.setSuccossorReply(message.substring(10));
-                    fingerFixer.setWaitingForSuccessor(true);
-                    fingerFixer.interrupt();
+                    int fingerIndex = Integer.parseInt(messageList[1]);
+                    fingerTable.updateEntry(fingerIndex, new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), BSip, BSport, null));
+                    this.gui.UpdateFingerTable(fingerIndex, fingerTable.getNodeAt(fingerIndex));
+                    System.out.println("FixFinger: Update finger " + fingerIndex + " of " + id + " to  " + fingerTable.getNodeAt(fingerIndex).getID());
+                    fingerFixer.setWaitingForReply(fingerIndex, false);
+                    fingerFixer.setLasFindSIssue(fingerIndex, System.currentTimeMillis());
                     break;
 
                 case "HB":      // heartbeat
@@ -619,7 +632,7 @@ public final class NodeImpl implements Node {
                         gui.echo("Some error while unregistering.");
                         break;
                 }
-            } 
+            }
         }
     }
 
@@ -631,10 +644,8 @@ public final class NodeImpl implements Node {
        ask node n to find the successor of key
      */
     @Override
-    public Node findSuccessorOf(int finger, int key, String originIP, int originPort) {
-        if (this.successor == null) {
-            return null;
-        } else {
+    public Node findSuccessorOf(int finger, int key, String originIP, int originPort, boolean reqFromFingerFixer) {
+        if (this.successor != null) {
             int successorID = this.successor.getID();
             // this node and successor are in opposite side of 0
             if (successorID < this.id) {
@@ -646,20 +657,25 @@ public final class NodeImpl implements Node {
                 return this.successor;
             } else {
                 Node nextNode = this.fingerTable.getClosestPredecessorToKey(id, key);
-                if (nextNode != null) {
+                if (nextNode != null && nextNode.getID() != this.id) {
                     String message = "FIND_S " + finger + " " + key + " " + originIP + " " + originPort;
+                    if (reqFromFingerFixer) {
+                        this.fingerFixer.setWaitingForReply(finger, true);
+                        this.fingerFixer.setLasFindSIssue(finger, System.currentTimeMillis());
+                    }
                     redirectMessage(message, nextNode);
                 }
                 return null;
             }
-            return null;
         }
-
+        return null;
     }
 
     @Override
     public void echo(String output) {
-        gui.echo("The message received is: " + output + "\n");
+        if (gui != null) {
+            gui.echo("The message received is: " + output + "\n");
+        }
     }
 
 }

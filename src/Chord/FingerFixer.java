@@ -15,56 +15,53 @@ public class FingerFixer extends Thread {
 
     private Node thisNode;
     private FingerTable fingerTable;
-
-    private boolean waitingForSuccussor;
-    private String succossorReply;
+    private boolean[] waitingForReply;
+    private long[] lastFindSIssue;
 
     public FingerFixer(Node thisNode) {
         this.setName("FingerFixer-Thread");
         this.thisNode = thisNode;
         this.fingerTable = thisNode.getFingerTable();
+        this.waitingForReply = new boolean[NodeImpl.MAX_FINGERS];
+        this.lastFindSIssue = new long[NodeImpl.MAX_FINGERS];
     }
 
-    public void setSuccossorReply(String reply) {
-        this.succossorReply = reply;
+    public void setWaitingForReply(int index, boolean waitStatus) {
+        this.waitingForReply[index] = waitStatus;
     }
-    
-    public void setWaitingForSuccessor(boolean waitState){
-        this.waitingForSuccussor = waitState;
+
+    public void setLasFindSIssue(int index, long issueTime) {
+        this.lastFindSIssue[index] = issueTime;
     }
 
     @Override
     public void run() {
         while (true) {
             try {
-                Thread.sleep(1000);
-                this.thisNode.echo("FingerFixer running...\n");
-                if (!waitingForSuccussor) {
+                if (thisNode.getSuccessor() == null) {
+                    System.out.println("Successor is null. FingerFixer will run in 10 seconds");
+                    Thread.sleep(10 * 1000);
+                }
+                if (thisNode.getSuccessor() != null) {  // successor can still be null after wake
                     fingerToFixNext++;
                     if (fingerToFixNext >= NodeImpl.MAX_FINGERS) {
                         System.out.println("FingerFixer New iteration...");
                         Thread.sleep(5000);
                         fingerToFixNext = 0;
                     }
-                    Node fingerEntry = thisNode.findSuccessorOf(fingerToFixNext, (thisNode.getID() + (int) Math.pow(2, fingerToFixNext)) % NodeImpl.MAX_NODES, thisNode.getIp(), thisNode.getPort());
-                    if (fingerEntry == null) {
-                        waitingForSuccussor = true;
-                        Thread.sleep(60 * 1000);
-                    } else {
-                        System.out.println("FixFinger: Update finger " + fingerToFixNext + " of " + thisNode.getID() + " from  " + fingerTable.getNodeAt(fingerToFixNext).getID() + " to " + fingerEntry.getID());
-                        fingerTable.updateEntry(fingerToFixNext, fingerEntry);
-                        thisNode.getGUI().UpdateFingerTable(fingerToFixNext, fingerEntry);
+                    if (!waitingForReply[fingerToFixNext] || (waitingForReply[fingerToFixNext] && lastFindSIssue[fingerToFixNext] + 2 * 60 * 1000 < System.currentTimeMillis())) {
+                        this.waitingForReply[fingerToFixNext] = false;
+                        this.lastFindSIssue[fingerToFixNext] = System.currentTimeMillis();
+                        Node fingerEntry = thisNode.findSuccessorOf(fingerToFixNext, (thisNode.getID() + (int) Math.pow(2, fingerToFixNext)) % NodeImpl.MAX_NODES, thisNode.getIp(), thisNode.getPort(), true);
+                        if (fingerEntry != null) {
+                            System.out.println("FixFinger: Update finger " + fingerToFixNext + " of " + thisNode.getID() + " from  " + fingerTable.getNodeAt(fingerToFixNext).getID() + " to " + fingerEntry.getID());
+                            fingerTable.updateEntry(fingerToFixNext, fingerEntry);
+                            thisNode.getGUI().UpdateFingerTable(fingerToFixNext, fingerEntry);
+                        }
                     }
+                    Thread.sleep(10 * 1000);
                 }
             } catch (InterruptedException ex) {
-                if (waitingForSuccussor) {
-                    String[] replyParts = succossorReply.split(" ");
-                    int fingerIndex = Integer.parseInt(replyParts[0]);
-                    fingerTable.updateEntry(fingerIndex, new NodeImpl(null, replyParts[1], Integer.parseInt(replyParts[2]), thisNode.getBSip(), thisNode.getBSport(), null));
-                    thisNode.getGUI().UpdateFingerTable(fingerToFixNext, fingerTable.getNodeAt(fingerIndex));
-                    System.out.println("FixFinger: Update finger " + fingerIndex + " of " + thisNode.getID() + " to  " + fingerTable.getNodeAt(fingerIndex).getID());
-                    waitingForSuccussor = false;
-                }
             }
         }
     }
