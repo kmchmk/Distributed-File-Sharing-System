@@ -8,8 +8,8 @@ package View;
 import BootstrapServer.BootstrapServer;
 import Chord.Node;
 import Chord.NodeImpl;
-import java.net.BindException;
 import java.net.DatagramSocket;
+import java.net.BindException;
 import java.net.SocketException;
 
 /**
@@ -597,11 +597,11 @@ public class GUI extends javax.swing.JFrame {
         Textuser1.setEnabled(false);
         Textuser2.setEnabled(false);
 
-        if (isBSServerRunning(BSHost, bsPort)) {
+        if (isBSServerRunning(bsPort)) {
             jButton1.setEnabled(false);
         }
     }//GEN-LAST:event_jButton6ActionPerformed
-    private boolean isBSServerRunning(String host, int bsPort) {
+    boolean isBSServerRunning(int bsPort) {
         DatagramSocket sock = null;
         try {
             sock = new DatagramSocket(bsPort);
@@ -614,6 +614,8 @@ public class GUI extends javax.swing.JFrame {
             return true;
         }
     }
+
+
     private void enterPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enterPortActionPerformed
         jButton6ActionPerformed(evt);
     }//GEN-LAST:event_enterPortActionPerformed

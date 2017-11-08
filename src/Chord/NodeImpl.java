@@ -283,23 +283,16 @@ public final class NodeImpl implements Node {
     public void search(String searchString) {
         System.out.println("\n\n");
 
-        String reply = null; // dirty fix
-
-        String searchQuery = " " + "SER" + " " + ip + " " + Integer.toString(port) + " " + searchString;
+        String searchQuery = " " + "SER" + " " + ip + " " + port + " @" + searchString;
         int length = searchQuery.length() + 4;
 
         searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
         //asking from the first user
-        if (neighborList.size() > 0) {
-            //here, IP should be neighborList.get(0).getIP()
-            socketConnector.send(searchQuery, "localhost", neighborList.get(0).getPort());
-            System.out.println("Reply from first neighbor:- " + reply);
-        }
-        if (neighborList.size() > 1) {
-            //here, IP should be neighborList.get(0).getIP()
-            socketConnector.send(searchQuery, "localhost", neighborList.get(1).getPort());
-            System.out.println("Reply from second neighbor:- " + reply);
-        }
+        
+        //To Do
+        Node receiver = null;//this should be implemented
+        socketConnector.send(searchQuery, receiver.getIp(), receiver.getPort());
+
     }
 
     public String searchMetaData(String queryMessage) {
@@ -579,8 +572,8 @@ public final class NodeImpl implements Node {
                 }
             } else if ("SER".equals(messageList[1])) {
                 String tempIP = messageList[2];
-                int TempPort = Integer.parseInt(messageList[3]);
-                String searchString = messageList[4];
+                String TempPort = messageList[3];
+                String searchString = message.split("@")[1];
                 int hashedID = Math.abs(searchString.hashCode());
                 if (hashedID > this.id) {
                     System.out.println("Handle the request here / route");
