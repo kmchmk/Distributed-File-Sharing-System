@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Chord;
+package com.uom.chord;
 
 /**
  *
@@ -13,10 +13,16 @@ public class SimpleNeighbor {
 
     private final String ip;
     private final int port;
+    private final int id;
 
     public SimpleNeighbor(String ip, int port) {
         this.ip = ip;
         this.port = port;
+        this.id = Node.getHash(ip + port);
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getIp() {

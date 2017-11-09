@@ -47,43 +47,43 @@ public class FingerTable{
         this.fingerEntries[index] = node;
     }
 
-    public Node getClosestPredecessorToKey(int Destkey) {
-        int maxBeforeKey = Integer.MIN_VALUE;
-        int maxKeyIndex = -1;
-        boolean found = false;
-        Node ClosestPredecessor = null;
-
-        for (int i = 0; i < maxEntries; i++) {
-            int key = fingerEntries[i].getID();
-            if (key < Destkey && key > maxBeforeKey) {
-                maxBeforeKey = key;
-                maxKeyIndex = i;
-                found = true;
-            }
-        }
-
-        if (found) {
-            ClosestPredecessor = this.fingerEntries[maxKeyIndex];
-        }
-        if (ClosestPredecessor == null) {
-            System.out.println("NO PRED");
-        }
-        return ClosestPredecessor;
-    }
-
-    public Node getClosestPredecessorToKey(int myID, int destKey) {
-        for (int i = maxEntries - 1; i >= 0; i--) {
-            int fingerKey = fingerEntries[i].getID();
-            if (myID < destKey) {
-                if (fingerKey <= destKey) {
-                    return fingerEntries[i];
-                }
-            } else if ((myID < fingerKey && fingerKey < Node.MAX_NODES) || (0 <= fingerKey && fingerKey <= destKey)) {
-                return fingerEntries[i];
-            }
-        }
-        return null;
-    }
+//    public Node getClosestPredecessorToKey(int Destkey) {
+//        int maxBeforeKey = Integer.MIN_VALUE;
+//        int maxKeyIndex = -1;
+//        boolean found = false;
+//        Node ClosestPredecessor = null;
+//
+//        for (int i = 0; i < maxEntries; i++) {
+//            int key = fingerEntries[i].getID();
+//            if (key < Destkey && key > maxBeforeKey) {
+//                maxBeforeKey = key;
+//                maxKeyIndex = i;
+//                found = true;
+//            }
+//        }
+//
+//        if (found) {
+//            ClosestPredecessor = this.fingerEntries[maxKeyIndex];
+//        }
+//        if (ClosestPredecessor == null) {
+//            System.out.println("NO PRED");
+//        }
+//        return ClosestPredecessor;
+//    }
+//
+//    public Node getClosestPredecessorToKey(int myID, int destKey) {
+//        for (int i = maxEntries - 1; i >= 0; i--) {
+//            int fingerKey = fingerEntries[i].getID();
+//            if (myID < destKey) {
+//                if (fingerKey <= destKey) {
+//                    return fingerEntries[i];
+//                }
+//            } else if ((myID < fingerKey && fingerKey < Node.MAX_NODES) || (0 <= fingerKey && fingerKey <= destKey)) {
+//                return fingerEntries[i];
+//            }
+//        }
+//        return null;
+//    }
 
     /*@Override
     public void removeEntry(int key) {

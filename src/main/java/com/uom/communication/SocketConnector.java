@@ -75,18 +75,10 @@ public class SocketConnector implements Connector {
                     while (live) {
                         socket.receive(incomingPacket);
                         byte[] data = incomingPacket.getData();
-                        String incomingIP = incomingPacket.getAddress().getHostAddress();
-                        int incomingPort = incomingPacket.getPort();
+//                        String incomingIP = incomingPacket.getAddress().getHostAddress();
+//                        int incomingPort = incomingPacket.getPort();
                         String incomingMessage = new String(data, 0, incomingPacket.getLength());
-//                        myNode.getGUI().echo("Message Received: " + incomingMessage + " (from " + incomingIP + ":" + incomingPort + ")");
-
-//                        new Thread() {
-//                            public void run() {
-                        myNode.handleMessage(incomingMessage, incomingIP);
-//                        myNode.getGUI().echo("Message handled...");
-
-//                            }
-//                        }.start();
+                        myNode.handleMessage(incomingMessage);
                     }
                 } catch (SocketException ex) {
                     System.err.println(ex);
@@ -118,7 +110,7 @@ public class SocketConnector implements Connector {
             byte[] data = repl.getData();
             String reply = new String(data, 0, repl.getLength());
 
-            myNode.handleMessage(reply, repl.getAddress().getHostAddress());
+            myNode.handleMessage(reply);
 
         } catch (IOException e) {
             System.err.println("IOException " + e);

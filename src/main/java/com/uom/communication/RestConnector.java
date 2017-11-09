@@ -110,7 +110,7 @@ public class RestConnector implements Connector {
             byte[] data = repl.getData();
             String reply = new String(data, 0, repl.getLength());
 
-            myNode.handleMessage(reply, repl.getAddress().getHostAddress());
+            myNode.handleMessage(reply);
 
         } catch (IOException e) {
             System.err.println("IOException " + e);
