@@ -56,8 +56,6 @@ public final class Node {
         if (MainOrDummy) {
             this.BSip = BSip;
             this.BSport = BSport;
-//            fingerTable = new FingerTable(MAX_FINGERS);
-//            metaData = new HashMap<>();
             files = new ArrayList<>();
 
             this.connector = new SocketConnector(this);
@@ -76,6 +74,10 @@ public final class Node {
         System.out.println("I am " + this.id);
         populateWithFiles();
         this.connector.listen(port);
+    }
+
+    public ArrayList<String> getFiles() {
+        return files;
     }
 
     public String getIp() {
@@ -124,10 +126,6 @@ public final class Node {
         gui.UpdatePredecessor(predecessor);
     }
 
-    /**
-     *
-     * @return
-     */
     public GUI getGUI() {
         return this.gui;
     }
@@ -205,64 +203,9 @@ public final class Node {
         connector.sendToBS(unregisterMessage);
     }
 
-//    public void joinNetwork() {
-//
-//        sendMessageToSuccessor();
-////        sendMessageToPredecessor();//not implemented yet
-//    }
-//    public boolean leaveNetwork() {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    }
-//    public void sendMessageToSuccessor() {
-//        String message = "FS " + this.id + " " + this.ip + " " + this.port;
-//        this.connector.send(message, this.neighborList.get(0).getIp(), this.neighborList.get(0).getPort());
-////        echo("Sending message to neighbor (" + this.neighborList.get(0).getPort() + "), Routing to self (" + message + ")");
-//    }
-//    public void sendMessageToPredecessor() {
-//        //not implemented yet
-//    }
-//    public void search(String searchString) {
-//        String searchQuery = "SER" + " " + ip + " " + port + " @" + searchString;
-////        int length = searchQuery.length() + 4;
-//
-////        searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
-//        //check whether I have the file.
-//        if (files.contains(searchString)) {
-//            foundFile(searchString, this);
-//        } else if (this.searchMetaData(searchString) != null) {
-//            Node receiver = this.searchMetaData(searchString);
-//            gui.echo("Sending message: " + searchQuery + " (to " + receiver.getIp() + ":" + receiver.getPort() + ") - found this node in meta data");
-//            connector.send(searchQuery, receiver.getIp(), receiver.getPort());
-//        } //else do this
-//        else {
-//            Node receiver = null;
-//            int hashKey = getHash(searchString);
-//            receiver = fingerTable.getNode(hashKey);
-//            if (receiver == null) {
-//                receiver = fingerTable.getClosestPredecessorToKey(hashKey);
-//            }
-//            if (receiver == null) {
-//                receiver = this.successor;
-//            }
-//            if (receiver != null) {
-//                gui.echo("Sending message: " + searchQuery + " (to " + receiver.getIp() + ":" + receiver.getPort() + ")");
-//                connector.send(searchQuery, receiver.getIp(), receiver.getPort());
-//            } else {
-//                gui.updateDisplay("No receiver found");
-//            }
-//        }
-//    }
     private void foundFile(String searchString, Node result) {
         gui.updateDisplay("Found file \"" + searchString + "\" on node " + result.getIp() + " : " + result.getPort() + " (" + result.getUserName() + ")");
     }
-
-//    public Node searchMetaData(String file) {
-//        if (metaData.containsKey(file)) {
-//            return this.metaData.get(file);
-//        } else {
-//            return null;
-//        }
-//    }
 
     /*
     BS Messages:
@@ -328,66 +271,33 @@ public final class Node {
                     Node predecessor1 = new Node(messageList[4], messageList[1], messageList[2]);
                     this.setPredecessor(predecessor1);
                     break;
-//                case "SER":
-//                    gui.echo("Received: " + message);
-//                    String tempIP = messageList[1];
-//                    int TempPort = Integer.parseInt(messageList[2]);
-//                    String searchString = message.split("@")[1];
-//                    gui.echo("Search String: " + searchString);
-//                    //check whether I have the file.
-//                    if (files.contains(searchString)) {
-//                        gui.echo("file exists");
-//                        //notify the user
-//                        String searchQuery = "FOUND_FILE" + " " + this.ip + " " + this.port + " " + this.username + " @" + searchString;
-////                        int length = searchQuery.length() + 4;
-////
-////                        searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
-//
-//                        connector.send(searchQuery, tempIP, TempPort);
-//                    } else if (this.searchMetaData(searchString) != null) {
-//                        Node receiver = this.searchMetaData(searchString);
-//                        gui.echo("Sending message: " + message + " (to " + receiver.getIp() + ":" + receiver.getPort() + ") - found this node in meta data");
-//                        connector.send(message, receiver.getIp(), receiver.getPort());
-//                    } //else do this
-//                    else {
-//                        gui.echo("file not exist");
-//                        Node receiver = null;
-//                        int hashKey = getHash(searchString);
-//                        receiver = fingerTable.getNode(hashKey);
-//                        if (receiver == null) {
-//                            Node tempReceiver = fingerTable.getClosestPredecessorToKey(hashKey);
-//                            if (tempReceiver != null) {
-//                                int tempReceiverID = getHash(tempReceiver.getIp() + tempReceiver.getPort());
-//                                if (tempReceiverID > this.id) {//otherwise this could send to it self
-//                                    receiver = tempReceiver;
-//                                }
-//                            }
-//                        }
-//                        if (receiver == null) {
-//                            Node tempReceiver = this.successor;
-//                            int tempReceiverID = getHash(tempReceiver.getIp() + tempReceiver.getPort());
-//                            if (tempReceiverID <= hashKey && tempReceiverID != getHash(tempIP + TempPort)) {
-//                                System.out.println("tempReceiverID " + tempReceiverID);
-//                                System.out.println("DestinationID " + getHash(tempIP + TempPort));
-//                                receiver = tempReceiver;
-//                            }
-//                        }
-//
-//                        if (receiver != null) {
-//                            gui.echo("Sending message: " + message + " (to " + receiver.getIp() + ":" + receiver.getPort() + ")");
-//                            connector.send(message, receiver.getIp(), receiver.getPort());
-//                        } else {
-//                            gui.updateDisplay("No receiver found");
-//                        }
-//                    }
-//                    break;
+                case "SEARCH_UP":
+                    String fileUp = message.split("@")[1];
+                    if (this.getFiles().contains(fileUp)) {
+                        String found = "FOUND_FILE " + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName() + " @" + fileUp;
+                        connector.send(found, messageList[1], Integer.parseInt(messageList[2]));
+                    }
+                    if (this.getSuccessor() != null) {
+                        connector.send(message, this.getSuccessor().getIp(), this.getSuccessor().getPort());
+                    }
+                    break;
+                case "SEARCH_DOWN":
+                    String fileDown = message.split("@")[1];
+                    if (this.getFiles().contains(fileDown)) {
+                        String found = "FOUND_FILE " + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName() + " @" + fileDown;
+                        connector.send(found, messageList[1], Integer.parseInt(messageList[2]));
+                    }
+                    if (this.getPredecessor() != null) {
+                        connector.send(message, this.getPredecessor().getIp(), this.getPredecessor().getPort());
+                    }
+                    break;
                 case "FOUND_FILE":
-                    gui.echo(message);
-                    String resultIP = messageList[1];
-                    int resultPort = Integer.parseInt(messageList[2]);
-                    String resultUserName = messageList[3];
-                    String resultSearchText = message.split("@")[1];
-                    foundFile(resultSearchText, new Node(resultUserName, resultIP, resultPort, null, 55555, null, false));
+//                    String resultIP = messageList[1];
+//                    String resultPort = messageList[2];
+//                    String resultID = messageList[3];
+//                    String resultUserName = messageList[4];
+//                    String resultFile = message.split("@")[1];
+                    foundFile(message.split("@")[1], new Node(messageList[4], messageList[1], messageList[2]));
                     break;
 
                 default:
@@ -481,6 +391,24 @@ public final class Node {
     private void askToUpdatePredeccessor(Node receiver, Node predeccessor_) {
         String message = "UPDATE_PRED " + predeccessor_.getIp() + " " + predeccessor_.getPort() + " " + predeccessor_.getID() + " " + predeccessor_.getUserName();
         connector.send(message, receiver.getIp(), receiver.getPort());
+    }
+
+    public void search(String file) {
+        if (this.getFiles().contains(file)) {
+            foundFile(file);
+        }
+        String searchUp = "SEARCH_UP " + this.ip + " " + this.port + " @" + file;
+        if (this.getSuccessor() != null) {
+            connector.send(searchUp, this.getSuccessor().getIp(), this.getSuccessor().getPort());
+        }
+        String searchDown = "SEARCH_DOWN " + this.ip + " " + this.port + " @" + file;
+        if (this.getPredecessor() != null) {
+            connector.send(searchDown, this.getPredecessor().getIp(), this.getPredecessor().getPort());
+        }
+    }
+
+    private void foundFile(String file) {
+        System.out.println(file);
     }
 
 }
