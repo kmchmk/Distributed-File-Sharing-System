@@ -19,7 +19,7 @@ public interface Node {
 
     public void initialize();
 
-    public void routeMessge(String message, int key);
+//    public void routeMessge(String message, int key);
 
     public Node getSuccessor();
 

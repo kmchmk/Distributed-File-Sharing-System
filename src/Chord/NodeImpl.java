@@ -101,8 +101,10 @@ public final class NodeImpl implements Node {
 //        gui.echo("Init (" + this.username + ")");
         populateWithFiles();
         this.socketConnector.listen(port);
-        echo("initializing key:" + this.id);
+//        echo("initializing key:" + this.id);
 //        gui.echo("Start listening...(" + port + ") ");
+
+//        distributeFileMetadata();
     }
 
     @Override
@@ -172,25 +174,46 @@ public final class NodeImpl implements Node {
         return fingerTable;
     }
 
+    /**
+     *
+     * @return
+     */
+    @Override
     public GUI getGUI() {
         return this.gui;
     }
 
+    @Override
     public void setGUI(GUI gui) {
         this.gui = gui;
     }
 
-    private void distributeFileMetadata() {
+    public void distributeFileMetadata() {
         for (String file : files) {
-            int hash = getHash(file);
-            String message = "REGMD " + hash;
-//            gui.echo(message);
-            //routeMessge(message, hash);
+            int hashKey = getHash(file);
+            String message = "REGMD " + this.ip + " " + this.port + " " + this.username + " " + "@" + file;//register meta data
+            if (fingerTable == null) {
+                System.out.println("Finger Table is null");
+            }
+
+            Node receiver = fingerTable.getNode(hashKey);
+            if (receiver == null) {
+                receiver = fingerTable.getClosestPredecessorToKey(hashKey);
+            }
+            if (receiver == null) {
+                receiver = this.successor;
+            }
+            if (receiver != null) {
+                socketConnector.send(message, receiver.getIp(), receiver.getPort());
+            } else {
+                gui.echo("No receiver found for metadata distribution");
+            }
         }
     }
 
     private void insertFileMetadata(String file, Node Mnode) {
         this.metaData.put(file, Mnode);
+        gui.updateMetadataTable(file, Mnode);
     }
 
     public static String getMyIP() {
@@ -223,21 +246,19 @@ public final class NodeImpl implements Node {
         if (gui != null) {
             gui.updateFileLabel(text);
         }
-        distributeFileMetadata();
     }
 
-    @Override
-    public void routeMessge(String message, int key) {
-        Node next;
-        if ((next = fingerTable.getNode(key)) == null) {
-            next = fingerTable.getClosestPredecessorToKey(key);
-        }
-        if (next == null) {
-            next = this.successor;
-        }
-        redirectMessage(message, next);
-    }
-
+//    @Override
+//    public void routeMessges(String message, int key) {
+//        Node next;
+//        if ((next = fingerTable.getNode(key)) == null) {
+//            next = fingerTable.getClosestPredecessorToKey(key);
+//        }
+//        if (next == null) {
+//            next = this.successor;
+//        }
+//        redirectMessage(message, next);
+//    }
     public void registerToNetwork() {
 
         String registerMessage = " " + "REG" + " " + ip + " " + Integer.toString(port) + " " + username;
@@ -292,6 +313,10 @@ public final class NodeImpl implements Node {
         //check whether I have the file.
         if (files.contains(searchString)) {
             foundFile(searchString, this);
+        } else if (this.searchMetaData(searchString) != null) {
+            Node receiver = this.searchMetaData(searchString);
+            gui.echo("Sending message: " + searchQuery + " (to " + receiver.getIp() + ":" + receiver.getPort() + ") - found this node in meta data");
+            socketConnector.send(searchQuery, receiver.getIp(), receiver.getPort());
         } //else do this
         else {
             Node receiver = null;
@@ -344,8 +369,7 @@ public final class NodeImpl implements Node {
     length ERROR
      */
     @Override
-    public void handleMessage(String message, String incomingIP
-    ) {
+    public void handleMessage(String message, String incomingIP) {
 //        echo(message);//this is also implemented in listener
 
         String[] messageList = message.split(" ");
@@ -579,6 +603,10 @@ public final class NodeImpl implements Node {
 //                        searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
 
                         socketConnector.send(searchQuery, tempIP, TempPort);
+                    } else if (this.searchMetaData(searchString) != null) {
+                        Node receiver = this.searchMetaData(searchString);
+                        gui.echo("Sending message: " + message + " (to " + receiver.getIp() + ":" + receiver.getPort() + ") - found this node in meta data");
+                        socketConnector.send(message, receiver.getIp(), receiver.getPort());
                     } //else do this
                     else {
                         gui.echo("file not exist");
@@ -619,6 +647,30 @@ public final class NodeImpl implements Node {
                     String resultUserName = messageList[3];
                     String resultSearchText = message.split("@")[1];
                     foundFile(resultSearchText, new NodeImpl(resultUserName, resultIP, resultPort, null, 55555, null, false));
+                    break;
+
+                case "REGMD":
+                    gui.echo(message);
+                    String ownerIP = messageList[1];
+                    int ownerPort = Integer.parseInt(messageList[2]);
+                    String ownerName = messageList[3];
+                    String fileName = message.split("@")[1];
+                    int hashKey = getHash(fileName);
+                    insertFileMetadata(fileName, new NodeImpl(ownerName, ownerIP, ownerPort, null, 55555, null, false));
+
+                    Node receiver = fingerTable.getNode(hashKey);
+                    if (receiver == null) {
+                        receiver = fingerTable.getClosestPredecessorToKey(hashKey);
+                    }
+//                    if (receiver == null) {
+//                        receiver = this.successor;
+//                    }
+                    if (receiver != null) {
+                        socketConnector.send(message, receiver.getIp(), receiver.getPort());
+                    } else {
+                        gui.echo("No receiver found for metadata distribution");
+                    }
+
                     break;
                 default:
                     break;
