@@ -44,7 +44,7 @@ public final class NodeImpl implements Node {
 
     private ArrayList<SimpleNeighbor> neighborList;
 
-    private Map<Integer, String> metaData;//these are the pointers
+    private Map<String, Node> metaData;//these are the pointers
     private ArrayList<String> files;
 
     private Stabilizer stabilizer;
@@ -189,8 +189,8 @@ public final class NodeImpl implements Node {
         }
     }
 
-    private void insertFileMetadata(int key, String file) {
-        this.metaData.put(key, file);
+    private void insertFileMetadata(String file, Node Mnode) {
+        this.metaData.put(file, Mnode);
     }
 
     public static String getMyIP() {
@@ -215,7 +215,7 @@ public final class NodeImpl implements Node {
         for (int i = 0; i < 3; i++) {
             int rand = new Random().nextInt(filelist.size());
             String file = filelist.get(rand);
-            files.add(file);
+            files.add(file.toLowerCase());
             text += "My file " + getHash(file) + " is: " + file + "<br>";
             filelist.remove(rand);
         }
@@ -316,22 +316,12 @@ public final class NodeImpl implements Node {
         gui.updateDisplay("Found the file \"" + searchString + "\" on node " + result.getIp() + " : " + result.getPort() + " (" + result.getUserName() + ")");
     }
 
-    public String searchMetaData(String queryMessage) {
-        gui.echo(queryMessage);
-        String[] messageList = queryMessage.split(" ");
-
-        if ("SER".equals(messageList[1])) {
-
-            String queryWord = messageList[4];
-            gui.echo("Searching for (" + queryWord + ")");
-
-            if (metaData.containsKey(getHash(queryWord))) {
-                return ("Found - " + queryWord);
-            } else {
-                return ("Not found - " + queryWord);
-            }
+    public Node searchMetaData(String file) {
+        if (metaData.containsKey(file)) {
+            return this.metaData.get(file);
+        } else {
+            return null;
         }
-        return "Search query is in wrong format";
     }
 
     /*
@@ -354,7 +344,8 @@ public final class NodeImpl implements Node {
     length ERROR
      */
     @Override
-    public void handleMessage(String message, String incomingIP) {
+    public void handleMessage(String message, String incomingIP
+    ) {
 //        echo(message);//this is also implemented in listener
 
         String[] messageList = message.split(" ");
@@ -607,6 +598,8 @@ public final class NodeImpl implements Node {
                             Node tempReceiver = this.successor;
                             int tempReceiverID = getHash(tempReceiver.getIp() + tempReceiver.getPort());
                             if (tempReceiverID <= hashKey && tempReceiverID != getHash(tempIP + TempPort)) {
+                                System.out.println("tempReceiverID " + tempReceiverID);
+                                System.out.println("DestinationID " + getHash(tempIP + TempPort));
                                 receiver = tempReceiver;
                             }
                         }
