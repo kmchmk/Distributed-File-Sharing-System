@@ -45,7 +45,7 @@ public class FingerFixer extends Thread {
                 if (thisNode.getSuccessor() != null) {  // successor can still be null after wake
                     fingerToFixNext++;
                     if (fingerToFixNext >= NodeImpl.MAX_FINGERS) {
-                        System.out.println("FingerFixer New iteration...");
+//                        System.out.println("FingerFixer New iteration...");
                         Thread.sleep(5000);
                         fingerToFixNext = 0;
                     }
@@ -54,7 +54,7 @@ public class FingerFixer extends Thread {
                         this.lastFindSIssue[fingerToFixNext] = System.currentTimeMillis();
                         Node fingerEntry = thisNode.findSuccessorOf(fingerToFixNext, (thisNode.getID() + (int) Math.pow(2, fingerToFixNext)) % NodeImpl.MAX_NODES, thisNode.getIp(), thisNode.getPort(), true);
                         if (fingerEntry != null) {
-                            System.out.println("FixFinger: Update finger " + fingerToFixNext + " of " + thisNode.getID() + " from  " + fingerTable.getNodeAt(fingerToFixNext).getID() + " to " + fingerEntry.getID());
+//                            System.out.println("FixFinger: Update finger " + fingerToFixNext + " of " + thisNode.getID() + " from  " + fingerTable.getNodeAt(fingerToFixNext).getID() + " to " + fingerEntry.getID());
                             fingerTable.updateEntry(fingerToFixNext, fingerEntry);
                             thisNode.getGUI().UpdateFingerTable(fingerToFixNext, fingerEntry);
                         }

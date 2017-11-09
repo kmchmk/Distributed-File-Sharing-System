@@ -24,7 +24,16 @@ public class SocketConnector implements Connector {
     Thread listner;
     boolean live;
 
+    DatagramSocket sendSocket;
+
     public SocketConnector(Node myNode) {
+
+        try {
+            sendSocket = new DatagramSocket();
+        } catch (Exception ex) {
+            System.err.println("Error 0001");
+            System.err.println(ex);
+        }
         this.myNode = myNode;
     }
 
@@ -34,20 +43,19 @@ public class SocketConnector implements Connector {
 
     @Override
     public void send(String OutgoingMessage, String OutgoingIP, int OutgoingPort) {
-        System.out.println("Sending message is: " + OutgoingMessage + " (to " + OutgoingIP + ":" + OutgoingPort + ")");
+//        myNode.getGUI().echo("Sending message is: " + OutgoingMessage + " (to " + OutgoingIP + ":" + OutgoingPort + ")");
         try {
-
             byte[] bytes = OutgoingMessage.getBytes();
             //System.out.println(bytes.length);
             DatagramPacket packet = new DatagramPacket(bytes, bytes.length, InetAddress.getByName(OutgoingIP), OutgoingPort);
 
-            DatagramSocket socket = new DatagramSocket();
-            socket.send(packet);
+            sendSocket.send(packet);
 
+//        myNode.getGUI().echo("Message sent...");
         } catch (Exception ex) {
-            System.out.println(ex);
+            System.out.println("Error 00002");
+            System.err.println(ex);
         }
-        System.out.println("Message sent...");
     }
 
     @Override
@@ -69,12 +77,13 @@ public class SocketConnector implements Connector {
                         String incomingIP = incomingPacket.getAddress().getHostAddress();
                         int incomingPort = incomingPacket.getPort();
                         String incomingMessage = new String(data, 0, incomingPacket.getLength());
-                        System.out.println("Message Received: " + incomingMessage + " (from " + incomingIP + ":" + incomingPort + ")");
+//                        myNode.getGUI().echo("Message Received: " + incomingMessage + " (from " + incomingIP + ":" + incomingPort + ")");
 
 //                        new Thread() {
 //                            public void run() {
                         myNode.handleMessage(incomingMessage, incomingIP);
-                        System.out.println("Message handled...");
+//                        myNode.getGUI().echo("Message handled...");
+
 //                            }
 //                        }.start();
                     }

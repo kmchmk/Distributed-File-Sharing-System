@@ -38,7 +38,7 @@ public class Stabilizer extends Thread {
                     Thread.sleep(10 * 1000);
                 }
                 if (thisNode.getSuccessor() != null) {
-                    System.out.println("Stabilizing...\n");
+//                    System.out.println("Stabilizing...\n");
                     if (!predMsgSent) {
                         String msg = "GET_PRED " + thisNode.getIp() + " " + thisNode.getPort();
                         thisNode.redirectMessage(msg, thisNode.getSuccessor());
@@ -51,7 +51,7 @@ public class Stabilizer extends Thread {
                 if (predMsgSent) {
                     boolean notify = false;
                     if (newPredessor != null) {
-                        System.out.println("GET_PRED Success");
+//                        System.out.println("GET_PRED Success");
                         int predOfSuccessorID = newPredessor.getID();
                         int currentSuccessorID = thisNode.getSuccessor().getID();
                         // this node and successor are in opposite side of 0

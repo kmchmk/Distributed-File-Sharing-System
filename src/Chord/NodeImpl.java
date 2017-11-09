@@ -51,11 +51,7 @@ public final class NodeImpl implements Node {
     private FingerFixer fingerFixer;
     private PredecessorCheckor predecessorCheckor;
 
-    public NodeImpl(String username, String ip, int port, String BSip, int BSport, GUI gui) {
-        fingerTable = new FingertableImpl(MAX_FINGERS);
-        metaData = new HashMap<>();
-        files = new ArrayList<>();
-        neighborList = new ArrayList<>();
+    public NodeImpl(String username, String ip, int port, String BSip, int BSport, GUI gui, boolean MainOrDummy) {
 
         this.username = username;
         this.ip = ip;
@@ -64,13 +60,20 @@ public final class NodeImpl implements Node {
         this.BSport = BSport;
         this.id = getHash(this.ip + this.port);
 
-        this.socketConnector = new SocketConnector(this);
+        if (MainOrDummy) {
+            fingerTable = new FingertableImpl(MAX_FINGERS);
+            metaData = new HashMap<>();
+            files = new ArrayList<>();
+            neighborList = new ArrayList<>();
 
-        this.stabilizer = new Stabilizer(this);
-        this.fingerFixer = new FingerFixer(this);
-        this.predecessorCheckor = new PredecessorCheckor(this);
-        this.gui = gui;
-        initialize();
+            this.socketConnector = new SocketConnector(this);
+
+            this.stabilizer = new Stabilizer(this);
+            this.fingerFixer = new FingerFixer(this);
+            this.predecessorCheckor = new PredecessorCheckor(this);
+            this.gui = gui;
+            initialize();
+        }
     }
 
     public NodeImpl(String username, String ip, int port, boolean proxy) {
@@ -161,7 +164,7 @@ public final class NodeImpl implements Node {
     @Override
     public void redirectMessage(String message, Node next) {
         socketConnector.send(message, next.getIp(), next.getPort());
-        echo("redirecting message to: " + next.getPort() + "(" + message + ")");
+//        echo("redirecting message to: " + next.getPort() + "(" + message + ")");
     }
 
     @Override
@@ -282,13 +285,10 @@ public final class NodeImpl implements Node {
 //        //not implemented yet
 //    }
     public void search(String searchString) {
-        gui.echo("\n\n");
+        String searchQuery = "SER" + " " + ip + " " + port + " @" + searchString;
+//        int length = searchQuery.length() + 4;
 
-        String searchQuery = " " + "SER" + " " + ip + " " + port + " @" + searchString;
-        int length = searchQuery.length() + 4;
-
-        searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
-
+//        searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
         //check whether I have the file.
         if (files.contains(searchString)) {
             foundFile(searchString, this);
@@ -300,7 +300,11 @@ public final class NodeImpl implements Node {
             if (receiver == null) {
                 receiver = fingerTable.getClosestPredecessorToKey(hashKey);
             }
+            if (receiver == null) {
+                receiver = this.successor;
+            }
             if (receiver != null) {
+                gui.echo("Sending message: " + searchQuery + " (to " + receiver.getIp() + ":" + receiver.getPort() + ")");
                 socketConnector.send(searchQuery, receiver.getIp(), receiver.getPort());
             } else {
                 gui.updateDisplay("No receiver found");
@@ -357,7 +361,7 @@ public final class NodeImpl implements Node {
 
         if (null != messageList[0] && messageList.length > 1) {
 
-            //echo("message received: (" + messageList[0] + ")");
+//            echo("message received: (" + messageList[0] + ")");
             switch (messageList[0]) {
                 case "FS"://find successor
                     echo("message received: (" + messageList[0] + ")");
@@ -369,8 +373,8 @@ public final class NodeImpl implements Node {
                         //set new node as my successor
                         Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
                         this.setSuccessor(tempSuccessor);
-                        gui.echo(this.getPort() + ": my successor is :- " + this.successor.getIp() + ":" + this.successor.getPort());
-                        gui.echo("succ null");
+//                        gui.echo(this.getPort() + ": my successor is :- " + this.successor.getIp() + ":" + this.successor.getPort());
+//                        gui.echo("succ null");
                         ///send me as the successor for new node
                         String tempMsg = "US " + this.getIp() + " " + this.getPort();
                         socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
@@ -386,7 +390,7 @@ public final class NodeImpl implements Node {
 
                                 Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
                                 this.setSuccessor(tempSuccessor);
-                                gui.echo(this.getPort() + ": my successor is : " + this.successor.getPort());
+//                                gui.echo(this.getPort() + ": my successor is : " + this.successor.getPort());
 
                                 //request the finger tabel from my successor
                                 //"RFT <myIP> <myPort>"
@@ -395,43 +399,41 @@ public final class NodeImpl implements Node {
                                 gui.echo(this.getPort() + ": request finger table : (" + tempMsg + ")");*/
                                 routMessage = false;
                             }
-                        } else {
-                            if ((id < key && key < MAX_NODES) || (0 <= key && key < successor.getID())) {
-                                String tempMsg = "US " + successor.getIp() + " " + successor.getPort();
-                                socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
+                        } else if ((id < key && key < MAX_NODES) || (0 <= key && key < successor.getID())) {
+                            String tempMsg = "US " + successor.getIp() + " " + successor.getPort();
+                            socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
 
-                                Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
-                                this.setSuccessor(tempSuccessor);
-                                gui.echo(this.getPort() + ": my successor is : " + this.successor.getPort());
+                            Node tempSuccessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
+                            this.setSuccessor(tempSuccessor);
+//                            gui.echo(this.getPort() + ": my successor is : " + this.successor.getPort());
 
-                                //request the finger tabel from my successor
-                                //"RFT <myIP> <myPort>"
-                                /*tempMsg = "RFT " + this.getIp() + " " + this.getPort();
+                            //request the finger tabel from my successor
+                            //"RFT <myIP> <myPort>"
+                            /*tempMsg = "RFT " + this.getIp() + " " + this.getPort();
                                 socketConnector.send(tempMsg, incomingIP, Integer.parseInt(messageList[3]));
                                 gui.echo(this.getPort() + ": request finger table : (" + tempMsg + ")");*/
-                                routMessage = false;
-                            }
+                            routMessage = false;
                         }
-                        if (routMessage){
+                        if (routMessage) {
                             Node next = fingerTable.getClosestPredecessorToKey(id, key);
-                            if (next != null){
-                                if (next.getID() == id){
+                            if (next != null) {
+                                if (next.getID() == id) {
                                     String tempMsg = "US " + ip + " " + port;
-                                socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
+                                    socketConnector.send(tempMsg, messageList[2], Integer.parseInt(messageList[3]));
 
-                                Node tempPredecessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
-                                this.setPredecessor(tempPredecessor);
-                                gui.echo(this.getPort() + ": my predecessor is : " + this.predecessor.getPort());
+                                    Node tempPredecessor = new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), true);
+                                    this.setPredecessor(tempPredecessor);
+//                                    gui.echo(this.getPort() + ": my predecessor is : " + this.predecessor.getPort());
 
-                                //request the finger tabel from my successor
-                                //"RFT <myIP> <myPort>"
-                                /*tempMsg = "RFT " + this.getIp() + " " + this.getPort();
+                                    //request the finger tabel from my successor
+                                    //"RFT <myIP> <myPort>"
+                                    /*tempMsg = "RFT " + this.getIp() + " " + this.getPort();
                                 socketConnector.send(tempMsg, incomingIP, Integer.parseInt(messageList[3]));
                                 gui.echo(this.getPort() + ": request finger table : (" + tempMsg + ")");*/
-                                }else{
+                                } else {
                                     socketConnector.send(message, next.getIp(), next.getPort());
                                 }
-                            }else{
+                            } else {
                                 System.err.println("Couldn't find a succosser for " + message);
                             }
                         }
@@ -443,14 +445,14 @@ public final class NodeImpl implements Node {
 
                     Node tempSuccessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), true);
                     this.setSuccessor(tempSuccessor);
-                    gui.echo(this.getPort() + ": my successor is : " + this.successor.getPort());
+//                    gui.echo(this.getPort() + ": my successor is : " + this.successor.getPort());
                     new Thread() {
                         public void run() {
                             try {
                                 Thread.sleep(1000);
                                 String tempRFTMsg = "RFT " + ip + " " + port;
                                 socketConnector.send(tempRFTMsg, incomingIP, Integer.parseInt(messageList[2]));
-                                gui.echo(port + ": request finger table : (" + tempRFTMsg + ")");
+//                                gui.echo(port + ": request finger table : (" + tempRFTMsg + ")");
                             } catch (InterruptedException ex) {
                                 ex.printStackTrace();
                             }
@@ -477,7 +479,7 @@ public final class NodeImpl implements Node {
                         tempMsg += entry.getIp() + " " + entry.getPort() + " ";
                     }
                     socketConnector.send(tempMsg, messageList[1], Integer.parseInt(messageList[2]));
-                    gui.echo(this.getPort() + ": sending finger table to : " + messageList[2] + " (" + tempMsg + ")");
+//                    gui.echo(this.getPort() + ": sending finger table to : " + messageList[2] + " (" + tempMsg + ")");
                     break;
                 case "UFT"://update finger table
                     echo("message received: (" + messageList[0] + ")");
@@ -496,18 +498,18 @@ public final class NodeImpl implements Node {
                     break;
                 case "NOTIFY_S":    // notify succoessor
 
-                    Node tempPredecessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport(), null);
+                    Node tempPredecessor = new NodeImpl(null, messageList[1], Integer.parseInt(messageList[2]), this.getBSip(), this.getBSport(), null, false);
                     if (predecessor == null) {
                         this.setPredecessor(tempPredecessor);
-                        gui.echo("NOTIFY_S: Update predecessor of " + id + " to " + tempPredecessor.getID());
+//                        gui.echo("NOTIFY_S: Update predecessor of " + id + " to " + tempPredecessor.getID());
                     } else if (predecessor.getID() > this.id) {
                         if ((predecessor.getID() < tempPredecessor.getID() && tempPredecessor.getID() < MAX_NODES)
                                 || (0 <= tempPredecessor.getID() && tempPredecessor.getID() < this.id)) {
-                            gui.echo("NOTIFY_S: Update predecessor of " + id + " from  " + predecessor.getID() + " to " + tempPredecessor.getID());
+//                            gui.echo("NOTIFY_S: Update predecessor of " + id + " from  " + predecessor.getID() + " to " + tempPredecessor.getID());
                             this.setPredecessor(tempPredecessor);
                         }
                     } else if (predecessor.getID() < tempPredecessor.getID() && tempPredecessor.getID() < this.id) {
-                        gui.echo("NOTIFY_S: Update predecessor of " + id + " from  " + predecessor.getID() + " to " + tempPredecessor.getID());
+//                        gui.echo("NOTIFY_S: Update predecessor of " + id + " from  " + predecessor.getID() + " to " + tempPredecessor.getID());
                         this.setPredecessor(tempPredecessor);
                     }
                     break;
@@ -519,12 +521,12 @@ public final class NodeImpl implements Node {
                     } else {
                         rep += "NULL";
                     }
-                    redirectMessage(rep, new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport, null));
+                    redirectMessage(rep, new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport, null, false));
                     break;
 
                 case "GET_PRED_OK":     // respond from get predecessor request
                     if (!messageList[1].equals("NULL")) {
-                        Node newPred = new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport, null);
+                        Node newPred = new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport, null, false);
                         stabilizer.setNewPredessor(newPred);
                     } else {
                         stabilizer.setNullPredecessor(true);
@@ -546,14 +548,14 @@ public final class NodeImpl implements Node {
                         Node succosser = findSuccessorOf(Integer.parseInt(messageList[1]), Integer.parseInt(messageList[2]), originIP, originPort, false);
                         if (succosser != null) {
                             String response = "FIND_S_OK " + messageList[1] + " " + succosser.getIp() + " " + succosser.getPort();
-                            redirectMessage(response, new NodeImpl("", messageList[3], Integer.parseInt(messageList[4]), BSip, BSport, null));
+                            redirectMessage(response, new NodeImpl("", messageList[3], Integer.parseInt(messageList[4]), BSip, BSport, null, false));
                         }
                     }
                     break;
 
                 case "FIND_S_OK":   // reply to findSuccessor
                     int fingerIndex = Integer.parseInt(messageList[1]);
-                    fingerTable.updateEntry(fingerIndex, new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), BSip, BSport, null));
+                    fingerTable.updateEntry(fingerIndex, new NodeImpl(null, messageList[2], Integer.parseInt(messageList[3]), BSip, BSport, null, false));
                     this.gui.UpdateFingerTable(fingerIndex, fingerTable.getNodeAt(fingerIndex));
                     System.out.println("FixFinger: Update finger " + fingerIndex + " of " + id + " to  " + fingerTable.getNodeAt(fingerIndex).getID());
                     fingerFixer.setWaitingForReply(fingerIndex, false);
@@ -561,46 +563,70 @@ public final class NodeImpl implements Node {
                     break;
 
                 case "HB":      // heartbeat
-                    gui.echo("HB recieved. Sending HB_OK");
-                    redirectMessage("HB_OK", new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport, null));
+//                    gui.echo("HB recieved. Sending HB_OK");
+                    redirectMessage("HB_OK", new NodeImpl("", messageList[1], Integer.parseInt(messageList[2]), BSip, BSport, null, false));
                     break;
 
                 case "HB_OK":
-                    gui.echo("HB_OK received");
+//                    gui.echo("HB_OK received");
                     predecessorCheckor.setPredecessorHBOK(true);
                     break;
 
                 case "SER":
-                    String tempIP = messageList[2];
-                    int TempPort = Integer.parseInt(messageList[3]);
+                    gui.echo("Received: " + message);
+                    String tempIP = messageList[1];
+                    int TempPort = Integer.parseInt(messageList[2]);
                     String searchString = message.split("@")[1];
+                    gui.echo("Search String: " + searchString);
                     //check whether I have the file.
                     if (files.contains(searchString)) {
+                        gui.echo("file exists");
                         //notify the user
-                        String searchQuery = " " + "FOUND_FILE" + " " + this.ip + " " + this.port + " " + this.username + " @" + searchString;
-                        int length = searchQuery.length() + 4;
-
-                        searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
+                        String searchQuery = "FOUND_FILE" + " " + this.ip + " " + this.port + " " + this.username + " @" + searchString;
+//                        int length = searchQuery.length() + 4;
+//
+//                        searchQuery = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + Integer.toString(length) + searchQuery;
 
                         socketConnector.send(searchQuery, tempIP, TempPort);
                     } //else do this
                     else {
+                        gui.echo("file not exist");
                         Node receiver = null;
                         int hashKey = getHash(searchString);
-                        if (fingerTable.getNode(hashKey) != null) {
-                            receiver = fingerTable.getNode(hashKey);
-                        } else {
-                            receiver = fingerTable.getClosestPredecessorToKey(hashKey);
+                        receiver = fingerTable.getNode(hashKey);
+                        if (receiver == null) {
+                            Node tempReceiver = fingerTable.getClosestPredecessorToKey(hashKey);
+                            if (tempReceiver != null) {
+                                int tempReceiverID = getHash(tempReceiver.getIp() + tempReceiver.getPort());
+                                if (tempReceiverID > this.id) {//otherwise this could send to it self
+                                    receiver = tempReceiver;
+                                }
+                            }
                         }
-                        socketConnector.send(message, receiver.getIp(), receiver.getPort());
+                        if (receiver == null) {
+                            Node tempReceiver = this.successor;
+                            int tempReceiverID = getHash(tempReceiver.getIp() + tempReceiver.getPort());
+                            if (tempReceiverID <= hashKey && tempReceiverID != getHash(tempIP + TempPort)) {
+                                receiver = tempReceiver;
+                            }
+                        }
+
+                        if (receiver != null) {
+                            gui.echo("Sending message: " + message + " (to " + receiver.getIp() + ":" + receiver.getPort() + ")");
+                            socketConnector.send(message, receiver.getIp(), receiver.getPort());
+                        } else {
+                            gui.updateDisplay("No receiver found");
+                        }
                     }
                     break;
                 case "FOUND_FILE":
-                    String resultIP = messageList[2];
-                    int resultPort = Integer.parseInt(messageList[3]);
-                    String resultUserName = messageList[4];
+                    gui.echo(message);
+                    String resultIP = messageList[1];
+                    int resultPort = Integer.parseInt(messageList[2]);
+                    String resultUserName = messageList[3];
                     String resultSearchText = message.split("@")[1];
-                    foundFile(resultSearchText, new NodeImpl(resultUserName, resultIP, resultPort, null, 55555, null));
+                    foundFile(resultSearchText, new NodeImpl(resultUserName, resultIP, resultPort, null, 55555, null, false));
+                    break;
                 default:
                     break;
             }
