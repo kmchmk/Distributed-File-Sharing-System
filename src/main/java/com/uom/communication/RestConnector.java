@@ -68,13 +68,23 @@ public class RestConnector implements Connector {
     }
 
     @Override
-    public void send(String msg, String ip, int port) {
+    public void send(String OutgoingMessage, String OutgoingIP, String OutgoingPort) {
+        send(OutgoingMessage, OutgoingIP, Integer.parseInt(OutgoingPort));
+    }
+
+    @Override
+    public void send(String OutgoingMessage, Node destination) {
+        send(OutgoingMessage, destination.getIp(), destination.getPort());
+    }
+
+    @Override
+    public void send(String OutgoingMessage, String OutgoingIP, int OutgoingPort) {
         UriBuilder url = UriBuilder.fromPath("rest")
-                .path(msg)
+                .path(OutgoingMessage)
                 .scheme("http")
-                .host(ip)
-                .port(port);
-        System.out.println("Sending REST message: " + msg);
+                .host(OutgoingIP)
+                .port(OutgoingPort);
+        System.out.println("Sending REST message: " + OutgoingMessage);
 //        System.out.println(url.toString());
 
         Client client = JerseyClientBuilder.createClient();
@@ -82,10 +92,10 @@ public class RestConnector implements Connector {
         String response = client.target(url)
                 .request(MediaType.APPLICATION_JSON)
                 .get(String.class);
-        
+
         if (response.equals(Response.Status.OK.toString())) {
             System.out.println("Message Successfully Sent.");
-        }else{
+        } else {
             System.out.println("Message did not delivered.");
         }
     }

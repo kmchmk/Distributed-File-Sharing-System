@@ -30,7 +30,7 @@ public class SocketConnector implements Connector {
 
         try {
             sendSocket = new DatagramSocket();
-        } catch (SocketException ex){
+        } catch (SocketException ex) {
             System.err.println("Error 0001");
             System.err.println(ex);
         }
@@ -42,8 +42,20 @@ public class SocketConnector implements Connector {
     }
 
     @Override
+    public void send(String OutgoingMessage, String OutgoingIP, String OutgoingPort) {
+        send(OutgoingMessage, OutgoingIP, Integer.parseInt(OutgoingPort));
+    }
+
+    @Override
+    public void send(String OutgoingMessage, Node destination) {
+        if (destination != null) {
+            send(OutgoingMessage, destination.getIp(), destination.getPort());
+        }
+    }
+
+    @Override
     public void send(String OutgoingMessage, String OutgoingIP, int OutgoingPort) {
-        
+
         System.out.println("Sending: " + OutgoingMessage);
 
         try {
@@ -79,7 +91,7 @@ public class SocketConnector implements Connector {
 //                        String incomingIP = incomingPacket.getAddress().getHostAddress();
 //                        int incomingPort = incomingPacket.getPort();
                         String incomingMessage = new String(data, 0, incomingPacket.getLength());
-                        System.out.println("Received: "+incomingMessage);
+                        System.out.println("Received: " + incomingMessage);
                         myNode.handleMessage(incomingMessage);
                     }
                 } catch (SocketException ex) {

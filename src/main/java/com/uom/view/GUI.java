@@ -5,7 +5,7 @@
  */
 package com.uom.view;
 
-import BootstrapServer.BootstrapServer;
+import com.uom.bootstrapServer.BootstrapServer;
 import com.uom.chord.Node;
 import java.net.DatagramSocket;
 import java.net.BindException;
@@ -584,7 +584,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         node.registerToNetwork();
-        
+
         jButton3.setEnabled(false);
         search.setEnabled(true);
         jButton2.setEnabled(true);
@@ -616,6 +616,31 @@ public class GUI extends javax.swing.JFrame {
         jLabel15.setText(text);
     }
 
+    private void createNode(boolean socketOrRest, java.awt.event.ActionEvent evt) {
+        int Port = Integer.parseInt(enterPort.getText());
+        String BSHost = Textuser1.getText();
+        int BSPort = Integer.parseInt(Textuser2.getText());
+
+        node = new Node(Node.getMyIP(), Port, Textuser.getText(), BSHost, BSPort, this, true, socketOrRest);
+
+        IP.setText(node.getIp());
+        PortNo.setText(String.valueOf(node.getPort()));
+        name.setText(node.getUserName());
+        ID.setText(String.valueOf(node.getID()));
+        jButton6.setEnabled(false);
+        jButton7.setEnabled(false);
+        enterPort.setEnabled(false);
+        Textuser.setEnabled(false);
+        Textuser1.setEnabled(false);
+        Textuser2.setEnabled(false);
+
+        if (isBSServerRunning(BSPort)) {
+            jButton1.setEnabled(false);
+            jButton3ActionPerformed(evt);
+        } else {
+            jButton3.setEnabled(true);
+        }
+    }
 //    public void updateMetadataTable(String file, Map<String, Node> metaData) {
 //        DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
 //
@@ -629,32 +654,9 @@ public class GUI extends javax.swing.JFrame {
 //        }
 //
 //    }
-    public void echo(String text) {
-        System.out.println(text);
-    }
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-        // TODO add your handling code here:
-        int Port = Integer.parseInt(enterPort.getText());
-        String BSHost = Textuser1.getText();
-        int BSPort = Integer.parseInt(Textuser2.getText());
-
-        node = new Node(Textuser.getText(), Node.getMyIP(), Port, BSHost, BSPort, this, true, true);
-
-        IP.setText(node.getIp());
-        PortNo.setText(String.valueOf(node.getPort()));
-        name.setText(node.getUserName());
-        ID.setText(String.valueOf(node.getID()));
-        jButton6.setEnabled(false);
-        enterPort.setEnabled(false);
-        Textuser.setEnabled(false);
-        Textuser1.setEnabled(false);
-        Textuser2.setEnabled(false);
-
-        if (isBSServerRunning(BSPort)) {
-            jButton1.setEnabled(false);
-        }
-        jButton3.setEnabled(true);
+        createNode(true, evt);
     }//GEN-LAST:event_jButton6ActionPerformed
     boolean isBSServerRunning(int bsPort) {
         DatagramSocket sock = null;
@@ -688,27 +690,7 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_Textuser2ActionPerformed
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
-               // TODO add your handling code here:
-        int Port = Integer.parseInt(enterPort.getText());
-        String BSHost = Textuser1.getText();
-        int BSPort = Integer.parseInt(Textuser2.getText());
-
-        node = new Node(Textuser.getText(), Node.getMyIP(), Port, BSHost, BSPort, this, true, false);
-
-        IP.setText(node.getIp());
-        PortNo.setText(String.valueOf(node.getPort()));
-        name.setText(node.getUserName());
-        ID.setText(String.valueOf(node.getID()));
-        jButton6.setEnabled(false);
-        enterPort.setEnabled(false);
-        Textuser.setEnabled(false);
-        Textuser1.setEnabled(false);
-        Textuser2.setEnabled(false);
-
-        if (isBSServerRunning(BSPort)) {
-            jButton1.setEnabled(false);
-        }
-        jButton3.setEnabled(true);
+        createNode(false, evt);
     }//GEN-LAST:event_jButton7ActionPerformed
 
     /**
