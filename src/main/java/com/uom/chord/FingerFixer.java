@@ -11,32 +11,22 @@ package com.uom.chord;
  */
 public class FingerFixer extends Thread {
 
-//    private static int fingerToFixNext = -1;
     private final Node thisNode;
     private FingerTable fingerTable;
-//    private final boolean[] waitingForReply;
-//    private final long[] lastFindSIssue;
-//    boolean fileDistributed;
 
     public FingerFixer(Node thisNode) {
-//        this.setName("FingerFixer-Thread");
         this.thisNode = thisNode;
-//        this.fingerTable = thisNode.getFingerTable();
-//        this.waitingForReply = new boolean[Node.MAX_FINGERS];
-//        this.lastFindSIssue = new long[Node.MAX_FINGERS];
-//        this.fileDistributed = false;
     }
 
-//    public void setWaitingForReply(int index, boolean waitStatus) {
-//        this.waitingForReply[index] = waitStatus;
-//    }
-//
-//    public void setLasFindSIssue(int index, long issueTime) {
-//        this.lastFindSIssue[index] = issueTime;
-//    }
     @Override
     public void run() {
         while (true) {
+            String heartBeatUp = "HEARTBEAT_UP "+thisNode.getIp()+" "+thisNode.getPort()+" "+thisNode.getID()+ " "+thisNode.getUserName()+ " 0";
+            ;
+//            send beat to down;
+            
+            
+            
 //            try {
 //                if (thisNode.getSuccessor() == null) {
 //                    System.out.println("Successor is null. FingerFixer will run in 10 seconds");

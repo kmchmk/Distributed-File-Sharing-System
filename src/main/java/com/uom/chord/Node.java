@@ -5,6 +5,7 @@
  */
 package com.uom.chord;
 
+import com.uom.communication.Connector;
 import com.uom.communication.SocketConnector;
 import com.uom.view.GUI;
 import java.net.DatagramSocket;
@@ -35,8 +36,7 @@ public final class Node {
     private final String username;
     private final int id;
 
-    private SocketConnector connector;
-//    private RestConnector connector;
+    private Connector connector;
 
     private FingerTable successorFingerTable;
     private FingerTable predecessorFingerTable;
@@ -126,6 +126,10 @@ public final class Node {
 
     public GUI getGUI() {
         return this.gui;
+    }
+
+    public Connector getConnector() {
+        return connector;
     }
 
     public void setGUI(GUI gui) {
