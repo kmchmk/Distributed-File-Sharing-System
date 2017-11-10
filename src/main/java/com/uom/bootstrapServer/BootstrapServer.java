@@ -10,9 +10,9 @@ import java.util.StringTokenizer;
 
 public class BootstrapServer {
 
-    public static void main(String[] args) {
-        runBootstrapServer();
-    }
+//    public static void main(String[] args) {
+//        runBootstrapServer();
+//    }
 
     public static void runBootstrapServer() {
         DatagramSocket sock = null;

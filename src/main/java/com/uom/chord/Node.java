@@ -6,6 +6,7 @@
 package com.uom.chord;
 
 import com.uom.communication.Connector;
+import com.uom.communication.RestConnector;
 import com.uom.communication.SocketConnector;
 import com.uom.view.GUI;
 import static java.lang.System.exit;
@@ -48,7 +49,7 @@ public final class Node {
     private Node predecessor;
     private FingerFixer fingerFixer;
 
-    public Node(String username, String ip, int port, String BSip, int BSport, GUI gui, boolean MainOrDummy) {
+    public Node(String username, String ip, int port, String BSip, int BSport, GUI gui, boolean MainOrDummy, boolean SocketOrRest) {
 
         this.username = username;
         this.ip = ip;
@@ -61,8 +62,11 @@ public final class Node {
             this.BSport = BSport;
             files = new ArrayList<>();
 
+            if(SocketOrRest){
             this.connector = new SocketConnector(this);
-//            this.connector = new RestConnector(this);
+            }else{
+            this.connector = new RestConnector(this);
+            }
 
             this.successors = new Node[4];
             this.predeccessors = new Node[4];
@@ -74,7 +78,7 @@ public final class Node {
     }
 
     public Node(String username, String ip, String port) {
-        this(username, ip, Integer.parseInt(port), null, 55555, null, false);
+        this(username, ip, Integer.parseInt(port), null, 55555, null, false, true);
     }
 
     public void initialize() {
