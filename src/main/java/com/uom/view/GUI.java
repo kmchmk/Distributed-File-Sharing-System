@@ -574,7 +574,6 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton4ActionPerformed
 
     public void UpdateSuccessor(int index, Node succ) {
-        System.out.println(index);
         successorTable.setValueAt(succ == null ? "" : succ.getID(), index, 1);
         successorTable.setValueAt(succ == null ? "" : succ.getIp(), index, 2);
         successorTable.setValueAt(succ == null ? "" : succ.getPort(), index, 3);

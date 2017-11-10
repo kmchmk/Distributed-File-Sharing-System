@@ -118,13 +118,13 @@ public final class Node {
     public void setSuccessor(Node successor) {
         this.successor = successor;
         this.successors[0] = successor;
-        gui.UpdateSuccessor(0,successor);
+        gui.UpdateSuccessor(0, successor);
     }
 
     public void setPredecessor(Node predecessor) {
         this.predecessor = predecessor;
         this.predeccessors[0] = predecessor;
-        gui.UpdatePredecessor(0,predecessor);
+        gui.UpdatePredecessor(0, predecessor);
     }
 
     public GUI getGUI() {
@@ -298,26 +298,24 @@ public final class Node {
                     break;
 
                 case "HEARTBEAT_UP":
-                    System.out.println("HEARTBEAT_UP");
                     int indexUp = Integer.parseInt(messageList[5]);
                     if (indexUp > 0) {
-                        String present = "PRESENT_UP" + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName() + " " + indexUp;
+                        String present = "PRESENT_UP " + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName() + " " + indexUp;
                         connector.send(present, messageList[1], Integer.parseInt(messageList[2]));
                     }
-                    if (this.getSuccessor() != null) {
+                    if (this.getSuccessor() != null && indexUp < 3) {
                         String nextHeartBeat = messageList[0] + " " + messageList[1] + " " + messageList[2] + " " + messageList[3] + " " + messageList[4] + " " + (indexUp + 1);
                         connector.send(nextHeartBeat, this.getSuccessor().getIp(), this.getSuccessor().getPort());
                     }
 
                     break;
                 case "HEARTBEAT_DOWN":
-                    System.out.println("HEARTBEAT_DOWN");
                     int indexDown = Integer.parseInt(messageList[5]);
                     if (indexDown > 0) {
-                        String present = "PRESENT_DOWN" + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName() + " " + indexDown;
+                        String present = "PRESENT_DOWN " + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName() + " " + indexDown;
                         connector.send(present, messageList[1], Integer.parseInt(messageList[2]));
                     }
-                    if (this.getPredecessor() != null) {
+                    if (this.getPredecessor() != null  && indexDown < 3) {
                         String nextHeartBeat = messageList[0] + " " + messageList[1] + " " + messageList[2] + " " + messageList[3] + " " + messageList[4] + " " + (indexDown + 1);
                         connector.send(nextHeartBeat, this.getPredecessor().getIp(), this.getPredecessor().getPort());
                     }
@@ -395,7 +393,6 @@ public final class Node {
                         break;
                 }
             } else if ("UNROK".equals(messageList[1])) {
-                //("message received: (" + messageList[1] + ")");
                 switch (messageList[2]) {
                     case "0":
                         gui.echo("Successfully unregistered.\n");
@@ -494,10 +491,12 @@ public final class Node {
             predeccessors[i] = null;
         }
     }
+
     private void updateExistingSuccessor(int index, Node existingSuccessor) {
         gui.UpdateSuccessor(index, existingSuccessor);
         this.getSuccessors()[index] = existingSuccessor;
     }
+
     private void updateExistingPredecessor(int index, Node existingPredecessor) {
         gui.UpdatePredecessor(index, existingPredecessor);
         this.getPredeccessors()[index] = existingPredecessor;
