@@ -28,8 +28,7 @@ public class RestConnector implements Connector {
         this.myNode = myNode;
     }
 
-    @Override
-    public void stop() {
+    public void kill() {
         if (started) {
             started = false;
             try {

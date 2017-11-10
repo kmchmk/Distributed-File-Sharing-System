@@ -254,6 +254,7 @@ public class GUI extends javax.swing.JFrame {
         jLabel2.setText("Bootstrap Server");
 
         jButton3.setText("Register");
+        jButton3.setEnabled(false);
         jButton3.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jButton3MouseClicked(evt);
@@ -266,6 +267,7 @@ public class GUI extends javax.swing.JFrame {
         });
 
         jButton4.setText("Unregister");
+        jButton4.setEnabled(false);
         jButton4.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jButton4MouseClicked(evt);
@@ -544,6 +546,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }.start();
         jButton1.setEnabled(false);
+        jButton3.setEnabled(true);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton3MouseClicked
@@ -567,6 +570,7 @@ public class GUI extends javax.swing.JFrame {
         jButton3.setEnabled(false);
         search.setEnabled(true);
         jButton2.setEnabled(true);
+        jButton4.setEnabled(true);
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
@@ -632,6 +636,7 @@ public class GUI extends javax.swing.JFrame {
         if (isBSServerRunning(BSPort)) {
             jButton1.setEnabled(false);
         }
+        jButton3.setEnabled(true);
     }//GEN-LAST:event_jButton6ActionPerformed
     boolean isBSServerRunning(int bsPort) {
         DatagramSocket sock = null;

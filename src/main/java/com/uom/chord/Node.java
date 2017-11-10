@@ -8,6 +8,7 @@ package com.uom.chord;
 import com.uom.communication.Connector;
 import com.uom.communication.SocketConnector;
 import com.uom.view.GUI;
+import static java.lang.System.exit;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -40,6 +42,8 @@ public final class Node {
     private Node[] successors;
     private Node[] predeccessors;
 
+    private boolean successorExists;
+    private boolean predecessorExists;
     private Node successor;
     private Node predecessor;
     private FingerFixer fingerFixer;
@@ -139,32 +143,6 @@ public final class Node {
         this.gui = gui;
     }
 
-//    public void distributeFileMetadata() {
-//        for (String file : files) {
-//            int hashKey = getHash(file);
-//            String message = "REGMD " + this.ip + " " + this.port + " " + this.username + " " + "@" + file;//register meta data
-//            if (fingerTable == null) {
-//                System.out.println("Finger Table is null");
-//            }
-//
-//            Node receiver = fingerTable.getNode(hashKey);
-//            if (receiver == null) {
-//                receiver = fingerTable.getClosestPredecessorToKey(hashKey);
-//            }
-//            if (receiver == null) {
-//                receiver = this.successor;
-//            }
-//            if (receiver != null) {
-//                connector.send(message, receiver.getIp(), receiver.getPort());
-//            } else {
-//                gui.echo("No receiver found for metadata distribution");
-//            }
-//        }
-//    }
-//    private void insertFileMetadata(String file, Node Mnode) {
-//        this.metaData.put(file, Mnode);
-//        gui.updateMetadataTable(file, metaData);
-//    }
     public static String getMyIP() {
         try {
             final DatagramSocket socket = new DatagramSocket();
@@ -307,15 +285,15 @@ public final class Node {
                         String nextHeartBeat = messageList[0] + " " + messageList[1] + " " + messageList[2] + " " + messageList[3] + " " + messageList[4] + " " + (indexUp + 1);
                         connector.send(nextHeartBeat, this.getSuccessor().getIp(), this.getSuccessor().getPort());
                     }
-
                     break;
+
                 case "HEARTBEAT_DOWN":
                     int indexDown = Integer.parseInt(messageList[5]);
                     if (indexDown > 0) {
                         String present = "PRESENT_DOWN " + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName() + " " + indexDown;
                         connector.send(present, messageList[1], Integer.parseInt(messageList[2]));
                     }
-                    if (this.getPredecessor() != null  && indexDown < 3) {
+                    if (this.getPredecessor() != null && indexDown < 3) {
                         String nextHeartBeat = messageList[0] + " " + messageList[1] + " " + messageList[2] + " " + messageList[3] + " " + messageList[4] + " " + (indexDown + 1);
                         connector.send(nextHeartBeat, this.getPredecessor().getIp(), this.getPredecessor().getPort());
                     }
@@ -330,16 +308,7 @@ public final class Node {
                 case "PRESENT_DOWN":
                     Node existingDown = new Node(messageList[4], messageList[1], messageList[2]);
                     int existingIndexDown = Integer.parseInt(messageList[5]);
-
                     updateExistingPredecessor(existingIndexDown, existingDown);
-
-                    break;
-
-                case "CORRECT_NETWORK_UP":
-                    System.out.println("CORRECT_NETWORK_UP");
-                    break;
-                case "CORRECT_NETWORK_DOWN":
-                    System.out.println("CORRECT_NETWORK_DOWN");
                     break;
                 default:
                     break;
@@ -374,19 +343,23 @@ public final class Node {
                         break;
 
                     case "9999":
-                        gui.echo(" Failed, there is some error in the command.");
+                        JOptionPane.showMessageDialog(gui, " Failed, there is some error in the command.");
+                        exit(0);
                         break;
 
                     case "9998":
-                        gui.echo("Failed, already registered to you, unregister first.");
+                        JOptionPane.showMessageDialog(gui, "Failed, already registered to you, unregister first.");
+                        exit(0);
                         break;
 
                     case "9997":
-                        gui.echo("Failed, registered to another user, try a different IP and port.");
+                        JOptionPane.showMessageDialog(gui, "Failed, registered to another user, try a different IP and port.");
+                        exit(0);
                         break;
 
                     case "9996":
-                        gui.echo("Failed, can’t register. Bootstrap Server full.");
+                        JOptionPane.showMessageDialog(gui, "Failed, can’t register. Bootstrap Server full.");
+                        exit(0);
                         break;
 
                     default:
@@ -396,7 +369,10 @@ public final class Node {
                 switch (messageList[2]) {
                     case "0":
                         gui.echo("Successfully unregistered.\n");
-                        this.connector.stop(); //stop listning, equivelent to leave the network
+                        this.connector.kill(); //stop listning, equivelent to leave the network
+                        this.fingerFixer.kill();
+                        JOptionPane.showMessageDialog(gui, "Close interface?");
+                        exit(0);
                         break;
 
                     case "9999":
@@ -426,12 +402,12 @@ public final class Node {
         connector.send(message, neighbour.getIp(), neighbour.getPort());
     }
 
-    private void askToUpdateSuccessor(Node receiver, Node successor_) {
+    public void askToUpdateSuccessor(Node receiver, Node successor_) {
         String message = "UPDATE_SUCC " + successor_.getIp() + " " + successor_.getPort() + " " + successor_.getID() + " " + successor_.getUserName();
         connector.send(message, receiver.getIp(), receiver.getPort());
     }
 
-    private void askToUpdatePredeccessor(Node receiver, Node predeccessor_) {
+    public void askToUpdatePredeccessor(Node receiver, Node predeccessor_) {
         String message = "UPDATE_PRED " + predeccessor_.getIp() + " " + predeccessor_.getPort() + " " + predeccessor_.getID() + " " + predeccessor_.getUserName();
         connector.send(message, receiver.getIp(), receiver.getPort());
     }
@@ -472,12 +448,6 @@ public final class Node {
 
     }
 
-    void clearSuccessors() {
-        for (int i = 1; i < 4; i++) {
-            successors[i] = null;
-        }
-    }
-
     public Node[] getSuccessors() {
         return successors;
     }
@@ -486,20 +456,16 @@ public final class Node {
         return predeccessors;
     }
 
-    void clearPredecessors() {
-        for (int i = 1; i < 4; i++) {
-            predeccessors[i] = null;
-        }
-    }
-
-    private void updateExistingSuccessor(int index, Node existingSuccessor) {
+    public void updateExistingSuccessor(int index, Node existingSuccessor) {
         gui.UpdateSuccessor(index, existingSuccessor);
         this.getSuccessors()[index] = existingSuccessor;
+        this.fingerFixer.temporarySuccessors[index] = existingSuccessor;
     }
 
-    private void updateExistingPredecessor(int index, Node existingPredecessor) {
+    public void updateExistingPredecessor(int index, Node existingPredecessor) {
         gui.UpdatePredecessor(index, existingPredecessor);
         this.getPredeccessors()[index] = existingPredecessor;
+        this.fingerFixer.temporaryPredeccessors[index] = existingPredecessor;
     }
 
 }

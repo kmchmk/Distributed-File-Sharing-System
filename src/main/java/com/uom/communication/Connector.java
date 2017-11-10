@@ -17,5 +17,5 @@ public interface Connector {
 
     public void listen(int port);
     
-    public void stop();
+    public void kill();
 }

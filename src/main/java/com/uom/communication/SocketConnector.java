@@ -37,16 +37,15 @@ public class SocketConnector implements Connector {
         this.myNode = myNode;
     }
 
-    @Override
-    public void stop() {
+    public void kill() {
         this.live = false;
     }
 
     @Override
     public void send(String OutgoingMessage, String OutgoingIP, int OutgoingPort) {
-//        myNode.getGUI().echo("Sending message is: " + OutgoingMessage + " (to " + OutgoingIP + ":" + OutgoingPort + ")");
         
-//        System.out.println("Sending: " + OutgoingMessage);
+        System.out.println("Sending: " + OutgoingMessage);
+
         try {
             byte[] bytes = OutgoingMessage.getBytes();
             //System.out.println(bytes.length);
@@ -80,7 +79,7 @@ public class SocketConnector implements Connector {
 //                        String incomingIP = incomingPacket.getAddress().getHostAddress();
 //                        int incomingPort = incomingPacket.getPort();
                         String incomingMessage = new String(data, 0, incomingPacket.getLength());
-//                        System.out.println("Received: "+incomingMessage);
+                        System.out.println("Received: "+incomingMessage);
                         myNode.handleMessage(incomingMessage);
                     }
                 } catch (SocketException ex) {
