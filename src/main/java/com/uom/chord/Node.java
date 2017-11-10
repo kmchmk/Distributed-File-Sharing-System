@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 
+
+
 /**
  *
  * @author erang
@@ -104,10 +106,6 @@ public final class Node {
         return this.id;
     }
 
-    public int getthePort() {
-        return port;
-    }
-
     public Node getSuccessor() {
         return this.successor;
     }
@@ -183,7 +181,7 @@ public final class Node {
         }
         text += "</html>";
         if (gui != null) {
-            gui.updateFileLabel(text);
+            gui.updateFilesDisplay(text);
         }
     }
 
@@ -203,9 +201,6 @@ public final class Node {
         connector.sendToBS(unregisterMessage);
     }
 
-    private void foundFile(String searchString, Node result) {
-        gui.updateDisplay("Found file \"" + searchString + "\" on node " + result.getIp() + " : " + result.getPort() + " (" + result.getUserName() + ")");
-    }
 
     /*
     BS Messages:
@@ -273,8 +268,8 @@ public final class Node {
                     break;
                 case "SEARCH_UP":
                     String fileUp = message.split("@")[1];
-                    if (this.getFiles().contains(fileUp)) {
-                        String found = "FOUND_FILE " + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName() + " @" + fileUp;
+                    for (String eachResult : this.contains(fileUp)) {
+                        String found = "FOUND_FILE " + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName() + " @" + eachResult;
                         connector.send(found, messageList[1], Integer.parseInt(messageList[2]));
                     }
                     if (this.getSuccessor() != null) {
@@ -283,8 +278,8 @@ public final class Node {
                     break;
                 case "SEARCH_DOWN":
                     String fileDown = message.split("@")[1];
-                    if (this.getFiles().contains(fileDown)) {
-                        String found = "FOUND_FILE " + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName() + " @" + fileDown;
+                    for (String eachResult : this.contains(fileDown)) {
+                        String found = "FOUND_FILE " + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName() + " @" + eachResult;
                         connector.send(found, messageList[1], Integer.parseInt(messageList[2]));
                     }
                     if (this.getPredecessor() != null) {
@@ -297,7 +292,7 @@ public final class Node {
 //                    String resultID = messageList[3];
 //                    String resultUserName = messageList[4];
 //                    String resultFile = message.split("@")[1];
-                    foundFile(message.split("@")[1], new Node(messageList[4], messageList[1], messageList[2]));
+                    gui.updateResultsDisplay(message.split("@")[1], new Node(messageList[4], messageList[1], messageList[2]));
                     break;
 
                 default:
@@ -394,9 +389,10 @@ public final class Node {
     }
 
     public void search(String file) {
-        if (this.getFiles().contains(file)) {
-            foundFile(file);
+        for (String eachResult : this.contains(file)) {
+            gui.updateResultsDisplay(eachResult, this);
         }
+
         String searchUp = "SEARCH_UP " + this.ip + " " + this.port + " @" + file;
         if (this.getSuccessor() != null) {
             connector.send(searchUp, this.getSuccessor().getIp(), this.getSuccessor().getPort());
@@ -407,8 +403,26 @@ public final class Node {
         }
     }
 
-    private void foundFile(String file) {
-        System.out.println(file);
+
+    private ArrayList<String> contains(String file) {
+        ArrayList<String> results = new ArrayList<>();
+        for (String eachFile : this.getFiles()) {
+
+            if (file.equals(eachFile)) {
+                results.add(eachFile);
+            }
+            String[] words = eachFile.split(" ");
+            if (words.length > 1) {
+                for (int i = 0; i < words.length; i++) {
+                    if (file.equals(words[i])) {
+                        results.add(eachFile);
+                    }
+                }
+            }
+
+        }
+        return results;
+
     }
 
 }

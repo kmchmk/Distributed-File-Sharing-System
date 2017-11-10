@@ -10,6 +10,7 @@ import com.uom.chord.Node;
 import java.net.DatagramSocket;
 import java.net.BindException;
 import java.net.SocketException;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -52,9 +53,8 @@ public class GUI extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         search = new javax.swing.JTextField();
         jButton2 = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        display = new javax.swing.JTextArea();
-        search1 = new javax.swing.JTextField();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        resultsTable = new javax.swing.JTable();
         jPanel3 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
@@ -185,20 +185,30 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        display.setEditable(false);
-        display.setBackground(new java.awt.Color(204, 204, 204));
-        display.setColumns(20);
-        display.setRows(5);
-        jScrollPane2.setViewportView(display);
+        resultsTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
 
-        search1.setEditable(false);
-        search1.setBackground(new java.awt.Color(204, 204, 204));
-        search1.setFont(new java.awt.Font("SansSerif", 1, 12)); // NOI18N
-        search1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                search1ActionPerformed(evt);
+            },
+            new String [] {
+                "File", "ID", "IP", "Port", "Username"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, true, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
             }
         });
+        jScrollPane4.setViewportView(resultsTable);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -211,8 +221,7 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(search)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(search1)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING))
+                    .addComponent(jScrollPane4))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -223,9 +232,7 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(search, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(search1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -518,6 +525,13 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_searchActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+
+//clear table
+        DefaultTableModel model = (DefaultTableModel) resultsTable.getModel();
+        while (model.getRowCount() > 0) {
+            model.removeRow(0);
+        }
+
         String fileName = search.getText();
         node.search(fileName.toLowerCase());
     }//GEN-LAST:event_jButton2ActionPerformed
@@ -598,11 +612,13 @@ public class GUI extends javax.swing.JFrame {
         jTable2.setValueAt(temp.getPort(), index, 3);
     }
 
-    public void updateDisplay(String text) {
-        search1.setText(text);
+    public void updateResultsDisplay(String searchString, Node result) {
+        DefaultTableModel model = (DefaultTableModel) resultsTable.getModel();
+        model.addRow(new Object[]{searchString, result.getID(), result.getIp(), result.getPort(), result.getUserName()});
+
     }
 
-    public void updateFileLabel(String text) {
+    public void updateFilesDisplay(String text) {
         jLabel15.setText(text);
     }
 
@@ -619,19 +635,17 @@ public class GUI extends javax.swing.JFrame {
 //        }
 //
 //    }
-
     public void echo(String text) {
-        display.setText(display.getText() + "\n" + text);
         System.out.println(text);
     }
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
         // TODO add your handling code here:
-        int pno = Integer.parseInt(enterPort.getText());
+        int Port = Integer.parseInt(enterPort.getText());
         String BSHost = Textuser1.getText();
-        int bsPort = Integer.parseInt(Textuser2.getText());
+        int BSPort = Integer.parseInt(Textuser2.getText());
 
-        node = new Node(Textuser.getText(), node.getMyIP(), pno, BSHost, bsPort, this, true);
+        node = new Node(Textuser.getText(), Node.getMyIP(), Port, BSHost, BSPort, this, true);
 
         IP.setText(node.getIp());
         PortNo.setText(String.valueOf(node.getPort()));
@@ -643,7 +657,7 @@ public class GUI extends javax.swing.JFrame {
         Textuser1.setEnabled(false);
         Textuser2.setEnabled(false);
 
-        if (isBSServerRunning(bsPort)) {
+        if (isBSServerRunning(BSPort)) {
             jButton1.setEnabled(false);
         }
     }//GEN-LAST:event_jButton6ActionPerformed
@@ -677,10 +691,6 @@ public class GUI extends javax.swing.JFrame {
     private void Textuser2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Textuser2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_Textuser2ActionPerformed
-
-    private void search1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_search1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_search1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -737,7 +747,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JTextField Textuser;
     private javax.swing.JTextField Textuser1;
     private javax.swing.JTextField Textuser2;
-    private javax.swing.JTextArea display;
     private javax.swing.JTextField enterPort;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
@@ -765,12 +774,12 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
     private javax.swing.JLabel name;
+    private javax.swing.JTable resultsTable;
     private javax.swing.JTextField search;
-    private javax.swing.JTextField search1;
     // End of variables declaration//GEN-END:variables
 }
