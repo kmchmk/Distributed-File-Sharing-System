@@ -72,12 +72,11 @@ public class GUI extends javax.swing.JFrame {
         Textuser2 = new javax.swing.JTextField();
         jLabel14 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
-        jLabel12 = new javax.swing.JLabel();
+        predecessorTable = new javax.swing.JTable();
         jLabel13 = new javax.swing.JLabel();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        successorTable = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(204, 0, 0));
@@ -397,32 +396,8 @@ public class GUI extends javax.swing.JFrame {
 
         jPanel5.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        predecessorTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {"Bootstrap Server", null, null, null},
-                {"Successor", null, null, null},
-                {"Predecessor", null, null, null}
-            },
-            new String [] {
-                "", "ID", "IP", "Port"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-        });
-        jScrollPane1.setViewportView(jTable1);
-
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                { new Integer(-4), null, null, null},
-                { new Integer(-3), null, null, null},
-                { new Integer(-2), null, null, null},
-                { new Integer(-1), null, null, null},
                 { new Integer(1), null, null, null},
                 { new Integer(2), null, null, null},
                 { new Integer(3), null, null, null},
@@ -447,15 +422,39 @@ public class GUI extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane3.setViewportView(jTable2);
-
-        jLabel12.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        jLabel12.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel12.setText("Details");
+        jScrollPane3.setViewportView(predecessorTable);
 
         jLabel13.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel13.setText("Finger Table");
+
+        successorTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                { new Integer(1), null, null, null},
+                { new Integer(2), null, null, null},
+                { new Integer(3), null, null, null},
+                { new Integer(4), null, null, null}
+            },
+            new String [] {
+                "Index", "ID", "IP", "Port"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.Object.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane5.setViewportView(successorTable);
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
@@ -464,23 +463,22 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1)
-                    .addComponent(jScrollPane3)
-                    .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 408, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
-                .addGap(9, 9, 9)
-                .addComponent(jLabel12)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addContainerGap()
                 .addComponent(jLabel13)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -545,11 +543,6 @@ public class GUI extends javax.swing.JFrame {
 
             }
         }.start();
-
-        String bootId = node.getBSip();
-        String bootport = String.valueOf(node.getBSport());
-        jTable1.setValueAt(bootId, 0, 1);
-        jTable1.setValueAt(bootport, 0, 2);
         jButton1.setEnabled(false);
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -569,22 +562,8 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-
         node.registerToNetwork();
-//                if (node.getSuccessor() != null) {
-//                    String succid = node.getSuccessor().getIp();
-//                    String succport = String.valueOf(node.getSuccessor().getPort());
-//
-//                    jTable1.setValueAt((Object) succid, 1, 1);
-//                    jTable1.setValueAt((Object) succport, 1, 2);
-//                }
-//                if (node.getPredeccessor() != null) {
-//                    String preid = node.getPredeccessor().getIp();
-//                    String preport = String.valueOf(node.getPredeccessor().getPort());
-//                    jTable1.setValueAt((Object) preid, 2, 1);
-//                    jTable1.setValueAt((Object) preport, 2, 2);
-//                }
-
+        
         jButton3.setEnabled(false);
         search.setEnabled(true);
         jButton2.setEnabled(true);
@@ -594,28 +573,22 @@ public class GUI extends javax.swing.JFrame {
         node.unregisterFromNetwork();
     }//GEN-LAST:event_jButton4ActionPerformed
 
-    public void UpdateSuccessor(Node succ) {
-        jTable1.setValueAt(succ == null ? "" : succ.getID(), 1, 1);
-        jTable1.setValueAt(succ == null ? "" : succ.getIp(), 1, 2);
-        jTable1.setValueAt(succ == null ? "" : succ.getPort(), 1, 3);
+    public void UpdateSuccessor(int index, Node succ) {
+        System.out.println(index);
+        successorTable.setValueAt(succ == null ? "" : succ.getID(), index, 1);
+        successorTable.setValueAt(succ == null ? "" : succ.getIp(), index, 2);
+        successorTable.setValueAt(succ == null ? "" : succ.getPort(), index, 3);
     }
 
-    public void UpdatePredecessor(Node pred) {
-        jTable1.setValueAt(pred == null ? "" : pred.getID(), 2, 1);
-        jTable1.setValueAt(pred == null ? "" : pred.getIp(), 2, 2);
-        jTable1.setValueAt(pred == null ? "" : pred.getPort(), 2, 3);
-    }
-
-    public void UpdateFingerTable(int index, Node temp) {
-        jTable2.setValueAt(temp.getID(), index, 1);
-        jTable2.setValueAt(temp.getIp(), index, 2);
-        jTable2.setValueAt(temp.getPort(), index, 3);
+    public void UpdatePredecessor(int index, Node pred) {
+        predecessorTable.setValueAt(pred == null ? "" : pred.getID(), index, 1);
+        predecessorTable.setValueAt(pred == null ? "" : pred.getIp(), index, 2);
+        predecessorTable.setValueAt(pred == null ? "" : pred.getPort(), index, 3);
     }
 
     public void updateResultsDisplay(String searchString, Node result) {
         DefaultTableModel model = (DefaultTableModel) resultsTable.getModel();
         model.addRow(new Object[]{searchString, result.getID(), result.getIp(), result.getPort(), result.getUserName()});
-
     }
 
     public void updateFilesDisplay(String text) {
@@ -756,7 +729,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
@@ -773,13 +745,13 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel5;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JLabel name;
+    private javax.swing.JTable predecessorTable;
     private javax.swing.JTable resultsTable;
     private javax.swing.JTextField search;
+    private javax.swing.JTable successorTable;
     // End of variables declaration//GEN-END:variables
 }

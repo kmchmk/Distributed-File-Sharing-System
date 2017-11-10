@@ -17,8 +17,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 
-
-
 /**
  *
  * @author erang
@@ -38,14 +36,13 @@ public final class Node {
 
     private Connector connector;
 
-    private FingerTable successorFingerTable;
-    private FingerTable predecessorFingerTable;
-
     private ArrayList<String> files;
+    private Node[] successors;
+    private Node[] predeccessors;
 
-    Node successor;
-    Node predecessor;
-//    private FingerFixer fingerFixer;
+    private Node successor;
+    private Node predecessor;
+    private FingerFixer fingerFixer;
 
     public Node(String username, String ip, int port, String BSip, int BSport, GUI gui, boolean MainOrDummy) {
 
@@ -63,7 +60,11 @@ public final class Node {
             this.connector = new SocketConnector(this);
 //            this.connector = new RestConnector(this);
 
+            this.successors = new Node[4];
+            this.predeccessors = new Node[4];
+
             this.gui = gui;
+            this.fingerFixer = new FingerFixer(this);
             initialize();
         }
     }
@@ -116,12 +117,14 @@ public final class Node {
 
     public void setSuccessor(Node successor) {
         this.successor = successor;
-        gui.UpdateSuccessor(successor);
+        this.successors[0] = successor;
+        gui.UpdateSuccessor(0,successor);
     }
 
     public void setPredecessor(Node predecessor) {
         this.predecessor = predecessor;
-        gui.UpdatePredecessor(predecessor);
+        this.predeccessors[0] = predecessor;
+        gui.UpdatePredecessor(0,predecessor);
     }
 
     public GUI getGUI() {
@@ -291,14 +294,55 @@ public final class Node {
                     }
                     break;
                 case "FOUND_FILE":
-//                    String resultIP = messageList[1];
-//                    String resultPort = messageList[2];
-//                    String resultID = messageList[3];
-//                    String resultUserName = messageList[4];
-//                    String resultFile = message.split("@")[1];
                     gui.updateResultsDisplay(message.split("@")[1], new Node(messageList[4], messageList[1], messageList[2]));
                     break;
 
+                case "HEARTBEAT_UP":
+                    System.out.println("HEARTBEAT_UP");
+                    int indexUp = Integer.parseInt(messageList[5]);
+                    if (indexUp > 0) {
+                        String present = "PRESENT_UP" + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName() + " " + indexUp;
+                        connector.send(present, messageList[1], Integer.parseInt(messageList[2]));
+                    }
+                    if (this.getSuccessor() != null) {
+                        String nextHeartBeat = messageList[0] + " " + messageList[1] + " " + messageList[2] + " " + messageList[3] + " " + messageList[4] + " " + (indexUp + 1);
+                        connector.send(nextHeartBeat, this.getSuccessor().getIp(), this.getSuccessor().getPort());
+                    }
+
+                    break;
+                case "HEARTBEAT_DOWN":
+                    System.out.println("HEARTBEAT_DOWN");
+                    int indexDown = Integer.parseInt(messageList[5]);
+                    if (indexDown > 0) {
+                        String present = "PRESENT_DOWN" + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName() + " " + indexDown;
+                        connector.send(present, messageList[1], Integer.parseInt(messageList[2]));
+                    }
+                    if (this.getPredecessor() != null) {
+                        String nextHeartBeat = messageList[0] + " " + messageList[1] + " " + messageList[2] + " " + messageList[3] + " " + messageList[4] + " " + (indexDown + 1);
+                        connector.send(nextHeartBeat, this.getPredecessor().getIp(), this.getPredecessor().getPort());
+                    }
+                    break;
+
+                case "PRESENT_UP":
+                    Node existingUp = new Node(messageList[4], messageList[1], messageList[2]);
+                    int existingIndexUp = Integer.parseInt(messageList[5]);
+                    updateExistingSuccessor(existingIndexUp, existingUp);
+                    break;
+
+                case "PRESENT_DOWN":
+                    Node existingDown = new Node(messageList[4], messageList[1], messageList[2]);
+                    int existingIndexDown = Integer.parseInt(messageList[5]);
+
+                    updateExistingPredecessor(existingIndexDown, existingDown);
+
+                    break;
+
+                case "CORRECT_NETWORK_UP":
+                    System.out.println("CORRECT_NETWORK_UP");
+                    break;
+                case "CORRECT_NETWORK_DOWN":
+                    System.out.println("CORRECT_NETWORK_DOWN");
+                    break;
                 default:
                     break;
             }
@@ -307,12 +351,14 @@ public final class Node {
                 switch (messageList[2]) {
                     case "0":
                         gui.echo("This is the first node.");
+                        fingerFixer.start();
                         break;
 
                     case "1":
                         gui.echo("This is the second node.");
                         SimpleNeighbor firstNeighbor = new SimpleNeighbor(messageList[3], Integer.parseInt(messageList[4]));
                         joinNetwork(firstNeighbor);
+                        fingerFixer.start();
                         break;
 
                     case "2":
@@ -326,6 +372,7 @@ public final class Node {
                         } else {
                             joinNetwork(secondNeighbor);
                         }
+                        fingerFixer.start();
                         break;
 
                     case "9999":
@@ -407,7 +454,6 @@ public final class Node {
         }
     }
 
-
     private ArrayList<String> contains(String file) {
         ArrayList<String> results = new ArrayList<>();
         for (String eachFile : this.getFiles()) {
@@ -427,6 +473,34 @@ public final class Node {
         }
         return results;
 
+    }
+
+    void clearSuccessors() {
+        for (int i = 1; i < 4; i++) {
+            successors[i] = null;
+        }
+    }
+
+    public Node[] getSuccessors() {
+        return successors;
+    }
+
+    public Node[] getPredeccessors() {
+        return predeccessors;
+    }
+
+    void clearPredecessors() {
+        for (int i = 1; i < 4; i++) {
+            predeccessors[i] = null;
+        }
+    }
+    private void updateExistingSuccessor(int index, Node existingSuccessor) {
+        gui.UpdateSuccessor(index, existingSuccessor);
+        this.getSuccessors()[index] = existingSuccessor;
+    }
+    private void updateExistingPredecessor(int index, Node existingPredecessor) {
+        gui.UpdatePredecessor(index, existingPredecessor);
+        this.getPredeccessors()[index] = existingPredecessor;
     }
 
 }

@@ -12,7 +12,9 @@ package com.uom.chord;
 public class FingerFixer extends Thread {
 
     private final Node thisNode;
-    private FingerTable fingerTable;
+    private boolean live = true;
+    private final int randomIterationTime = 2000;
+    private final int waitingTime = 1000;
 
     public FingerFixer(Node thisNode) {
         this.thisNode = thisNode;
@@ -20,44 +22,46 @@ public class FingerFixer extends Thread {
 
     @Override
     public void run() {
-        while (true) {
-            String heartBeatUp = "HEARTBEAT_UP "+thisNode.getIp()+" "+thisNode.getPort()+" "+thisNode.getID()+ " "+thisNode.getUserName()+ " 0";
-            ;
-//            send beat to down;
-            
-            
-            
-//            try {
-//                if (thisNode.getSuccessor() == null) {
-//                    System.out.println("Successor is null. FingerFixer will run in 10 seconds");
-//                    Thread.sleep(10 * 1000);
-//                }
-//                if (thisNode.getSuccessor() != null) {  // successor can still be null after wake
-//                    fingerToFixNext++;
-//                    if (fingerToFixNext >= Node.MAX_FINGERS) {
-////                        System.out.println("FingerFixer New iteration...");
-////                        if (!fileDistributed) {
-////                            thisNode.distributeFileMetadata();
-////                            fileDistributed = true;
-////                        }
-//                        Thread.sleep(5000);
-//                        fingerToFixNext = 0;
-//                    }
-//                    if (!waitingForReply[fingerToFixNext] || (waitingForReply[fingerToFixNext] && lastFindSIssue[fingerToFixNext] + 2 * 60 * 1000 < System.currentTimeMillis())) {
-//                        this.waitingForReply[fingerToFixNext] = false;
-//                        this.lastFindSIssue[fingerToFixNext] = System.currentTimeMillis();
-//                        Node fingerEntry = thisNode.findSuccessorOf(fingerToFixNext, (thisNode.getID() + (int) Math.pow(2, fingerToFixNext)) % Node.MAX_NODES, thisNode.getIp(), thisNode.getPort(), true);
-//                        if (fingerEntry != null) {
-////                            System.out.println("FixFinger: Update finger " + fingerToFixNext + " of " + thisNode.getID() + " from  " + fingerTable.getNodeAt(fingerToFixNext).getID() + " to " + fingerEntry.getID());
-//                            fingerTable.updateEntry(fingerToFixNext, fingerEntry);
-//                            thisNode.getGUI().UpdateFingerTable(fingerToFixNext, fingerEntry);
-//                        }
-//                    }
-//                    Thread.sleep(10 * 1000);
-//                }
-//            } catch (InterruptedException ex) {
-//            }
+        while (live) {
+            try {
+                Thread.sleep(randomIterationTime);
+                thisNode.clearSuccessors();
+                if (thisNode.getSuccessor() != null) {
+                    String heartBeatUp = "HEARTBEAT_UP " + thisNode.getIp() + " " + thisNode.getPort() + " " + thisNode.getID() + " " + thisNode.getUserName() + " 0";
+                    thisNode.getConnector().send(heartBeatUp, thisNode.getSuccessor().getIp(), thisNode.getSuccessor().getPort());
+                }
+
+                thisNode.clearPredecessors();
+                if (thisNode.getPredecessor() != null) {
+                    String heartBeatDown = "HEARTBEAT_DOWN " + thisNode.getIp() + " " + thisNode.getPort() + " " + thisNode.getID() + " " + thisNode.getUserName() + " 0";
+                    thisNode.getConnector().send(heartBeatDown, thisNode.getPredecessor().getIp(), thisNode.getPredecessor().getPort());
+                }
+                Thread.sleep(waitingTime);
+
+                for (int i = 1; i < 4; i++) {
+                    if (thisNode.getSuccessors()[i] == null) {
+                        if (thisNode.getSuccessors()[i - 1] != null) {
+                            //send correct network request to langama ekaata.
+                            String correctNetworkUp = "CORRECT_NETWORK_UP";
+                            thisNode.getConnector().send(correctNetworkUp, thisNode.getSuccessors()[i - 1].getIp(), thisNode.getSuccessors()[i - 1].getPort());
+                        }
+                    }
+                    if (thisNode.getPredeccessors()[i] == null) {
+                        if (thisNode.getPredeccessors()[i - 1] != null) {
+                            //send correct network request to langama ekaata.
+                            String correctNetworkDown = "CORRECT_NETWORK_DOWN";
+                            thisNode.getConnector().send(correctNetworkDown, thisNode.getPredeccessors()[i - 1].getIp(), thisNode.getPredeccessors()[i - 1].getPort());
+                        }
+                    }
+                }
+            } catch (InterruptedException ex) {
+                System.err.println("Error in finger fixer :  " + ex);
+            }
         }
+    }
+
+    public void kill() {
+        this.live = false;
     }
 
 }
