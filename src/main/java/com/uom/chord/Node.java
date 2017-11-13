@@ -43,18 +43,15 @@ public final class Node {
 //    private Node[] successors;
 //    private Node[] predeccessors;
 
-//    private boolean successorExists;
-//    private boolean predecessorExists;
-    
-   
-
+    private boolean successorExists;
+    private boolean predecessorExists;
     private Node successor;
     private Node greateSuccessor;
-
 
     private Node predecessor;
     private Node greatePredecessor;
     private FingerFixer fingerFixer;
+    private Stabilizer stabilizer;
 
     public Node(String ip, int port, String username, String BSip, int BSport, GUI gui, boolean MainOrDummy, boolean SocketOrRest) {
 
@@ -78,8 +75,25 @@ public final class Node {
 //            this.predeccessors = new Node[4];
             this.gui = gui;
             this.fingerFixer = new FingerFixer(this);
+            this.stabilizer = new Stabilizer(this);
             initialize();
         }
+    }
+
+    public boolean isSuccessorExists() {
+        return successorExists;
+    }
+
+    public void setSuccessorExists(boolean successorExists) {
+        this.successorExists = successorExists;
+    }
+
+    public void setPredecessorExists(boolean predecessorExists) {
+        this.predecessorExists = predecessorExists;
+    }
+
+    public boolean isPredecessorExists() {
+        return predecessorExists;
     }
 
     public Node(String ip, int port, String username) {
@@ -143,6 +157,7 @@ public final class Node {
 //        this.predeccessors[0] = predecessor;
         gui.UpdatePredecessor(0, predecessor);
     }
+
     public void setGreateSuccessor(Node greateSuccessor) {
         this.greateSuccessor = greateSuccessor;
     }
@@ -150,6 +165,7 @@ public final class Node {
     public void setGreatePredecessor(Node greatePredecessor) {
         this.greatePredecessor = greatePredecessor;
     }
+
     public GUI getGUI() {
         return this.gui;
     }
@@ -157,6 +173,7 @@ public final class Node {
     public Connector getConnector() {
         return connector;
     }
+
     public Node getGreateSuccessor() {
         return greateSuccessor;
     }
@@ -164,6 +181,7 @@ public final class Node {
     public Node getGreatePredecessor() {
         return greatePredecessor;
     }
+
     public void setGUI(GUI gui) {
         this.gui = gui;
     }
@@ -195,20 +213,24 @@ public final class Node {
         }
     }
 
-    public void registerToNetwork() {
-        String registerMessage = " " + "REG" + " " + ip + " " + Integer.toString(port) + " " + username;
-        int length = registerMessage.length() + 4;
-        registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0"))
-                + length + registerMessage;
+    public void registerToNetwork(Node newNode) {
+        if (newNode != null) {
+            String registerMessage = " " + "REG" + " " + newNode.getIp() + " " + Integer.toString(newNode.getPort()) + " " + newNode.getUserName();
+            int length = registerMessage.length() + 4;
+            registerMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + length + registerMessage;
 
-        connector.sendToBS(registerMessage);
+            connector.sendToBS(registerMessage);
+        }
     }
 
-    public void unregisterFromNetwork() {
-        String unregisterMessage = " " + "UNREG" + " " + this.getIp() + " " + this.getPort() + " " + username;
-        int length = unregisterMessage.length() + 4;
-        unregisterMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + length + unregisterMessage;
-        connector.sendToBS(unregisterMessage);
+    public void unregisterFromNetwork(Node newNode) {
+        if (newNode != null) {
+            String unregisterMessage = " " + "UNREG" + " " + newNode.getIp() + " " + newNode.getPort() + " " + newNode.getUserName();
+            int length = unregisterMessage.length() + 4;
+            unregisterMessage = String.join("", Collections.nCopies(4 - (Integer.toString(length).length()), "0")) + length + unregisterMessage;
+
+            connector.sendToBS(unregisterMessage);
+        }
     }
 
 
@@ -302,8 +324,11 @@ public final class Node {
                     Node existingUp = new Node(messageList[1], messageList[2], messageList[3]);
                     int existingIndexUp = Integer.parseInt(messageList[4]);
                     updateExistingSuccessor(existingIndexUp, existingUp);
-                    if (existingIndexUp == 1) {
+                    if (existingIndexUp == 0) {
+                        this.setSuccessor(existingUp);
+                    } else if (existingIndexUp == 1) {
                         this.setGreateSuccessor(existingUp);
+                        System.err.println("Great successor: " + existingUp.getID());
                     }
                     break;
 
@@ -311,46 +336,54 @@ public final class Node {
                     Node existingDown = new Node(messageList[1], messageList[2], messageList[3]);
                     int existingIndexDown = Integer.parseInt(messageList[4]);
                     updateExistingPredecessor(existingIndexDown, existingDown);
-//                    if (existingIndexDown == 1) {
-//                        this.setGreatePredecessor(existingDown);
-//                    }
+                    if (existingIndexDown == 0) {
+                        this.setPredecessor(existingDown);
+                    } else if (existingIndexDown == 1) {
+                        this.setGreatePredecessor(existingDown);
+                        System.err.println("Great predecessor: " + existingDown.getID());
+                    }
                     break;
-//
-//                case "PING_UP":
-//                    String answerUp = "ANSWER_UP " + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName();
-//                    connector.send(answerUp, messageList[1], messageList[2]);
-//                    break;
-//                case "PING_DOWN":
-//                    String answerDown = "ANSWER_DOWN " + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName();
-//                    connector.send(answerDown, messageList[1], messageList[2]);
-//                    break;
-//                case "ANSWER_UP":
-//                    String receiverUpIP = messageList[1];
-//                    int receiverUpPort = Integer.parseInt(messageList[2]);
+
+                case "PING_UP":
+                    String answerUp = "ANSWER_UP " + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName();
+                    connector.send(answerUp, messageList[1], messageList[2]);
+                    break;
+
+                case "PING_DOWN":
+                    String answerDown = "ANSWER_DOWN " + this.getIp() + " " + this.getPort() + " " + this.getID() + " " + this.getUserName();
+                    connector.send(answerDown, messageList[1], messageList[2]);
+                    break;
+
+                case "ANSWER_UP":
+                    String receiverUpIP = messageList[1];
+                    int receiverUpPort = Integer.parseInt(messageList[2]);
 //                    if (this.getSuccessor() != null) {
 //                        if (receiverUpIP.equals(this.getSuccessor().getIp()) && receiverUpPort == this.getSuccessor().getPort()) {
-//                            this.setSuccessorExists(true);
+                    this.setSuccessorExists(true);
 //                        }
 //                    }
-//                    break;
-//                case "ANSWER_DOWN":
-//                    String receiverDownIP = messageList[1];
-//                    int receiverDownPort = Integer.parseInt(messageList[2]);
+                    break;
+
+                case "ANSWER_DOWN":
+                    String receiverDownIP = messageList[1];
+                    int receiverDownPort = Integer.parseInt(messageList[2]);
 //                    if (this.getPredecessor() != null) {
 //                        if (receiverDownIP.equals(this.getPredecessor().getIp()) && receiverDownPort == this.getPredecessor().getPort()) {
-//                            this.setPredecessorExists(true);
+                    this.setPredecessorExists(true);
 //                        }
 //                    }
-//                    break;
+                    break;
                 default:
                     break;
             }
+//<editor-fold defaultstate="collapsed" desc="comment">
 
             if ("REGOK".equals(messageList[1])) {
                 switch (messageList[2]) {
                     case "0":
                         echo("This is the first node.");
                         fingerFixer.start();
+                        stabilizer.start();
                         break;
 
                     case "1":
@@ -358,6 +391,7 @@ public final class Node {
                         Node firstNeighbor = new Node(messageList[3], messageList[4], "");
                         joinNetwork(firstNeighbor);
                         fingerFixer.start();
+                        stabilizer.start();
                         break;
 
                     case "2":
@@ -372,6 +406,7 @@ public final class Node {
                             joinNetwork(secondNeighbor);
                         }
                         fingerFixer.start();
+                        stabilizer.start();
                         break;
 
                     case "9999":
@@ -393,21 +428,28 @@ public final class Node {
                     default:
                         break;
                 }
+//</editor-fold>
+//<editor-fold defaultstate="collapsed" desc="comment">
+
             } else if ("UNROK".equals(messageList[1])) {
                 switch (messageList[2]) {
                     case "0":
-                        this.connector.kill(); //stop listning, equivelent to leave the network
-                        this.fingerFixer.kill();
-                        notifyAndClose("Successfully unregistered");
+//                        this.connector.kill(); //stop listning, equivelent to leave the network
+//                        this.fingerFixer.kill();
+//                        notifyAndClose("Successfully unregistered");
+                        echo("Successfully unregistered");
                         break;
                     case "9999":
-                        notifyAndClose("Error while unregistering. IP and port may not be in the registry or command is incorrect.");
+//                        notifyAndClose("Error while unregistering. IP and port may not be in the registry or command is incorrect.");
+                        echo("Error while unregistering. IP and port may not be in the registry or command is incorrect.");
                         break;
                     default:
-                        notifyAndClose("Some error while unregistering.");
+//                        notifyAndClose("Some error while unregistering.");
+                        echo("Some error while unregistering.");
                         break;
                 }
             }
+//</editor-fold>
         }
     }
 
@@ -431,7 +473,7 @@ public final class Node {
     }
 
     public void echo(String output) {
-        System.out.println("The message received is: " + output);
+//        System.out.println(output);
     }
 
     private void joinNetwork(Node neighbour) {
@@ -470,13 +512,19 @@ public final class Node {
     }
 
     public void askToUpdateSuccessor(Node receiver, Node successor_) {
-        String message = "UPDATE_SUCC " + successor_.getIp() + " " + successor_.getPort() + " " + successor_.getUserName();
-        connector.send(message, receiver.getIp(), receiver.getPort());
+        if (receiver != null && successor_ != null) {
+            receiver.setSuccessorExists(true);//this is useful for staibilizer thread
+            String message = "UPDATE_SUCC " + successor_.getIp() + " " + successor_.getPort() + " " + successor_.getUserName();
+            connector.send(message, receiver.getIp(), receiver.getPort());
+        }
     }
 
     public void askToUpdatePredeccessor(Node receiver, Node predeccessor_) {
-        String message = "UPDATE_PRED " + predeccessor_.getIp() + " " + predeccessor_.getPort() + " " + predeccessor_.getUserName();
-        connector.send(message, receiver.getIp(), receiver.getPort());
+        if (receiver != null && predeccessor_ != null) {
+            receiver.setPredecessorExists(true);//this is useful for staibilizer thread
+            String message = "UPDATE_PRED " + predeccessor_.getIp() + " " + predeccessor_.getPort() + " " + predeccessor_.getUserName();
+            connector.send(message, receiver.getIp(), receiver.getPort());
+        }
     }
 
     public void search(String file) {

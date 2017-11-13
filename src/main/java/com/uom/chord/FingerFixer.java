@@ -13,7 +13,7 @@ public class FingerFixer extends Thread {
 
     private final Node thisNode;
     private boolean live = true;
-    private final int randomIterationTime = 2000;
+    private final int randomIterationTime = 3000;
 
     public FingerFixer(Node thisNode) {
         this.thisNode = thisNode;
@@ -21,11 +21,17 @@ public class FingerFixer extends Thread {
 
     @Override
     public void run() {
+        thisNode.echo("FingerFixer started!");
         while (live) {
             try {
                 Thread.sleep(randomIterationTime);
+                
+                thisNode.getGUI().clearSuccessorTable();
                 heartBeatUp(thisNode.getSuccessor());
+                
+                thisNode.getGUI().clearPredecessorTable();
                 hearBeatDown(thisNode.getPredecessor());
+                
             } catch (InterruptedException ex) {
                 System.err.println("Error in finger fixer :  " + ex);
             }

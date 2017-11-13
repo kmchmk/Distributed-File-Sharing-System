@@ -26,7 +26,7 @@ public class RestController {
     @Path("/rest/{msg}")
     public Response routeTable(@PathParam("msg") String msg, @Context HttpServletRequest request) {
         if (msg != null) {
-            System.out.println("Received REST message: " + msg);
+            myNode.echo("Received REST message: " + msg);
 //            myNode.handleMessage(msg, request.getRemoteAddr());
             myNode.handleMessage(msg);
             return Response.status(Response.Status.OK).build();
