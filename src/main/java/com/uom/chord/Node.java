@@ -275,34 +275,42 @@ public final class Node {
 
                 case "SEARCH_UP":
                     String fileUp = message.split("@")[1];
-                    Node searcherUp = new Node(messageList[1], messageList[2], messageList[3]);
+                    int hopsUp = Integer.parseInt(messageList[4]) + 1;
+
                     for (String eachResult : this.contains(fileUp)) {
-                        String found = "FOUND_FILE " + this.getIp() + " " + this.getPort() + " " + this.getUserName() + " @" + eachResult;
+                        Node searcherUp = new Node(messageList[1], messageList[2], messageList[3]);
+                        String found = "FOUND_FILE " + this.getIp() + " " + this.getPort() + " " + this.getUserName() + " " + hopsUp + " @" + eachResult;
                         connector.send(found, searcherUp);
                     }
-                    connector.send(message, this.getSuccessor());
 
+                    String searchUp = "SEARCH_UP " + messageList[1] + " " + messageList[2] + " " + messageList[3] + " " + hopsUp + " @" + fileUp;
+                    connector.send(searchUp, this.getSuccessor());
                     break;
+
                 case "SEARCH_DOWN":
                     String fileDown = message.split("@")[1];
-                    Node searcherDown = new Node(messageList[1], messageList[2], messageList[3]);
+                    int hopsDown = Integer.parseInt(messageList[4]) + 1;
+
                     for (String eachResult : this.contains(fileDown)) {
-                        String found = "FOUND_FILE " + this.getIp() + " " + this.getPort() + " " + this.getUserName() + " @" + eachResult;
+                        Node searcherDown = new Node(messageList[1], messageList[2], messageList[3]);
+                        String found = "FOUND_FILE " + this.getIp() + " " + this.getPort() + " " + this.getUserName() + " " + hopsDown + " @" + eachResult;
                         connector.send(found, searcherDown);
                     }
-                    connector.send(message, this.getPredecessor());
 
+                    String searchDown = "SEARCH_DOWN " + messageList[1] + " " + messageList[2] + " " + messageList[3] + " " + hopsDown + " @" + fileDown;
+                    connector.send(searchDown, this.getPredecessor());
                     break;
+
                 case "FOUND_FILE":
-                    gui.updateResultsDisplay(message.split("@")[1], new Node(messageList[1], messageList[2], messageList[3]));
+                    gui.updateResultsDisplay(message.split("@")[1], new Node(messageList[1], messageList[2], messageList[3]), messageList[4]);
                     break;
 
                 case "HEARTBEAT_UP":
                     int indexUp = Integer.parseInt(messageList[4]);
                     String presentUp = "PRESENT_UP " + this.getIp() + " " + this.getPort() + " " + this.getUserName() + " " + indexUp;
                     connector.send(presentUp, messageList[1], messageList[2]);
-//                    
-                    if (this.getSuccessor() != null && indexUp < 3) {
+
+                    if (indexUp < 3) {
                         String nextHeartBeat = messageList[0] + " " + messageList[1] + " " + messageList[2] + " " + messageList[3] + " " + (indexUp + 1);
                         connector.send(nextHeartBeat, this.getSuccessor());
                     }
@@ -314,9 +322,9 @@ public final class Node {
                     String presentDown = "PRESENT_DOWN " + this.getIp() + " " + this.getPort() + " " + this.getUserName() + " " + indexDown;
                     connector.send(presentDown, messageList[1], messageList[2]);
 
-                    if (this.getPredecessor() != null && indexDown < 3) {
+                    if (indexDown < 3) {
                         String nextHeartBeat = messageList[0] + " " + messageList[1] + " " + messageList[2] + " " + messageList[3] + " " + (indexDown + 1);
-                        connector.send(nextHeartBeat, this.getPredecessor().getIp(), this.getPredecessor().getPort());
+                        connector.send(nextHeartBeat, this.getPredecessor());
                     }
                     break;
 
@@ -355,24 +363,13 @@ public final class Node {
                     break;
 
                 case "ANSWER_UP":
-                    String receiverUpIP = messageList[1];
-                    int receiverUpPort = Integer.parseInt(messageList[2]);
-//                    if (this.getSuccessor() != null) {
-//                        if (receiverUpIP.equals(this.getSuccessor().getIp()) && receiverUpPort == this.getSuccessor().getPort()) {
                     this.setSuccessorExists(true);
-//                        }
-//                    }
                     break;
 
                 case "ANSWER_DOWN":
-                    String receiverDownIP = messageList[1];
-                    int receiverDownPort = Integer.parseInt(messageList[2]);
-//                    if (this.getPredecessor() != null) {
-//                        if (receiverDownIP.equals(this.getPredecessor().getIp()) && receiverDownPort == this.getPredecessor().getPort()) {
                     this.setPredecessorExists(true);
-//                        }
-//                    }
                     break;
+
                 default:
                     break;
             }
@@ -453,21 +450,6 @@ public final class Node {
         }
     }
 
-//    public void setGreateSuccessor(Node greateSuccessor) {
-//        this.greateSuccessor = greateSuccessor;
-//    }
-//
-//    public void setGreatePredecessor(Node greatePredecessor) {
-//        this.greatePredecessor = greatePredecessor;
-//    }
-//
-//    public boolean isSuccessorExists() {
-//        return successorExists;
-//    }
-//
-//    public boolean isPredecessorExists() {
-//        return predecessorExists;
-//    }
     public static int getHash(String text) {
         return Math.abs(text.hashCode()) % 1000;
     }
@@ -529,17 +511,15 @@ public final class Node {
 
     public void search(String file) {
         for (String eachResult : this.contains(file)) {
-            gui.updateResultsDisplay(eachResult, this);
+            gui.updateResultsDisplay(eachResult, this, "0");
         }
 
-        String searchUp = "SEARCH_UP " + this.getIp() + " " + this.getPort() + " " + this.getUserName() + " @" + file;
-        if (this.getSuccessor() != null) {
-            connector.send(searchUp, this.getSuccessor().getIp(), this.getSuccessor().getPort());
-        }
-        String searchDown = "SEARCH_DOWN " + this.getIp() + " " + this.getPort() + " " + this.getUserName() + " @" + file;
-        if (this.getPredecessor() != null) {
-            connector.send(searchDown, this.getPredecessor().getIp(), this.getPredecessor().getPort());
-        }
+        String searchUp = "SEARCH_UP " + this.getIp() + " " + this.getPort() + " " + this.getUserName() + " " + 0 + " @" + file;
+        connector.send(searchUp, this.getSuccessor());
+
+        String searchDown = "SEARCH_DOWN " + this.getIp() + " " + this.getPort() + " " + this.getUserName() + " " + 0 + " @" + file;
+        connector.send(searchDown, this.getPredecessor());
+
     }
 
     private ArrayList<String> contains(String file) {

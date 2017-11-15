@@ -74,7 +74,9 @@ public class RestConnector implements Connector {
 
     @Override
     public void send(String OutgoingMessage, Node destination) {
-        send(OutgoingMessage, destination.getIp(), destination.getPort());
+        if (destination != null) {
+            send(OutgoingMessage, destination.getIp(), destination.getPort());
+        }
     }
 
     @Override
@@ -94,9 +96,9 @@ public class RestConnector implements Connector {
                 .get(String.class);
 
         if (response.equals(Response.Status.OK.toString())) {
-             myNode.echo("Message Successfully Sent.");
+            myNode.echo("Message Successfully Sent.");
         } else {
-             myNode.echo("Message did not delivered.");
+            myNode.echo("Message did not delivered.");
         }
     }
 

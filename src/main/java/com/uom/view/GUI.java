@@ -7,9 +7,18 @@ package com.uom.view;
 
 import com.uom.bootstrapServer.BootstrapServer;
 import com.uom.chord.Node;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.DatagramSocket;
 import java.net.BindException;
 import java.net.SocketException;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -22,11 +31,13 @@ public class GUI extends javax.swing.JFrame {
      * Creates new form GUI
      */
     Node node;
+    long startTime;
+    boolean socketOrRest;
 
     public GUI() {
         //node.registerToNetwork();
         initComponents();
-
+        startTime = System.currentTimeMillis();
     }
 
     /**
@@ -192,14 +203,14 @@ public class GUI extends javax.swing.JFrame {
 
             },
             new String [] {
-                "File", "ID", "IP", "Port", "Username"
+                "File", "ID", "IP", "Port", "Username", "time", "Hops"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, true, false
+                false, false, false, true, false, false, true
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -562,7 +573,6 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_searchActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-
         //clear table
         DefaultTableModel model = (DefaultTableModel) resultsTable.getModel();
         while (model.getRowCount() > 0) {
@@ -570,6 +580,7 @@ public class GUI extends javax.swing.JFrame {
         }
 
         String fileName = search.getText();
+        startTime = System.currentTimeMillis();
         node.search(fileName.toLowerCase());
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -579,7 +590,6 @@ public class GUI extends javax.swing.JFrame {
             @Override
             public void run() {
                 BootstrapServer.runBootstrapServer();
-
             }
         }.start();
         jButton1.setEnabled(false);
@@ -628,9 +638,36 @@ public class GUI extends javax.swing.JFrame {
         predecessorTable.setValueAt(pred == null ? "" : pred.getPort(), index, 3);
     }
 
-    public void updateResultsDisplay(String searchString, Node result) {
+    public void updateResultsDisplay(String searchString, Node result, String hops) {
+        long estimatedTime = System.currentTimeMillis() - startTime;
         DefaultTableModel model = (DefaultTableModel) resultsTable.getModel();
-        model.addRow(new Object[]{searchString, result.getID(), result.getIp(), result.getPort(), result.getUserName()});
+        model.addRow(new Object[]{searchString, result.getID(), result.getIp(), result.getPort(), result.getUserName(), estimatedTime + "ms", hops});
+        File file;
+        if (socketOrRest) {
+            file = new File("log-Socket.csv");
+        } else {
+            file = new File("log-Rest.csv");
+        }
+        if (!file.exists()) {
+            System.out.println("Not Exists");
+            try {
+                file.createNewFile();
+                try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "utf-8"))) {
+                    writer.write("Method,HopCount,Time\n");
+                    writer.close();
+                }
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, ex);
+            }
+        }
+        try {
+            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
+            out.println((socketOrRest ? "Socket," : "Rest,") + hops + "," + estimatedTime + "ms");
+            out.close();
+        }
+        catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, ex);
+        }
     }
 
     public void updateFilesDisplay(String text) {
@@ -662,22 +699,10 @@ public class GUI extends javax.swing.JFrame {
             jButton3.setEnabled(true);
         }
     }
-//    public void updateMetadataTable(String file, Map<String, Node> metaData) {
-//        DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
-//
-//        while (model.getRowCount() > 0) {
-//            model.removeRow(0);
-//        }
-//
-//        for (String currentKey : metaData.keySet()) {
-//            Node Mnode = metaData.get(currentKey);
-//            model.addRow(new Object[]{Mnode.getID(), Mnode.getIp(), Mnode.getPort(), Mnode.getUserName(), file});
-//        }
-//
-//    }
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-        createNode(true, evt);
+        socketOrRest = true;
+        createNode(socketOrRest, evt);
     }//GEN-LAST:event_jButton6ActionPerformed
     boolean isBSServerRunning(int bsPort) {
         DatagramSocket sock = null;
@@ -711,7 +736,8 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_Textuser2ActionPerformed
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
-        createNode(false, evt);
+        socketOrRest = false;
+        createNode(socketOrRest, evt);
     }//GEN-LAST:event_jButton7ActionPerformed
 
     /**
