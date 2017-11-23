@@ -1,7 +1,6 @@
 package com.uom.communication;
 
 import com.uom.chord.Node;
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -41,29 +40,33 @@ public class RestConnector implements Connector {
 
     @Override
     public void listen(int port) {
-        if (started) {
-            System.out.println("Listener already running");
-        } else {
-            ResourceConfig config = new ResourceConfig();
-            config.register(new RestController(myNode));
+        try {
+            if (started) {
+                System.out.println("Listener already running");
+            } else {
+                ResourceConfig config = new ResourceConfig();
+                config.register(new RestController(myNode));
 
-            ServletHolder servlet = new ServletHolder(new ServletContainer(config));
+                ServletHolder servlet = new ServletHolder(new ServletContainer(config));
 
-            jettyServer = new Server(myNode.getPort());
+                jettyServer = new Server(myNode.getPort());
 
-            ServletContextHandler context = new ServletContextHandler(jettyServer, null);
-            context.addServlet(servlet, "/*");
-            context.setSessionHandler(new SessionHandler());
-            jettyServer.setHandler(context);
+                ServletContextHandler context = new ServletContextHandler(jettyServer, null);
+                context.addServlet(servlet, "/*");
+                context.setSessionHandler(new SessionHandler());
+                jettyServer.setHandler(context);
 
-            try {
-                jettyServer.start();
-            } catch (Exception e) {
-                System.err.println("Error occurred when starting REST server due to" + e);
-                return;
+                try {
+                    jettyServer.start();
+                } catch (Exception e) {
+                    System.err.println("Error occurred when starting REST server due to" + e);
+                    return;
+                }
+
+                System.out.println("REST Server started successfully ...");
             }
-
-            System.out.println("REST Server started successfully ...");
+        } catch (Exception e) {
+            System.err.println(e);
         }
     }
 
@@ -81,24 +84,29 @@ public class RestConnector implements Connector {
 
     @Override
     public void send(String OutgoingMessage, String OutgoingIP, int OutgoingPort) {
-        UriBuilder url = UriBuilder.fromPath("rest")
-                .path(OutgoingMessage)
-                .scheme("http")
-                .host(OutgoingIP)
-                .port(OutgoingPort);
-        myNode.echo("Sending REST message: " + OutgoingMessage);
+        try {
+            UriBuilder url = UriBuilder.fromPath("rest")
+                    .path(OutgoingMessage)
+                    .scheme("http")
+                    .host(OutgoingIP)
+                    .port(OutgoingPort);
+            myNode.echo("Sending REST message: " + OutgoingMessage);
+            myNode.getGUI().updateReceiveCount();
 //        System.out.println(url.toString());
 
-        Client client = JerseyClientBuilder.createClient();
+            Client client = JerseyClientBuilder.createClient();
 
-        String response = client.target(url)
-                .request(MediaType.APPLICATION_JSON)
-                .get(String.class);
+            String response = client.target(url)
+                    .request(MediaType.APPLICATION_JSON)
+                    .get(String.class);
 
-        if (response.equals(Response.Status.OK.toString())) {
-            myNode.echo("Message Successfully Sent.");
-        } else {
-            myNode.echo("Message did not delivered.");
+            if (response.equals(Response.Status.OK.toString())) {
+                myNode.echo("Message Successfully Sent.");
+            } else {
+                myNode.echo("Message did not delivered.");
+            }
+        } catch (Exception e) {
+            System.err.println("Send error");
         }
     }
 
@@ -114,20 +122,20 @@ public class RestConnector implements Connector {
 
                     DatagramPacket dp = new DatagramPacket(b, b.length, InetAddress.getByName(myNode.getBSip()), myNode.getBSport());
                     socket.send(dp);
-
+                    myNode.getGUI().updateSendCount();
                     //now receive reply
                     //buffer to receive incoming data
                     byte[] buffer = new byte[65536];
-                    socket.setSoTimeout(1000);
+                    socket.setSoTimeout(10000);
                     DatagramPacket repl = new DatagramPacket(buffer, buffer.length);
                     socket.receive(repl);
 
                     byte[] data = repl.getData();
                     String reply = new String(data, 0, repl.getLength());
-
+                    myNode.getGUI().updateReceiveCount();
                     myNode.handleMessage(reply);
 
-                } catch (IOException e) {
+                } catch (Exception e) {
                     System.err.println("IOException " + e);
                 }
             }

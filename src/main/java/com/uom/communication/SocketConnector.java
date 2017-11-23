@@ -56,14 +56,13 @@ public class SocketConnector implements Connector {
     @Override
     public void send(String OutgoingMessage, String OutgoingIP, int OutgoingPort) {
 
-        myNode.echo("Sending: " + OutgoingMessage);
-
+//        myNode.echo("Sending: " + OutgoingMessage);
         try {
             byte[] bytes = OutgoingMessage.getBytes();
             DatagramPacket packet = new DatagramPacket(bytes, bytes.length, InetAddress.getByName(OutgoingIP), OutgoingPort);
 
             sendSocket.send(packet);
-
+            myNode.getGUI().updateSendCount();
 //        myNode.getGUI().echo("Message sent...");
         } catch (IOException ex) {
             System.err.println("Error 00002");
@@ -90,7 +89,8 @@ public class SocketConnector implements Connector {
 //                        String incomingIP = incomingPacket.getAddress().getHostAddress();
 //                        int incomingPort = incomingPacket.getPort();
                         String incomingMessage = new String(data, 0, incomingPacket.getLength());
-                        myNode.echo("Received: " + incomingMessage);
+//                        myNode.echo("Received: " + incomingMessage);
+                        myNode.getGUI().updateReceiveCount();
                         myNode.handleMessage(incomingMessage);
                     }
                 } catch (SocketException ex) {
@@ -116,17 +116,18 @@ public class SocketConnector implements Connector {
 
                     DatagramPacket dp = new DatagramPacket(b, b.length, InetAddress.getByName(myNode.getBSip()), myNode.getBSport());
                     socket.send(dp);
+                    myNode.getGUI().updateSendCount();
                     myNode.echo("Sending to BS: " + message);
                     //now receive reply
                     //buffer to receive incoming data
                     byte[] buffer = new byte[65536];
-                    socket.setSoTimeout(1000);
+                    socket.setSoTimeout(10000);
                     DatagramPacket repl = new DatagramPacket(buffer, buffer.length);
                     socket.receive(repl);
 
                     byte[] data = repl.getData();
                     String reply = new String(data, 0, repl.getLength());
-
+                    myNode.getGUI().updateReceiveCount();
                     myNode.handleMessage(reply);
 
                 } catch (IOException e) {

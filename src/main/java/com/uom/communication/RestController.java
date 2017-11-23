@@ -28,6 +28,7 @@ public class RestController {
         if (msg != null) {
             myNode.echo("Received REST message: " + msg);
 //            myNode.handleMessage(msg, request.getRemoteAddr());
+            myNode.getGUI().updateReceiveCount();
             myNode.handleMessage(msg);
             return Response.status(Response.Status.OK).build();
         }
