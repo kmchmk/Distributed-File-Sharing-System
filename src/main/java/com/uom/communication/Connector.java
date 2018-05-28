@@ -8,20 +8,20 @@ package com.uom.communication;
 import com.uom.chord.Node;
 
 /**
- *
- * @author erang
+ * @author charith munasinghe
  */
-public interface Connector {
+public interface Connector
+{
 
-    public void send(String OutgoingMessage, String OutgoingIP, int OutgoingPort);
+    public void send( String OutgoingMessage, String OutgoingIP, int OutgoingPort );
 
-    public void send(String OutgoingMessage, String OutgoingIP, String OutgoingPort);
+    public void send( String OutgoingMessage, String OutgoingIP, String OutgoingPort );
 
-    public void send(String OutgoingMessage, Node destination);
+    public void send( String OutgoingMessage, Node destination );
 
-    public void sendToBS(String message);
+    public void sendToBS( String message );
 
-    public void listen(int port);
+    public void listen( int port );
 
     public void kill();
 }
